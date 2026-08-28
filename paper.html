@@ -23,6 +23,10 @@
   code{ font:.85em ui-monospace, Menlo, monospace; background:#f4f4f5; padding:.05em .3em; border-radius:3px; }
   em.den{ color:var(--mut); }
   footer{ margin-top:3rem; color:var(--mut); font-size:.85rem; border-top:1px solid var(--line); padding-top:1rem; }
+  figure{ margin:1.4rem 0; }
+  figure svg{ width:100%; height:auto; display:block; border:1px solid var(--line);
+    border-radius:10px; background:#fcfcfd; }
+  figcaption{ font:.85rem/1.45 system-ui; color:var(--mut); margin-top:.4rem; }
 </style>
 </head>
 <body>
@@ -82,20 +86,129 @@ frames, mint-once identity, deterministic eggs, with a public specification, ref
 implementation, and conformance suite. The substrate is prior art by the same author and
 is not claimed here; this paper claims the orchestration methods built on it.</p>
 
+<figure>
+<svg viewBox="0 0 720 130" role="img" aria-label="A frame chain: each frame holds the fingerprint of the previous one" font-family="system-ui" font-size="13">
+  <defs><marker id="mA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
+  <g>
+    <rect x="15"  y="30" width="150" height="66" rx="9" fill="#f2f7fd" stroke="#9ec5ec"/>
+    <rect x="205" y="30" width="150" height="66" rx="9" fill="#fff" stroke="#c9c9ce"/>
+    <rect x="395" y="30" width="150" height="66" rx="9" fill="#fff" stroke="#c9c9ce"/>
+    <rect x="585" y="30" width="120" height="66" rx="9" fill="#fff" stroke="#c9c9ce" stroke-dasharray="5 4"/>
+    <text x="90"  y="52" text-anchor="middle" font-weight="700">#0 genesis</text>
+    <text x="90"  y="72" text-anchor="middle" font-family="monospace" font-size="12" fill="#5f5f64">is a1b2c3…</text>
+    <text x="280" y="52" text-anchor="middle" font-weight="700">#1</text>
+    <text x="280" y="72" text-anchor="middle" font-family="monospace" font-size="12" fill="#0b5cad">holds a1b2c3…</text>
+    <text x="280" y="88" text-anchor="middle" font-family="monospace" font-size="12" fill="#5f5f64">is d4e5f6…</text>
+    <text x="470" y="52" text-anchor="middle" font-weight="700">#2</text>
+    <text x="470" y="72" text-anchor="middle" font-family="monospace" font-size="12" fill="#0b5cad">holds d4e5f6…</text>
+    <text x="470" y="88" text-anchor="middle" font-family="monospace" font-size="12" fill="#5f5f64">is 7a8b9c…</text>
+    <text x="645" y="52" text-anchor="middle" font-weight="700">#3 next…</text>
+    <text x="645" y="72" text-anchor="middle" font-family="monospace" font-size="12" fill="#0b5cad">holds 7a8b9c…</text>
+    <line x1="205" y1="63" x2="172" y2="63" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mA)"/>
+    <line x1="395" y1="63" x2="362" y2="63" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mA)"/>
+    <line x1="585" y1="63" x2="552" y2="63" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mA)"/>
+    <text x="360" y="118" text-anchor="middle" fill="#5f5f64" font-size="12.5">each frame CONTAINS the fingerprint of the one before it — order is structural, not claimed</text>
+  </g>
+</svg>
+<figcaption><b>The substrate in one picture.</b> A frame chain: every entry embeds the
+SHA-256 fingerprint of its predecessor, so the sequence proves itself — no clock, no
+server, no trust in whoever wrote it down.</figcaption>
+</figure>
+
 <h2>3&nbsp;·&nbsp;Design</h2>
 <h3>3.1 Scan tiles</h3>
 <p>One genesis frame describes an estate-wide observation; N devices append child frames
 content-linked to the tile; a “dreamcatcher” merge produces one report frame. The whole
 observation is a single verifiable chain.</p>
+<figure>
+<svg viewBox="0 0 720 250" role="img" aria-label="A scan tile fans out to devices; child frames link back; a merge produces one report" font-family="system-ui" font-size="13">
+  <defs><marker id="mB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
+  <rect x="12" y="90" width="112" height="70" rx="9" fill="#f2f7fd" stroke="#9ec5ec"/>
+  <text x="68" y="118" text-anchor="middle" font-weight="700">SCAN TILE</text>
+  <text x="68" y="138" text-anchor="middle" font-family="monospace" font-size="12" fill="#5f5f64">is t1a2b3…</text>
+  <g>
+    <rect x="196" y="15"  width="120" height="52" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="256" y="46" text-anchor="middle">💻 mac</text>
+    <rect x="196" y="99"  width="120" height="52" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="256" y="130" text-anchor="middle">🎮 deck</text>
+    <rect x="196" y="183" width="120" height="52" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="256" y="214" text-anchor="middle">📺 apple-tv</text>
+    <line x1="124" y1="105" x2="190" y2="45"  stroke="#0b5cad" stroke-width="1.6" marker-end="url(#mB)"/>
+    <line x1="124" y1="125" x2="190" y2="125" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#mB)"/>
+    <line x1="124" y1="145" x2="190" y2="205" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#mB)"/>
+  </g>
+  <g>
+    <rect x="372" y="15"  width="168" height="52" rx="8" fill="#fff" stroke="#c9c9ce"/>
+    <text x="456" y="36" text-anchor="middle">child: 4 findings</text>
+    <text x="456" y="56" text-anchor="middle" font-family="monospace" font-size="11.5" fill="#0b5cad">holds t1a2b3…</text>
+    <rect x="372" y="99"  width="168" height="52" rx="8" fill="#fff" stroke="#c9c9ce"/>
+    <text x="456" y="120" text-anchor="middle">child: 3 findings</text>
+    <text x="456" y="140" text-anchor="middle" font-family="monospace" font-size="11.5" fill="#0b5cad">holds t1a2b3…</text>
+    <rect x="372" y="183" width="168" height="52" rx="8" fill="#fff" stroke="#c9c9ce"/>
+    <text x="456" y="204" text-anchor="middle">child: 1 finding</text>
+    <text x="456" y="224" text-anchor="middle" font-family="monospace" font-size="11.5" fill="#0b5cad">holds t1a2b3…</text>
+    <line x1="316" y1="41"  x2="366" y2="41"  stroke="#5f5f64" stroke-width="1.4" marker-end="url(#mB)"/>
+    <line x1="316" y1="125" x2="366" y2="125" stroke="#5f5f64" stroke-width="1.4" marker-end="url(#mB)"/>
+    <line x1="316" y1="209" x2="366" y2="209" stroke="#5f5f64" stroke-width="1.4" marker-end="url(#mB)"/>
+  </g>
+  <rect x="596" y="90" width="112" height="70" rx="9" fill="#f2faf3" stroke="#bfe0c3"/>
+  <text x="652" y="113" text-anchor="middle" font-weight="700">REPORT</text>
+  <text x="652" y="131" text-anchor="middle" font-size="12">8 findings</text>
+  <text x="652" y="149" text-anchor="middle" font-size="11.5" fill="#5f5f64">(the exhaust)</text>
+  <line x1="540" y1="45"  x2="592" y2="105" stroke="#1e7d32" stroke-width="1.6" marker-end="url(#mB)"/>
+  <line x1="540" y1="125" x2="590" y2="125" stroke="#1e7d32" stroke-width="1.6" marker-end="url(#mB)"/>
+  <line x1="540" y1="209" x2="592" y2="149" stroke="#1e7d32" stroke-width="1.6" marker-end="url(#mB)"/>
+</svg>
+<figcaption><b>§3.1 — One question, one chain.</b> The tile asks; every device answers with
+a child frame that <i>holds the tile's fingerprint</i>; a deterministic merge yields one
+report. The whole observation verifies end to end.</figcaption>
+</figure>
 <h3>3.2 Exhaust-driven precision</h3>
 <p>The report's payload is the <i>only</i> trigger set for the next round: unimplicated nodes
 bear zero cost, and successive tiles are diffed so work is O(delta), not O(estate). The
 estate's current truth becomes an addressable object — a virtual table.</p>
+<figure>
+<svg viewBox="0 0 720 215" role="img" aria-label="Only devices named by the exhaust are touched; the rest cost nothing" font-family="system-ui" font-size="13">
+  <defs><marker id="mC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
+  <rect x="185" y="12" width="350" height="58" rx="9" fill="#f2f7fd" stroke="#9ec5ec"/>
+  <text x="360" y="35" text-anchor="middle" font-weight="700">the exhaust (last report's payload)</text>
+  <text x="360" y="56" text-anchor="middle" font-family="monospace" font-size="12.5">mac:4 · deck:3 · tv:1 · bstation:0 · r1:0</text>
+  <g>
+    <rect x="15"  y="140" width="125" height="56" rx="8" fill="#fdf3f2" stroke="#e2b6b3"/><text x="77"  y="164" text-anchor="middle">💻 mac</text><text x="77" y="184" text-anchor="middle" font-size="11.5" fill="#b3261e">worked</text>
+    <rect x="157" y="140" width="125" height="56" rx="8" fill="#fdf3f2" stroke="#e2b6b3"/><text x="219" y="164" text-anchor="middle">🎮 deck</text><text x="219" y="184" text-anchor="middle" font-size="11.5" fill="#b3261e">worked</text>
+    <rect x="299" y="140" width="125" height="56" rx="8" fill="#fdf3f2" stroke="#e2b6b3"/><text x="361" y="164" text-anchor="middle">📺 apple-tv</text><text x="361" y="184" text-anchor="middle" font-size="11.5" fill="#b3261e">worked</text>
+    <g opacity="0.38">
+      <rect x="441" y="140" width="125" height="56" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="503" y="164" text-anchor="middle">🖥 bstation</text><text x="503" y="184" text-anchor="middle" font-size="11.5">untouched · 0 cost</text>
+      <rect x="583" y="140" width="125" height="56" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="645" y="164" text-anchor="middle">🤖 rappterone</text><text x="645" y="184" text-anchor="middle" font-size="11.5">untouched · 0 cost</text>
+    </g>
+    <line x1="255" y1="70" x2="90"  y2="134" stroke="#0b5cad" stroke-width="1.7" marker-end="url(#mC)"/>
+    <line x1="330" y1="70" x2="225" y2="134" stroke="#0b5cad" stroke-width="1.7" marker-end="url(#mC)"/>
+    <line x1="380" y1="70" x2="362" y2="134" stroke="#0b5cad" stroke-width="1.7" marker-end="url(#mC)"/>
+  </g>
+</svg>
+<figcaption><b>§3.2 — Work is O(delta), not O(estate).</b> The exhaust is the <i>only</i>
+trigger set: devices it doesn't name are never invoked. Follow-up cost scales with what
+changed, not with how big the fleet is.</figcaption>
+</figure>
 <h3>3.3 Homeostatic convergence</h3>
 <p>Loop: scan tile → deterministic, identity-preserving repairs on isolated branches → diff
 against the prior tile → append a tick frame to an append-only history chain. Convergence
 is declared after K stable ticks. Authority to merge stays with the owner; repairs are
 reversible.</p>
+<figure>
+<svg viewBox="0 0 720 195" role="img" aria-label="The homeostasis loop: scan, heal, diff, tick, repeat until converged" font-family="system-ui" font-size="13">
+  <defs><marker id="mD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
+  <rect x="25"  y="35" width="130" height="54" rx="9" fill="#f2f7fd" stroke="#9ec5ec"/><text x="90"  y="58" text-anchor="middle" font-weight="700">SCAN</text><text x="90" y="76" text-anchor="middle" font-size="11.5" fill="#5f5f64">mint a tile</text>
+  <rect x="200" y="35" width="130" height="54" rx="9" fill="#fff" stroke="#c9c9ce"/><text x="265" y="58" text-anchor="middle" font-weight="700">HEAL</text><text x="265" y="76" text-anchor="middle" font-size="11.5" fill="#5f5f64">on branches</text>
+  <rect x="375" y="35" width="130" height="54" rx="9" fill="#fff" stroke="#c9c9ce"/><text x="440" y="58" text-anchor="middle" font-weight="700">DIFF</text><text x="440" y="76" text-anchor="middle" font-size="11.5" fill="#5f5f64">vs prior tile</text>
+  <rect x="550" y="35" width="130" height="54" rx="9" fill="#fff" stroke="#c9c9ce"/><text x="615" y="58" text-anchor="middle" font-weight="700">TICK</text><text x="615" y="76" text-anchor="middle" font-size="11.5" fill="#5f5f64">append to history</text>
+  <line x1="155" y1="62" x2="194" y2="62" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mD)"/>
+  <line x1="330" y1="62" x2="369" y2="62" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mD)"/>
+  <line x1="505" y1="62" x2="544" y2="62" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mD)"/>
+  <path d="M 615 89 C 615 150, 90 150, 90 95" fill="none" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mD)"/>
+  <text x="352" y="132" text-anchor="middle" fill="#5f5f64" font-size="12.5">…and around again, on its own</text>
+  <text x="352" y="178" text-anchor="middle" fill="#1e7d32" font-weight="700" font-size="13.5">two stable ticks → CONVERGED → the estate goes quiet</text>
+</svg>
+<figcaption><b>§3.3 — Homeostasis.</b> The loop that ran live: 66 findings → healed floor →
+quiet, no human in it. Repairs happen on branches; the owner stays the merge authority.</figcaption>
+</figure>
 <h3>3.4 Recursive dimension drill</h3>
 <p>An event on the top tile (a drifted node) spawns a finer sub-chain scoped to that node,
 whose findings are re-dimensioned by required-fix class and reassimilated under the
@@ -107,12 +220,60 @@ succession rank, (b) a lease declared in each tick, (c) staggered-by-rank entitl
 after expiry (rank r waits (r−1)×grace), and (d) signed succession/resumption frames.
 Continuation requires no authority; history is never rewritten; latency cannot cause a
 false takeover; split-brain is structurally impossible with zero election traffic.</p>
+<figure>
+<svg viewBox="0 0 720 225" role="img" aria-label="Lease timeline: leader dies, lease expires, rank 2 waits its grace and succeeds; the returned leader defers to the boundary" font-family="system-ui" font-size="13">
+  <text x="15" y="72" font-weight="700">rank 1</text>
+  <text x="15" y="132" font-weight="700">rank 2</text>
+  <rect x="80"  y="55" width="100" height="24" rx="5" fill="#0b5cad"/>
+  <rect x="184" y="55" width="100" height="24" rx="5" fill="#0b5cad"/>
+  <rect x="288" y="55" width="52"  height="24" rx="5" fill="#0b5cad" opacity=".55"/>
+  <text x="130" y="72" text-anchor="middle" fill="#fff" font-size="11.5">tick · lease</text>
+  <text x="234" y="72" text-anchor="middle" fill="#fff" font-size="11.5">tick · lease</text>
+  <text x="352" y="45" fill="#b3261e" font-weight="800" font-size="15">✗ leader dies</text>
+  <line x1="404" y1="30" x2="404" y2="195" stroke="#8a6d00" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="404" y="212" text-anchor="middle" fill="#8a6d00" font-size="12">lease expires</text>
+  <path d="M 404 118 L 470 118" stroke="#8a6d00" stroke-width="1.6" stroke-dasharray="3 4"/>
+  <text x="437" y="108" text-anchor="middle" fill="#8a6d00" font-size="11.5">rank 2 waits its grace</text>
+  <g transform="translate(478,118)"><rect x="-9" y="-9" width="18" height="18" rx="3" fill="#0b5cad" transform="rotate(45)"/></g>
+  <text x="478" y="152" text-anchor="middle" fill="#0b5cad" font-size="11.5" font-weight="700">succession frame</text>
+  <rect x="492" y="115" width="95" height="24" rx="5" fill="#0b5cad"/>
+  <rect x="591" y="115" width="60" height="24" rx="5" fill="#0b5cad"/>
+  <text x="539" y="132" text-anchor="middle" fill="#fff" font-size="11.5">tick · lease</text>
+  <text x="540" y="72" fill="#1e7d32" font-size="12.5">❤️ rank 1 returns — <tspan font-weight="700">defers</tspan> to the live lease</text>
+  <text x="672" y="132" text-anchor="middle" fill="#5f5f64" font-size="11.5">…until the</text>
+  <text x="672" y="147" text-anchor="middle" fill="#5f5f64" font-size="11.5">boundary</text>
+  <text x="360" y="188" text-anchor="middle" fill="#5f5f64" font-size="12.5">rank 3 would wait 2× grace — hearing late only ever ADDS waiting. Latency cannot crown anyone.</text>
+</svg>
+<figcaption><b>§3.5 — Succession without elections.</b> The roster is signed in advance; the
+lease drains in public; ranks act only after their staggered wait; the returning leader
+re-enters at a boundary with a resumption frame. History is append-only throughout.</figcaption>
+</figure>
 <h3>3.6 Structural resume and the membrane</h3>
 <p>Validity is hash-structural, not temporal: a dimension dark for a month resumes by
 appending to its own head, and parallel dimensions of one organism merge at read time. A
 fully private estate participates in the global federation read-only — pulling and
 assimilating public chain data while its own frames never leave the boundary. Disconnection
 tolerance and privacy are the same mechanism at different budget settings.</p>
+<figure>
+<svg viewBox="0 0 720 185" role="img" aria-label="The one-way membrane: a private estate reads from public chains; nothing flows out" font-family="system-ui" font-size="13">
+  <defs><marker id="mF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
+  <rect x="25" y="30" width="285" height="120" rx="12" fill="#f2f7fd" stroke="#9ec5ec"/>
+  <text x="167" y="60" text-anchor="middle" font-weight="700">YOUR ESTATE (private)</text>
+  <text x="167" y="82" text-anchor="middle" font-size="12" fill="#5f5f64">its frames never leave</text>
+  <text x="167" y="122" text-anchor="middle" font-size="24">🏠</text>
+  <rect x="425" y="30" width="270" height="120" rx="12" fill="#fff" stroke="#c9c9ce"/>
+  <text x="560" y="60" text-anchor="middle" font-weight="700">PUBLIC FEDERATED CHAINS</text>
+  <text x="560" y="82" text-anchor="middle" font-size="12" fill="#5f5f64">read-only raw data</text>
+  <text x="560" y="122" text-anchor="middle" font-size="24">🌐</text>
+  <line x1="420" y1="70" x2="318" y2="70" stroke="#0b5cad" stroke-width="2" marker-end="url(#mF)"/>
+  <text x="368" y="58" text-anchor="middle" fill="#0b5cad" font-size="11.5" font-weight="700">reads IN — verified, contradiction-gated</text>
+  <line x1="315" y1="115" x2="418" y2="115" stroke="#c9c9ce" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="368" y="139" text-anchor="middle" fill="#b3261e" font-size="13" font-weight="800">✗ nothing goes out</text>
+</svg>
+<figcaption><b>§3.6 — The membrane.</b> Privacy and enrichment are not a trade-off: the
+same mechanism that tolerates disconnection makes federation one-way. Reads in; nothing
+out.</figcaption>
+</figure>
 <h3>3.7 Deterministic re-attach and the quantum drill</h3>
 <p>Frames declare their reads as {name → content-address}. A stranded frame conflicts with a
 candidate base iff the base's upstream declares a different address for a declared read —
@@ -132,6 +293,27 @@ tick; what grows is the anchor's <i>dimension</i>: dependent frames from any dev
 referencing that instant, conflict-gated as always. Resolution is fractal on demand
 (sub-tick anchors under a covering tick). Ownership of a timeline vests at spine genesis
 and deepens by continuity of stewardship and adoption, not tick density.</p>
+<figure>
+<svg viewBox="0 0 720 215" role="img" aria-label="The tick spine: frozen anchors, growing dimensions" font-family="system-ui" font-size="13">
+  <defs><marker id="mG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
+  <rect x="70"  y="28" width="120" height="46" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="130" y="56" text-anchor="middle" font-weight="700">tick N−1 ❄</text>
+  <rect x="300" y="28" width="120" height="46" rx="8" fill="#f2f7fd" stroke="#9ec5ec"/><text x="360" y="56" text-anchor="middle" font-weight="700">tick N ❄</text>
+  <rect x="530" y="28" width="120" height="46" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="590" y="56" text-anchor="middle" font-weight="700">tick N+1 ❄</text>
+  <line x1="294" y1="51" x2="196" y2="51" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mG)"/>
+  <line x1="524" y1="51" x2="426" y2="51" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mG)"/>
+  <text x="245" y="42" text-anchor="middle" font-size="11" fill="#0b5cad">holds</text>
+  <text x="475" y="42" text-anchor="middle" font-size="11" fill="#0b5cad">holds</text>
+  <rect x="120" y="115" width="180" height="40" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="210" y="140" text-anchor="middle" font-size="12">💻 mac's frame — holds N</text>
+  <rect x="420" y="115" width="180" height="40" rx="8" fill="#fff" stroke="#c9c9ce"/><text x="510" y="140" text-anchor="middle" font-size="12">🎮 deck's frame — holds N</text>
+  <rect x="270" y="168" width="220" height="40" rx="8" fill="#fff" stroke="#c9c9ce" stroke-dasharray="5 4"/><text x="380" y="193" text-anchor="middle" font-size="12">📺 tv arrives LATE — still attaches</text>
+  <line x1="210" y1="115" x2="330" y2="78" stroke="#5f5f64" stroke-width="1.3" stroke-dasharray="4 4"/>
+  <line x1="510" y1="115" x2="390" y2="78" stroke="#5f5f64" stroke-width="1.3" stroke-dasharray="4 4"/>
+  <line x1="380" y1="168" x2="362" y2="78" stroke="#5f5f64" stroke-width="1.3" stroke-dasharray="4 4"/>
+</svg>
+<figcaption><b>§3.8 — The chain is the clock.</b> Each anchor is frozen at mint; what grows
+is its <i>dimension</i> — frames from any device attaching to that instant, conflict-gated.
+On real hardware, a 17.6-second clock error changed nothing.</figcaption>
+</figure>
 <h3>3.9 Merge fidelity</h3>
 <p>When two frame histories that formed with no contact meet, the boolean drill generalizes
 to a graded score: join both histories on the tick key; a dimension is mergeable iff its

@@ -33,6 +33,32 @@ append-only chain</b>: no central server, no elections, no clock agreement. Prov
 real eight-device estate — including ordering that shrugged off a 17.6-second clock
 disagreement, because <i>the chain is the clock</i>.</p>
 
+<figure style="margin:1.2rem 0 1rem">
+<svg viewBox="0 0 720 118" role="img" aria-label="A frame chain: each frame holds the fingerprint of the previous one" font-family="system-ui" font-size="13" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#fcfcfd">
+  <defs><marker id="mH" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
+  <rect x="15"  y="26" width="150" height="66" rx="9" fill="#f2f7fd" stroke="#9ec5ec"/>
+  <rect x="205" y="26" width="150" height="66" rx="9" fill="#fff" stroke="#c9c9ce"/>
+  <rect x="395" y="26" width="150" height="66" rx="9" fill="#fff" stroke="#c9c9ce"/>
+  <rect x="585" y="26" width="120" height="66" rx="9" fill="#fff" stroke="#c9c9ce" stroke-dasharray="5 4"/>
+  <text x="90"  y="48" text-anchor="middle" font-weight="700">#0 genesis</text>
+  <text x="90"  y="68" text-anchor="middle" font-family="monospace" font-size="12" fill="#5f5f64">is a1b2c3…</text>
+  <text x="280" y="48" text-anchor="middle" font-weight="700">#1</text>
+  <text x="280" y="68" text-anchor="middle" font-family="monospace" font-size="12" fill="#0b5cad">holds a1b2c3…</text>
+  <text x="280" y="84" text-anchor="middle" font-family="monospace" font-size="12" fill="#5f5f64">is d4e5f6…</text>
+  <text x="470" y="48" text-anchor="middle" font-weight="700">#2</text>
+  <text x="470" y="68" text-anchor="middle" font-family="monospace" font-size="12" fill="#0b5cad">holds d4e5f6…</text>
+  <text x="470" y="84" text-anchor="middle" font-family="monospace" font-size="12" fill="#5f5f64">is 7a8b9c…</text>
+  <text x="645" y="48" text-anchor="middle" font-weight="700">#3 next…</text>
+  <text x="645" y="68" text-anchor="middle" font-family="monospace" font-size="12" fill="#0b5cad">holds 7a8b9c…</text>
+  <line x1="205" y1="59" x2="172" y2="59" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mH)"/>
+  <line x1="395" y1="59" x2="362" y2="59" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mH)"/>
+  <line x1="585" y1="59" x2="552" y2="59" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#mH)"/>
+</svg>
+<figcaption style="font:.85rem system-ui;color:var(--mut);margin-top:.35rem">The whole idea
+in one picture: every frame contains the fingerprint of the one before it — order is
+structural, not claimed.</figcaption>
+</figure>
+
 <a class="big" href="paper.html">Read the paper</a>
 <a class="big" style="background:#3b3b40" href="https://github.com/kody-w/frame-chains">GitHub</a>
 
