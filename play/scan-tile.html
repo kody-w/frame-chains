@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scan Tiles &amp; the Healing Loop — Frame Chains</title>
+<style>
+  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; --bad:#b3261e; --ok:#1e7d32; --warn:#8a6d00; }
+  *{ box-sizing:border-box; } body{ margin:0; font:16px/1.55 system-ui; color:var(--ink); }
+  main{ max-width:52rem; margin:0 auto; padding:2rem 1rem 4rem; }
+  h1{ font-size:1.5rem; margin:.2rem 0; } .lede{ color:var(--mut); }
+  .analogy{ background:#f6f8fb; border-left:3px solid var(--accent); padding:.6rem 1rem; border-radius:0 8px 8px 0; margin:1rem 0; }
+  .fleet{ display:grid; grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr)); gap:.7rem; margin:1rem 0; }
+  .node{ border:1px solid var(--line); border-radius:10px; padding:.6rem .7rem; text-align:center; transition:.25s; }
+  .node .n{ font-weight:700; } .node .f{ font:700 1.3rem ui-monospace,monospace; }
+  .node.dirty{ border-color:#e2b6b3; background:#fdf3f2; } .node.dirty .f{ color:var(--bad); }
+  .node.clean{ border-color:#bfe0c3; background:#f2faf3; } .node.clean .f{ color:var(--ok); }
+  .node.skip{ opacity:.45; }
+  .node.touched{ box-shadow:0 0 0 3px #cfe3f7; }
+  button{ font:600 .95rem system-ui; padding:.5rem .9rem; border-radius:8px; border:1px solid var(--line);
+    background:var(--accent); color:#fff; cursor:pointer; margin:.3rem .3rem .2rem 0; }
+  button.alt{ background:#fff; color:var(--ink); }
+  button:disabled{ opacity:.45; cursor:not-allowed; }
+  .meters{ display:flex; gap:1.2rem; flex-wrap:wrap; margin:.6rem 0; font:.95rem system-ui; }
+  .meters b{ font-size:1.2rem; }
+  .log{ border:1px solid var(--line); border-radius:10px; padding:.7rem 1rem; margin-top:.8rem;
+    font:.84rem ui-monospace,monospace; max-height:16rem; overflow:auto; }
+  .log .tile{ color:var(--accent); font-weight:700; } .log .tick{ color:var(--warn); font-weight:700; }
+  .converged{ font-weight:800; color:var(--ok); font-size:1.05rem; margin-top:.5rem; }
+  .what{ background:#fffbe8; border:1px solid #eadf9a; border-radius:8px; padding:.6rem 1rem; margin-top:1.2rem; font-size:.93rem; }
+  a{ color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<p><a href="../index.html">← Frame Chains</a></p>
+<h1>🛰 Scan Tiles &amp; the Healing Loop</h1>
+<p class="lede">Ask one question of a whole fleet with a single frame. Then only touch what
+the answer says needs touching — and watch the estate go quiet by itself.</p>
+
+<div class="analogy"><b>Analogy:</b> a group chat for chores. Mom posts ONE message
+(“everyone check your room”), each kid replies to <i>that message</i> with what they found,
+and the thread itself becomes the checklist. Next week she doesn't re-inspect the whole
+house — she reads the old thread and only knocks on the doors that changed.</div>
+
+<div>
+  <button id="scanBtn" onclick="scan()">🛰 Mint a scan tile</button>
+  <button id="healBtn" class="alt" onclick="heal()" disabled>🩹 Heal from the exhaust</button>
+  <button class="alt" onclick="mess()">😈 Mess up one device</button>
+  <button class="alt" onclick="reset()">Reset</button>
+</div>
+<div class="meters">
+  <span>findings: <b id="mFind">—</b></span>
+  <span>work spent this round: <b id="mWork">0</b></span>
+  <span>full-rescan cost would be: <b id="mFull">5</b></span>
+  <span>ticks: <b id="mTick">0</b></span>
+</div>
+<div class="fleet" id="fleet"></div>
+<div class="converged" id="conv"></div>
+<div class="log" id="log"><b>The chain</b> — every line is a frame; children hold the tile's fingerprint.</div>
+
+<div class="what"><b>What am I looking at?</b> The <b>scan tile</b> is one frame; every
+device answers with a child frame fingerprint-linked to it, and the merged report's payload
+(the <b>data exhaust</b>) is the ONLY to-do list for the next step — devices with nothing
+wrong cost <i>zero</i> (they grey out; the work meter doesn't move for them). Scan → heal →
+scan again: when two ticks in a row find nothing new, the loop declares
+<b>converged</b> and goes quiet. That's §3.1–3.3 of the paper — and the real estate run
+went 66 findings → healed floor → quiet, with no human input.</div>
+</main>
+<script>
+"use strict";
+const NAMES = ["💻 mac","🖥 battlestation","🎮 deck","📺 apple-tv","🤖 rappterone"];
+let nodes, lastExhaust, stableTicks, ticks, chainNo;
+async function sha(s){
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+function reset(){
+  nodes = NAMES.map((n,i)=>({ name:n, findings:[4,0,3,1,2][i], healable:[3,0,3,1,1][i] }));
+  lastExhaust = null; stableTicks = 0; ticks = 0; chainNo = 0;
+  document.getElementById("log").innerHTML = "<b>The chain</b> — every line is a frame; children hold the tile's fingerprint.";
+  document.getElementById("conv").textContent = "";
+  document.getElementById("healBtn").disabled = true;
+  meters(0,"—"); paint([]);
+}
+function meters(work, find){
+  document.getElementById("mWork").textContent = work;
+  document.getElementById("mFind").textContent = find;
+  document.getElementById("mTick").textContent = ticks;
+}
+function paint(touched){
+  const f = document.getElementById("fleet"); f.textContent = "";
+  nodes.forEach((n,i)=>{
+    const d = document.createElement("div");
+    d.className = "node " + (n.findings ? "dirty" : "clean")
+      + (touched.length && !touched.includes(i) ? " skip" : "")
+      + (touched.includes(i) ? " touched" : "");
+    d.innerHTML = `<div class="n">${n.name}</div><div class="f">${n.findings}</div><div style="font-size:.8rem;color:var(--mut)">findings</div>`;
+    f.appendChild(d);
+  });
+}
+function logLine(html){ const l=document.getElementById("log"); const d=document.createElement("div"); d.innerHTML=html; l.appendChild(d); l.scrollTop=l.scrollHeight; }
+async function scan(){
+  const tileHash = await sha("tile|" + (chainNo++));
+  logLine(`<span class="tile">SCAN TILE #${ticks} → ${tileHash.slice(0,8)}…</span> "everyone: check yourselves"`);
+  // O(delta): only devices the LAST exhaust implicated (or all, on the first scan) do work
+  const implicated = lastExhaust === null ? nodes.map((_,i)=>i)
+    : nodes.map((n,i)=> n.findings !== lastExhaust[i] || n.findings>0 ? i : -1).filter(i=>i>=0);
+  let work = 0;
+  for (const i of implicated){
+    const h = await sha(tileHash + "|" + i + "|" + nodes[i].findings);
+    work++;
+    logLine(`&nbsp;&nbsp;└ ${nodes[i].name} answers: ${nodes[i].findings} finding(s) <span style="color:var(--accent)">(holds ${tileHash.slice(0,8)}…, is ${h.slice(0,8)}…)</span>`);
+  }
+  const total = nodes.reduce((s,n)=>s+n.findings,0);
+  const exhaust = nodes.map(n=>n.findings);
+  const same = lastExhaust !== null && exhaust.every((v,i)=>v===lastExhaust[i]);
+  stableTicks = same ? stableTicks+1 : 0;
+  lastExhaust = exhaust; ticks++;
+  logLine(`<span class="tick">TICK ${ticks}</span> merged report: ${total} finding(s) · work spent: ${work} of 5 devices ${same?"· nothing changed":""}`);
+  meters(work, total); paint(implicated);
+  document.getElementById("healBtn").disabled = total===0 || nodes.every(n=>n.healable===0);
+  if (stableTicks >= 1 && ticks >= 2){
+    document.getElementById("conv").textContent = "✓ CONVERGED — two stable ticks; the estate goes quiet (no human involved)";
+  } else document.getElementById("conv").textContent = "";
+}
+async function heal(){
+  const targets = nodes.map((n,i)=>n.findings>0 && n.healable>0 ? i:-1).filter(i=>i>=0);
+  let work=0;
+  for (const i of targets){
+    const fix = Math.min(nodes[i].healable, nodes[i].findings);
+    nodes[i].findings -= fix; nodes[i].healable = 0; work++;
+    logLine(`&nbsp;&nbsp;🩹 heals ${nodes[i].name}: −${fix} (deterministic, on a branch — the owner merges)`);
+  }
+  const remaining = nodes.reduce((s,n)=>s+n.findings,0);
+  logLine(`exhaust says only ${targets.length} device(s) needed touching — the rest cost nothing. ${remaining? remaining + " finding(s) need a human." : ""}`);
+  meters(work, remaining); paint(targets);
+  document.getElementById("healBtn").disabled = true;
+}
+function mess(){
+  const i = Math.floor(Math.random()*nodes.length);
+  nodes[i].findings += 2; nodes[i].healable += 2; stableTicks = 0;
+  logLine(`😈 ${nodes[i].name} drifted (+2 findings) — the NEXT scan tile will notice, and only it will pay.`);
+  document.getElementById("conv").textContent = "";
+  paint([i]); meters(0, nodes.reduce((s,n)=>s+n.findings,0));
+}
+reset();
+</script>
+</body>
+</html>

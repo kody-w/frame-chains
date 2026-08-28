@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Chain Is the Clock — Frame Chains</title>
+<style>
+  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; --bad:#b3261e; --ok:#1e7d32; }
+  *{ box-sizing:border-box; } body{ margin:0; font:16px/1.55 system-ui; color:var(--ink); }
+  main{ max-width:52rem; margin:0 auto; padding:2rem 1rem 4rem; }
+  h1{ font-size:1.5rem; margin:.2rem 0; } .lede{ color:var(--mut); }
+  .analogy{ background:#f6f8fb; border-left:3px solid var(--accent); padding:.6rem 1rem; border-radius:0 8px 8px 0; margin:1rem 0; }
+  .devices{ display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; }
+  .dev{ flex:1; min-width:15rem; border:1px solid var(--line); border-radius:10px; padding:.8rem 1rem; }
+  .dev h3{ margin:.1rem 0 .3rem; } .clock{ font:600 1.05rem ui-monospace,monospace; }
+  .skewed .clock{ color:var(--bad); }
+  button{ font:600 .95rem system-ui; padding:.5rem .9rem; border-radius:8px; border:1px solid var(--line);
+    background:var(--accent); color:#fff; cursor:pointer; margin:.4rem .3rem .2rem 0; }
+  button.alt{ background:#fff; color:var(--ink); }
+  input[type=range]{ width:100%; }
+  .story{ border:1px solid var(--line); border-radius:10px; padding:.8rem 1rem; margin-top:1rem; }
+  .frame{ display:flex; gap:.7rem; align-items:baseline; padding:.35rem .5rem; border-bottom:1px dashed var(--line);
+    font:.85rem ui-monospace, monospace; flex-wrap:wrap; }
+  .frame b{ font-family:system-ui; }
+  .frame .h{ color:var(--accent); } .frame .t{ color:var(--mut); } .frame .twrong{ color:var(--bad); font-weight:700; }
+  .verdict{ margin:.8rem 0 0; font-weight:700; }
+  .verdict.ok{ color:var(--ok); } .verdict.bad{ color:var(--bad); }
+  .what{ background:#fffbe8; border:1px solid #eadf9a; border-radius:8px; padding:.6rem 1rem; margin-top:1.2rem; font-size:.93rem; }
+  a{ color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<p><a href="../index.html">← Frame Chains</a></p>
+<h1>⏱ The Chain Is the Clock</h1>
+<p class="lede">In the real experiment behind the paper, one machine's clock was
+<b>17.6&nbsp;seconds wrong</b> — and the shared story stayed in perfect order. Here's why.</p>
+
+<div class="analogy"><b>Analogy:</b> a relay race. You know who ran third because they took
+the baton from the second runner — not because you trusted everyone's wristwatch. Each new
+entry physically holds a fingerprint of the one before it. The <i>hand-off</i> is the order.</div>
+
+<div class="devices">
+  <div class="dev" id="devA">
+    <h3>💻 The Mac</h3>
+    <div>clock: <span class="clock" id="clockA">—</span></div>
+    <button onclick="act('A')">Do something on the Mac</button>
+  </div>
+  <div class="dev skewed" id="devB">
+    <h3>🎮 The Steam Deck</h3>
+    <div>clock: <span class="clock" id="clockB">—</span> <span style="color:var(--bad)">(wrong!)</span></div>
+    <label>how wrong is its clock? <b id="skewLabel">-17.6 s</b></label>
+    <input type="range" id="skew" min="-120" max="120" step="0.1" value="-17.6" oninput="skewChanged()">
+    <button onclick="act('B')">Do something on the Deck</button>
+  </div>
+</div>
+
+<div class="story">
+  <b>The shared story</b>
+  <button class="alt" id="sortBtn" onclick="toggleSort()">Sort by wall-clock time (the wrong way)</button>
+  <div id="frames"></div>
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<div class="what"><b>What am I looking at?</b> Every entry (“frame”) carries a real SHA-256
+fingerprint of the entry before it — computed live in your browser. <b>Chain order</b> can't
+lie: each frame provably came after the one it fingerprints. <b>Wall-clock order</b> breaks
+the moment one clock is wrong — flip the sort and watch the Deck's entries jump to the
+wrong place. That's the paper's §3.8: the timestamp is a note in the margin; the chain is
+the clock.</div>
+</main>
+<script>
+"use strict";
+const chain = [];
+let skewMs = -17600, sortByClock = false, t0 = Date.now();
+async function sha(s){
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+function fmt(ms){ const d=new Date(ms); return d.toTimeString().slice(0,8)+"."+String(d.getMilliseconds()).padStart(3,"0"); }
+function tickClocks(){
+  document.getElementById("clockA").textContent = fmt(Date.now());
+  document.getElementById("clockB").textContent = fmt(Date.now()+skewMs);
+}
+setInterval(tickClocks, 200); tickClocks();
+function skewChanged(){
+  skewMs = parseFloat(document.getElementById("skew").value)*1000;
+  document.getElementById("skewLabel").textContent = (skewMs/1000).toFixed(1)+" s";
+}
+const VERBS = { A:["backed up photos","replied to an email","ran the tests"],
+                B:["saved the game","synced a mod","updated a chart"] };
+async function act(dev){
+  const seq = chain.length;
+  const prev = seq ? chain[seq-1].hash : "genesis";
+  const what = VERBS[dev][seq % 3];
+  const claimed = Date.now() + (dev==="B" ? skewMs : 0);
+  const hash = await sha(prev + "|" + dev + "|" + what + "|" + seq);
+  chain.push({ seq, dev, what, claimed, prev, hash });
+  render();
+}
+function toggleSort(){
+  sortByClock = !sortByClock;
+  document.getElementById("sortBtn").textContent = sortByClock
+    ? "Sort by chain order (the true way)" : "Sort by wall-clock time (the wrong way)";
+  render();
+}
+function render(){
+  const box = document.getElementById("frames"); box.textContent = "";
+  const view = [...chain];
+  if (sortByClock) view.sort((a,b)=>a.claimed-b.claimed);
+  let broken = false;
+  view.forEach((f,i)=>{
+    if (f.seq !== i) broken = true;
+    const div = document.createElement("div"); div.className = "frame";
+    div.innerHTML = `<b>#${f.seq}</b> ${f.dev==="A"?"💻":"🎮"} ${f.what}
+      <span class="h">holds ${f.prev.slice(0,8)}…</span>
+      <span class="${sortByClock && f.dev==="B" ? "twrong":"t"}">claims ${fmt(f.claimed)}</span>
+      <span class="h">is ${f.hash.slice(0,8)}…</span>`;
+    box.appendChild(div);
+  });
+  const v = document.getElementById("verdict");
+  if (!chain.length){ v.textContent = ""; return; }
+  if (!sortByClock){ v.className = "verdict ok";
+    v.textContent = "✓ Chain order: every frame holds the fingerprint of the one before it. Always true, any clocks."; }
+  else { v.className = "verdict " + (broken ? "bad" : "ok");
+    v.textContent = broken
+      ? "✗ Wall-clock order just rearranged history — frames now sit BEFORE the entries they provably came after."
+      : "Wall-clock order happens to match — now make the Deck's clock wrong and interleave actions…"; }
+}
+</script>
+</body>
+</html>

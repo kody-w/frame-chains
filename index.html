@@ -3,211 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Frame Chains — Self-Healing, Leader-Redundant Orchestration of a Distributed AI Estate</title>
+<title>Frame Chains</title>
 <style>
-  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; --bg:#ffffff; }
+  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; }
   *{ box-sizing:border-box; }
-  body{ margin:0; background:var(--bg); color:var(--ink);
-    font:17px/1.65 Georgia, "Times New Roman", serif; }
+  body{ margin:0; color:var(--ink); font:17px/1.6 Georgia, serif; }
   main{ max-width:46rem; margin:0 auto; padding:3rem 1.2rem 5rem; }
-  h1{ font-size:1.7rem; line-height:1.3; margin:0 0 .4rem; }
-  .meta{ color:var(--mut); font-size:.95rem; margin-bottom:.4rem; }
-  .note{ font-size:.9rem; color:var(--mut); border-left:3px solid var(--accent);
-    padding:.5rem .9rem; background:#f6f8fb; margin:1.2rem 0; }
-  h2{ font-size:1.2rem; margin:2.2rem 0 .6rem; border-bottom:1px solid var(--line); padding-bottom:.25rem; }
-  h3{ font-size:1.02rem; margin:1.4rem 0 .35rem; }
-  p, li{ text-align:justify; hyphens:auto; }
-  .abstract{ font-size:.98rem; }
-  .abstract:first-line{ }
-  ol li, ul li{ margin:.35rem 0; }
+  h1{ font-size:1.9rem; margin:0 0 .3rem; }
+  .meta{ color:var(--mut); margin-bottom:1.4rem; }
+  .big{ display:inline-block; background:var(--accent); color:#fff; text-decoration:none;
+    padding:.6rem 1.1rem; border-radius:8px; font:600 1rem system-ui; margin:.4rem .5rem .4rem 0; }
+  .card{ border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0; }
+  .card a{ color:var(--accent); font-weight:600; text-decoration:none; font-family:system-ui; }
+  .card p{ margin:.35rem 0 0; color:var(--mut); font-size:.95rem; }
+  h2{ font-size:1.15rem; margin:2rem 0 .5rem; }
   code{ font:.85em ui-monospace, Menlo, monospace; background:#f4f4f5; padding:.05em .3em; border-radius:3px; }
-  em.den{ color:var(--mut); }
   footer{ margin-top:3rem; color:var(--mut); font-size:.85rem; border-top:1px solid var(--line); padding-top:1rem; }
 </style>
 </head>
 <body>
 <main>
-<h1>Frame Chains: Self-Healing, Leader-Redundant Orchestration of a Distributed AI Estate via Signed Content-Addressed Frame Chains</h1>
-<p class="meta">Kody Wildfeuer · RapterBox LLC · First public disclosure: August&nbsp;27,&nbsp;2026</p>
-<p class="note">Preprint. Conceived and reduced to practice 2026-08-24/25 on the author's
-eight-device estate; the engineering record of every experiment below is maintained by the
-author. The substrate protocol (rapp/1) is separately published at
-<code>github.com/kody-w/rapp-1</code>; this paper discloses the orchestration methods built on
-it. © 2026 RapterBox LLC.</p>
+<h1>Frame Chains</h1>
+<p class="meta">Self-healing, leader-redundant orchestration of a distributed AI estate via
+signed content-addressed frame chains · Kody Wildfeuer · RapterBox LLC · 2026</p>
 
-<h2>Abstract</h2>
-<p class="abstract">
-AI agents now accumulate on personal and organizational devices the way services once
-accumulated on servers: organically, unwatched, and drifting. We present <b>frame
-chains</b>, an orchestration architecture that maintains a heterogeneous fleet of AI agents
-and devices (an “AI estate”) as <i>verifiable state</i> on an append-only, cryptographically
-content-addressed substrate — with no central server, no election traffic, and no reliance
-on synchronized clocks. One signed genesis frame (a <i>scan tile</i>) fans an estate-wide
-observation across devices; child frames return findings content-linked to the tile; a
-deterministic merge yields a single report whose payload (the <i>data exhaust</i>) is the
-sole trigger set for subsequent work, making follow-up cost O(delta) rather than
-O(estate). A homeostatic loop (scan → deterministic repair on isolated branches → diff →
-append tick) converges the estate to a stable floor without human input. Leadership is
-governed by lease-and-roster frames with staggered-by-rank succession, structurally
-preventing split-brain without elections. Because chain validity derives from content
-addresses rather than recency, a dimension disconnected for arbitrarily long resumes by
-appending to its own head, and a purely local estate can enrich itself from federated
-public chains through a one-way membrane. Logical time is carried by the chain itself: on
-live hardware with a 17.6-second clock disagreement, ordering was unaffected. We report
-the system reduced to practice on a real eight-device estate: a five-frame verifiable
-observation across the live fleet; automated healing of compliance findings from 66 to a
-deterministic floor with convergence declared after two stable ticks; a 29-frame recursive
-drill that re-dimensioned one drifted node; a five-scenario succession proof; a
-deterministic no-LLM re-attach of a stranded chain; and an independent-determinism event
-in which two uncoordinated computations of a migrated identity met byte-identically across
-the federation.
-</p>
+<p>AI agents pile up on devices the way services once piled up on servers — organically,
+unwatched, drifting. Frame chains keep a whole fleet healthy as <b>verifiable state on an
+append-only chain</b>: no central server, no elections, no clock agreement. Proven on a
+real eight-device estate — including ordering that shrugged off a 17.6-second clock
+disagreement, because <i>the chain is the clock</i>.</p>
 
-<h2>1&nbsp;·&nbsp;Introduction</h2>
-<p>The sprawl is concrete, not hypothetical: on a single owner's estate of eight devices we
-inventoried roughly twenty undeclared local AI services on one node, autonomous agents
-running unwatched, four-way version drift, and three incompatible “frame” shapes. The
-thesis of this work is that estate health should be <i>verifiable state on an append-only
-substrate</i> — not a dashboard's opinion — and that next actions should derive from a
-signed state delta, never from polling everything again.</p>
-<p>Contributions: scan-tile orchestration; exhaust-driven O(delta) precision; homeostatic
-convergence; a recursive dimension drill; lease/roster succession without elections;
-structural (non-temporal) resume; a deterministic re-attach ladder requiring no model
-judgment; federated read-only enrichment (the membrane); tick-granular logical time with a
-global heartbeat; and graded merge fidelity between independently formed histories.</p>
+<a class="big" href="paper.html">Read the paper</a>
+<a class="big" style="background:#3b3b40" href="https://github.com/kody-w/frame-chains">GitHub</a>
 
-<h2>2&nbsp;·&nbsp;Substrate</h2>
-<p>The substrate is the separately published rapp/1 protocol: content-addressed eleven-key
-frames, mint-once identity, deterministic eggs, with a public specification, reference
-implementation, and conformance suite. The substrate is prior art by the same author and
-is not claimed here; this paper claims the orchestration methods built on it.</p>
+<h2>Play with the ideas (no coding required)</h2>
+<div class="card">
+  <a href="play/chain-is-the-clock.html">⏱ The Chain Is the Clock</a>
+  <p>Two machines whose clocks wildly disagree write to one story. Drag the skew — the
+  order never breaks. Why timestamps were never the boss.</p>
+</div>
+<div class="card">
+  <a href="play/scan-tile.html">🛰 Scan Tiles &amp; the Healing Loop</a>
+  <p>Ask one question of a whole fleet with a single frame, watch the answers link back,
+  then heal only what changed — and watch the estate go quiet on its own.</p>
+</div>
+<div class="card">
+  <a href="play/succession.html">👑 Succession Without Elections</a>
+  <p>Knock out the leader. Nobody votes, nobody panics: ranks wait their turn by rule,
+  lag can't cause a coup, and history is never rewritten.</p>
+</div>
 
-<h2>3&nbsp;·&nbsp;Design</h2>
-<h3>3.1 Scan tiles</h3>
-<p>One genesis frame describes an estate-wide observation; N devices append child frames
-content-linked to the tile; a “dreamcatcher” merge produces one report frame. The whole
-observation is a single verifiable chain.</p>
-<h3>3.2 Exhaust-driven precision</h3>
-<p>The report's payload is the <i>only</i> trigger set for the next round: unimplicated nodes
-bear zero cost, and successive tiles are diffed so work is O(delta), not O(estate). The
-estate's current truth becomes an addressable object — a virtual table.</p>
-<h3>3.3 Homeostatic convergence</h3>
-<p>Loop: scan tile → deterministic, identity-preserving repairs on isolated branches → diff
-against the prior tile → append a tick frame to an append-only history chain. Convergence
-is declared after K stable ticks. Authority to merge stays with the owner; repairs are
-reversible.</p>
-<h3>3.4 Recursive dimension drill</h3>
-<p>An event on the top tile (a drifted node) spawns a finer sub-chain scoped to that node,
-whose findings are re-dimensioned by required-fix class and reassimilated under the
-parent. Observation depth is purchased only where events occurred — sparse invocation
-applied to attention itself.</p>
-<h3>3.5 Lease/roster succession</h3>
-<p>Who may <i>mint new intent</i> on a stream is governed by (a) a signed roster frame fixing
-succession rank, (b) a lease declared in each tick, (c) staggered-by-rank entitlement
-after expiry (rank r waits (r−1)×grace), and (d) signed succession/resumption frames.
-Continuation requires no authority; history is never rewritten; latency cannot cause a
-false takeover; split-brain is structurally impossible with zero election traffic.</p>
-<h3>3.6 Structural resume and the membrane</h3>
-<p>Validity is hash-structural, not temporal: a dimension dark for a month resumes by
-appending to its own head, and parallel dimensions of one organism merge at read time. A
-fully private estate participates in the global federation read-only — pulling and
-assimilating public chain data while its own frames never leave the boundary. Disconnection
-tolerance and privacy are the same mechanism at different budget settings.</p>
-<h3>3.7 Deterministic re-attach and the quantum drill</h3>
-<p>Frames declare their reads as {name → content-address}. A stranded frame conflicts with a
-candidate base iff the base's upstream declares a different address for a declared read —
-a pure set intersection, no model judgment. The ladder (local → other local dimensions →
-federated chains) short-circuits at the first contradiction-free base; a dry hole is a
-no-op, not an error. Transplants carry <code>grafted_from</code> provenance; superseded
-originals are preserved. Search is anytime: the first hit bounds latency, and each further
-non-contradicting dimension found monotonically enriches the frame, re-gated by the
-contradiction check at merge time — search budget controls completeness, never
-correctness. An interruption is not an error path but the trigger for assimilation: a
-frame emerges from disconnection richer, not stalled.</p>
-<h3>3.8 Tick-granular logical time</h3>
-<p>The atomic unit of trackable time is the tick frame: one sequence increment, one dependent
-frame. Ordering authority is the dependency chain, never the wall clock — the timestamp is
-annotation and sanity bound. A designated global stream beats one discrete anchor per
-tick; what grows is the anchor's <i>dimension</i>: dependent frames from any device
-referencing that instant, conflict-gated as always. Resolution is fractal on demand
-(sub-tick anchors under a covering tick). Ownership of a timeline vests at spine genesis
-and deepens by continuity of stewardship and adoption, not tick density.</p>
-<h3>3.9 Merge fidelity</h3>
-<p>When two frame histories that formed with no contact meet, the boolean drill generalizes
-to a graded score: join both histories on the tick key; a dimension is mergeable iff its
-declarations are contradiction-free across every shared tick; the score is mergeable over
-shared dimensions. Aligned dimensions merge and continue; conflicted ones remain parallel,
-never forced; one-sided dimensions assimilate freely. The computation is deterministic on
-every node.</p>
-<h3>3.10 A practice note: heterogeneous chains</h3>
-<p>Because history is corrected by appending amendment frames rather than editing, every
-long-lived stream becomes heterogeneous, and consumers must filter by kind. Observed live:
-a single correction frame crashed an unrelated trend computation that assumed homogeneity.
-The append-only law is sound; the cost it imposes is kind-aware readers.</p>
-
-<h2>4&nbsp;·&nbsp;Reduction to practice</h2>
-<ol>
-<li><b>Estate survey:</b> eight devices, five reachable over the private network; the sprawl
-inventory above.</li>
-<li><b>Scan tile, live:</b> one genesis frame across all reachable devices produced a
-five-frame chain, every frame verified by the reference implementation; 15
-artifact-bearing repositories; 66 non-compliant findings across six rules.</li>
-<li><b>Healing:</b> exhaust-driven deterministic repairs on isolated branches took findings
-66&nbsp;→&nbsp;35 on healable repositories; a collision rule correctly skipped a repository
-with uncommitted changes; nothing was pushed; the owner authorizes by merge.</li>
-<li><b>Homeostasis, live:</b> tick&nbsp;0 (66) → tick&nbsp;1 (55 effective) → tick&nbsp;2
-converged — the estate healed to its deterministic floor and went quiet without human
-input; hourly automation armed.</li>
-<li><b>Drill:</b> a single DRIFT(27) event spawned a 29-frame verifying sub-chain that
-re-dimensioned 27 opaque findings into required-fix classes.</li>
-<li><b>Succession:</b> a five-scenario harness passed in full — a follower refused to mint
-during a live lease; rank&nbsp;2 succeeded only after lease+grace; a returned leader
-deferred to the live interim lease; rank&nbsp;1 reclaimed at the lease boundary; all
-chains verify and history was never rewritten — plus a single-node live run under a real
-two-hour lease. <em class="den">Honest denominator: fleet rollout staged, not yet
-fleet-live at time of writing.</em></li>
-<li><b>Structural resume:</b> a stream dark across a simulated month re-appended to its own
-head; both dimensions verify in parallel.</li>
-<li><b>Deterministic re-attach, live:</b> a stranded genesis chain re-attached with no model
-call; candidate&nbsp;0 was rejected on a real content-hash conflict; the grafted chain was
-judged compliant by the oracle; provenance was bridged and the superseded original
-preserved.</li>
-<li><b>Federated pull and independent determinism:</b> a global public chain was continued
-locally as if nothing changed — and the pulled stream's derived identity was
-byte-identical to a tail derived independently hours earlier by a separate computation.
-Two uncoordinated derivations, one answer, met across the federation.</li>
-<li><b>Heartbeat on real hardware:</b> tick anchors minted under a live lease; frames minted
-on three machines; one clock was 17,620&nbsp;ms off and ordering was unaffected — the
-chain is the clock; a sealed tick's dimension grew late with its anchor byte-identical; a
-contradicting read was refused while an agreeing read attached; spine and dimensions
-verify. A global spine runs live with CI verification and a ten-minute beat.</li>
-<li><b>Merge fidelity:</b> two independently formed estates scored 0.667 — roster and notes
-merged, configuration parked parallel on a real contradiction, disjoint dimensions
-imported.</li>
-</ol>
-
-<h2>5&nbsp;·&nbsp;Related work and position</h2>
-<p>Shipped systems coordinate by isolation (parallel coding agents in per-agent worktrees;
-vendor guidance describes that design as not an agent orchestration system), by
-conversation, or by a central runtime. The 2026 research trend — CRDT-based agent memory,
-event-sourced message pools — converges on pieces of this pattern but is unshipped. The
-claim here is architectural rather than “faster”: partition-native, O(delta) by
-construction, verifiable end-to-end, self-healing, with election-free leader redundancy,
-as a working combination on a signed content-addressed substrate with an identity law.</p>
-
-<h2>6&nbsp;·&nbsp;Limitations</h2>
-<p>Single-owner estate; one evaluator; succession fleet rollout pending; scale unmeasured
-beyond eight devices; the healing floor is the oracle's, not an absolute; anytime
-enrichment trades completeness against search budget by design.</p>
-
-<h2>7&nbsp;·&nbsp;Conclusion</h2>
-<p>An AI estate can govern itself the way its artifacts are addressed: by content, on
-chains, with authority carried in frames rather than in servers or clocks. Interruption
-becomes the trigger for enrichment; recovery and growth are the same operation.</p>
+<h2>Run a sample</h2>
+<p><code>python3 samples/frame_chain.py</code> — a ~120-line toy frame chain (real SHA-256,
+no dependencies): mint, append, verify, catch tampering, and merge two skewed-clock
+devices in chain order.</p>
 
 <footer>
-<p id="fc-marker">frame-chains · first public disclosure 2026-08-27 · © 2026 RapterBox LLC ·
-substrate: <a href="https://kody-w.github.io/rapp-1/">rapp/1</a></p>
+<p>First public disclosure 2026-08-27 · © 2026 RapterBox LLC · substrate:
+<a href="https://kody-w.github.io/rapp-1/">rapp/1</a> (published separately) ·
+the interactive pages are teaching toys — the paper is the source of truth.</p>
 </footer>
 </main>
 </body>
