@@ -553,20 +553,20 @@ td code { color: var(--cyan); overflow-wrap: anywhere; }
 
   <section class="guide-grid" aria-label="Newcomer guidance">
     <article class="guide-card" data-step="1">
-      <h2>Observe the fan-out</h2>
-      <p>Inject the seeded drift, then mint one scan tile. Every child response must carry that tile’s exact hash.</p>
+      <h2>What you are looking at</h2>
+      <p>A synthetic twelve-module Mars colony whose visible state is rebuilt from frames. One scan tile fans out, and every child response carries that tile’s exact hash.</p>
     </article>
     <article class="guide-card" data-step="2">
-      <h2>Repair only the delta</h2>
-      <p>The report names three changed modules. A full twelve-module sweep is deliberately rejected as waste.</p>
+      <h2>Do this</h2>
+      <p>Inject the seeded drift, mint the scan tile, repair only the report’s three-module delta, disable ARES, then partition and reattach Research.</p>
     </article>
     <article class="guide-card" data-step="3">
-      <h2>Advance logical authority</h2>
-      <p>Disable ARES. No vote occurs: PHOBOS may append only after its precommitted lease window begins.</p>
+      <h2>Watch for</h2>
+      <p>The full twelve-module sweep is rejected as waste. No vote occurs after ARES stops: PHOBOS may append only when its precommitted logical-beat lease begins.</p>
     </article>
     <article class="guide-card" data-step="4">
-      <h2>Reattach by contradiction</h2>
-      <p>Research continues on an offline dimension. Its head rejoins only if the base claims still agree.</p>
+      <h2>What this demonstrates</h2>
+      <p>Delta-bounded repair can converge, ranked leases can preserve authority without election, and Research can continue offline yet rejoin only when its base claims still agree.</p>
     </article>
   </section>
 
