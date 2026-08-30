@@ -1,0 +1,24 @@
+{
+  "frame": 8,
+  "slug": "08-teleporting-roguelike",
+  "title": "The Teleporting Roguelike",
+  "claim": "A playable deterministic world can teleport between devices as chain bytes alone, reconstruct byte-identically despite clock skew, accept compatible offline work by declared reads, and reject forged provenance without disturbing the last verified game.",
+  "entry": "index.html",
+  "synthetic_only": true,
+  "network_required": false,
+  "invariants": [
+    "The map, player, enemies, inventory, combat outcomes, and discovered rooms are reconstructed solely by replaying accepted frames.",
+    "Every frame uses recursive lexicographic canonical JSON and browser Web Crypto SHA-256.",
+    "Every non-genesis frame names the exact previous verified frame as its parent; device timestamps never determine dependency order.",
+    "Device B receives only serialized chain bytes and must reconstruct canonical world bytes identical to Device A.",
+    "Device C may reattach offline frames only when every declared read remains a verified ancestor of the destination.",
+    "A valid-hash semantic inventory forgery or parent-provenance forgery must be refused without replacing the last verified chain."
+  ],
+  "positive_path": [
+    "Play manually or run the guided proof to append deterministic movement, combat, pickup, healing, and discovery frames.",
+    "Pause Device A, transfer only its serialized chain to badly skewed-clock Device B, and compare canonical world SHA-256 bytes.",
+    "Continue Device C offline from an older frame and reattach its discoveries when all declared reads remain ancestors.",
+    "Scrub and replay the append-only ledger while live assertions independently verify the active chain."
+  ],
+  "failure_path": "Append a valid-hash nonexistent inventory use, wrong-parent frame, or unavailable Device C declared read; verification refuses the candidate without changing the accepted head."
+}
