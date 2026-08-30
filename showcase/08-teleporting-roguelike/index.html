@@ -300,6 +300,7 @@
         <p class="lede">A tiny dungeon whose map, hero, monsters, inventory, combat, discoveries, and device hand-offs exist only as the deterministic projection of an append-only SHA-256 frame chain.</p>
       </div>
       <div class="header-tools">
+        <button id="runDemo" class="primary">Run guided proof</button>
         <label class="sr-only" for="theme">Theme</label>
         <select id="theme" aria-label="Color theme">
           <option value="clawpilot">Clawpilot</option>
@@ -358,7 +359,6 @@
         <p class="lede" id="demoText">Run the scripted proof or use every control manually. The demo uses the same public operations as the game.</p>
         <div class="button-row">
           <button id="nextDemo" class="primary">Run next step</button>
-          <button id="runDemo">Run all</button>
           <button id="replayDemo">Replay proof</button>
         </div>
         <details open>
@@ -477,6 +477,7 @@
     let demoStep = 0;
     let demoRunning = false;
     let renderTicket = 0;
+    let controlQueue = Promise.resolve();
     const proof = { hashes:false, derived:false, transfer:false, clock:false, fork:false, mutation:false };
 
     function canonical(value) {
@@ -755,6 +756,8 @@
       activeDevice="A"; pausedA=false; cBaseLength=0; replayLength=1; demoStep=0;
       Object.keys(proof).forEach(k=>proof[k]=false);
       proof.hashes=true; proof.derived=true;
+      $("#demoCounter").textContent=`STEP 0 / ${demoSteps.length}`;
+      $("#demoText").textContent="Run the scripted proof or use every control manually. The demo uses the same public operations as the game.";
       await renderAll("Genesis verified. Use WASD, arrows, or run the guided proof.");
     }
 
@@ -1046,25 +1049,33 @@
 
     function announce(message) { $("#status").textContent=message; }
 
-    $$("[data-move]").forEach(button=>button.addEventListener("click",()=>move(button.dataset.move)));
-    $("#usePotion").addEventListener("click",usePotion);
-    $("#waitTurn").addEventListener("click",()=>appendActive({type:"wait"}));
-    $("#reset").addEventListener("click",init);
-    $("#pauseA").addEventListener("click",pauseDeviceA);
-    $("#transferB").addEventListener("click",transferToB);
-    $("#skewTurn").addEventListener("click",appendSkewTurn);
-    $("#forkC").addEventListener("click",forkToC);
-    $("#offlineC").addEventListener("click",continueCOffline);
-    $("#reattachC").addEventListener("click",reattachC);
-    $("#conflictC").addEventListener("click",corruptCRead);
-    $("#forgeItem").addEventListener("click",()=>testMutation("item"));
-    $("#forgeParent").addEventListener("click",()=>testMutation("parent"));
-    $("#verify").addEventListener("click",verifyActive);
-    $("#nextDemo").addEventListener("click",runNextDemo);
-    $("#runDemo").addEventListener("click",runAllDemo);
-    $("#replayDemo").addEventListener("click",async()=>{ await init(); demoStep=0; await runAllDemo(); });
-    $("#liveHead").addEventListener("click",async()=>{ replayLength=activeChain().length; await renderAll("Returned to the verified live head."); });
-    $("#replay").addEventListener("input",async e=>{ replayLength=Number(e.target.value); await renderAll(`Replaying prefix through frame ${replayLength-1}.`); });
+    function queueControl(operation) {
+      controlQueue=controlQueue.then(operation).catch(error=>{
+        console.error(error);
+        announce(`Control failed safely: ${error.message}`);
+      });
+      return controlQueue;
+    }
+
+    $$("[data-move]").forEach(button=>button.addEventListener("click",()=>queueControl(()=>move(button.dataset.move))));
+    $("#usePotion").addEventListener("click",()=>queueControl(usePotion));
+    $("#waitTurn").addEventListener("click",()=>queueControl(()=>appendActive({type:"wait"})));
+    $("#reset").addEventListener("click",()=>queueControl(init));
+    $("#pauseA").addEventListener("click",()=>queueControl(pauseDeviceA));
+    $("#transferB").addEventListener("click",()=>queueControl(transferToB));
+    $("#skewTurn").addEventListener("click",()=>queueControl(appendSkewTurn));
+    $("#forkC").addEventListener("click",()=>queueControl(forkToC));
+    $("#offlineC").addEventListener("click",()=>queueControl(continueCOffline));
+    $("#reattachC").addEventListener("click",()=>queueControl(reattachC));
+    $("#conflictC").addEventListener("click",()=>queueControl(corruptCRead));
+    $("#forgeItem").addEventListener("click",()=>queueControl(()=>testMutation("item")));
+    $("#forgeParent").addEventListener("click",()=>queueControl(()=>testMutation("parent")));
+    $("#verify").addEventListener("click",()=>queueControl(verifyActive));
+    $("#nextDemo").addEventListener("click",()=>queueControl(runNextDemo));
+    $("#runDemo").addEventListener("click",()=>queueControl(runAllDemo));
+    $("#replayDemo").addEventListener("click",()=>queueControl(async()=>{ await init(); await runAllDemo(); }));
+    $("#liveHead").addEventListener("click",()=>queueControl(async()=>{ replayLength=activeChain().length; await renderAll("Returned to the verified live head."); }));
+    $("#replay").addEventListener("input",e=>queueControl(async()=>{ replayLength=Number(e.target.value); await renderAll(`Replaying prefix through frame ${replayLength-1}.`); }));
     const forcedTheme=new URLSearchParams(location.search).get("scoutTheme");
     if (forcedTheme==="dark" || forcedTheme==="light") {
       document.documentElement.dataset.theme=forcedTheme;
@@ -1082,9 +1093,9 @@
       if (event.target.matches("input,select,button,summary")) return;
       const key=event.key.toLowerCase();
       const map={arrowup:"up",w:"up",arrowdown:"down",s:"down",arrowleft:"left",a:"left",arrowright:"right",d:"right"};
-      if (map[key]) { event.preventDefault(); move(map[key]); }
-      else if (key==="h") { event.preventDefault(); usePotion(); }
-      else if (key===".") { event.preventDefault(); appendActive({type:"wait"}); }
+      if (map[key]) { event.preventDefault(); queueControl(()=>move(map[key])); }
+      else if (key==="h") { event.preventDefault(); queueControl(usePotion); }
+      else if (key===".") { event.preventDefault(); queueControl(()=>appendActive({type:"wait"})); }
     });
 
     init();
