@@ -2,7 +2,7 @@
   "schema": "frame-chains.frame-loop/1",
   "loop": 1,
   "base_commit": "6a7c980837cf33ca8e40fd48feaafd5e63c786ee",
-  "integration_head_before_ledger": "fc5fc5540d17899d14cf3ae5ad1c9df50360fdc0",
+  "integration_head_before_ledger": "9c65d77db1f5ae2ac462b584858ecea1651dd18d",
   "merge_strategy": "git merge --no-ff",
   "squash": false,
   "frame_count": 10,
@@ -12,12 +12,13 @@
       "slug": "01-many-worlds",
       "branch": "frame/01-many-worlds",
       "path": "showcase/01-many-worlds",
-      "commit": "b37cdb54cd5391a3d5798585118c7b55868bcce2",
+      "commit": "14cbee49b4e1ef93f057d2d06e854b3567dae773",
       "commits": [
         "f48a17e00989040ac1d680c6e0cb148d743066cb",
         "cc9ef770b25fe3bb65fe639e7ccb7b1c22dae4c1",
         "f6e7d85f66fd548d880c459f8a168651a53a9890",
-        "b37cdb54cd5391a3d5798585118c7b55868bcce2"
+        "b37cdb54cd5391a3d5798585118c7b55868bcce2",
+        "14cbee49b4e1ef93f057d2d06e854b3567dae773"
       ]
     },
     {
@@ -25,12 +26,13 @@
       "slug": "02-soul-passport",
       "branch": "frame/02-soul-passport",
       "path": "showcase/02-soul-passport",
-      "commit": "191419bca4b2155e6a9b47074c66c096d85d37ae",
+      "commit": "6a40627b176364ae7fbe65cd0baadb7b3a611b48",
       "commits": [
         "5cc74232da89db2dab150dcbc0817cfa2c71bd98",
         "edf6a39f235729228ca8e51738e5d31fbefe3747",
         "28ce11cfdedf69e84ca6a55d2ad2a04053444cd7",
-        "191419bca4b2155e6a9b47074c66c096d85d37ae"
+        "191419bca4b2155e6a9b47074c66c096d85d37ae",
+        "6a40627b176364ae7fbe65cd0baadb7b3a611b48"
       ]
     },
     {
@@ -81,11 +83,12 @@
       "slug": "06-space-station",
       "branch": "frame/06-space-station",
       "path": "showcase/06-space-station",
-      "commit": "427b1138b20c4e0ca25a2cad7a6513c50a285b94",
+      "commit": "319958bfdf25840f8d3137f52ebf5ec74508741f",
       "commits": [
         "75746bb7d2237f8721f5db81c2820759e418f2b5",
         "9c5fe246c9a2aa4ce133c4effd5e2fffece25613",
-        "427b1138b20c4e0ca25a2cad7a6513c50a285b94"
+        "427b1138b20c4e0ca25a2cad7a6513c50a285b94",
+        "319958bfdf25840f8d3137f52ebf5ec74508741f"
       ]
     },
     {
@@ -107,7 +110,7 @@
       "slug": "08-teleporting-roguelike",
       "branch": "frame/08-teleporting-roguelike",
       "path": "showcase/08-teleporting-roguelike",
-      "commit": "1cf0118afd4c1bbaf642f5b5f6ff69e493356c2a",
+      "commit": "99a8d97c972f20ce887bc0d44e9b01e6a99aeb94",
       "commits": [
         "431d46d5719c6bb49f2b5570efb91833e649d402",
         "aa05697910cec1a069a565bcc2cd1a991848ba12",
@@ -115,7 +118,8 @@
         "c456b69356c63f49ae971a9697b36d8f0653a342",
         "c0fc9cdcf049b15a1a1b2079b765f1f6edc26f0e",
         "43ea4a07d8fe1d3229c15b980cf7cc36420c6aaf",
-        "1cf0118afd4c1bbaf642f5b5f6ff69e493356c2a"
+        "1cf0118afd4c1bbaf642f5b5f6ff69e493356c2a",
+        "99a8d97c972f20ce887bc0d44e9b01e6a99aeb94"
       ]
     },
     {
