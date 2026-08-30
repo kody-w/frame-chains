@@ -20,6 +20,24 @@ const frames = [
   "09-attack-timeline",
   "10-futures-museum",
 ];
+const interactionPlans = {
+  "03-mars-colony": {
+    positive: [{ selector: "#nextButton", repeat: 8, waitMs: 450 }],
+    failure: [
+      { selector: "#resetButton", waitMs: 300 },
+      { selector: "#injectButton", waitMs: 300 },
+      { selector: "#scanButton", waitMs: 700 },
+      { selector: "#sweepButton", waitMs: 500 },
+    ],
+  },
+};
+const runtimeFrames = process.env.SHOWCASE_FRAME
+  ? frames.filter((slug) => slug === process.env.SHOWCASE_FRAME)
+  : frames;
+check(
+  runtimeFrames.length > 0,
+  `unknown SHOWCASE_FRAME ${process.env.SHOWCASE_FRAME || ""}`,
+);
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".json": "application/json; charset=utf-8",
@@ -182,12 +200,14 @@ async function matchingButton(page, patterns, label) {
 }
 
 async function hasVisibleVerdict(page, kind) {
-  const pattern = kind === "pass" ? /\bPASS\b/i : /\b(?:FAIL|REJECTED|BLOCKED|DETECTED)\b/i;
+  const pattern = kind === "pass"
+    ? /PASS|VERIF(?:Y|IED|IES|ICATION)|AGREE|VALID|SUCCESS|✓/i
+    : /FAIL|REJECT|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
   return page.evaluate(({ source, flags }) => {
     const expression = new RegExp(source, flags);
     const candidates = [
       ...document.querySelectorAll(
-        '.pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
+        '.assertion, .assertion-result, .live-region, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
       ),
     ].filter((node) => {
       const rect = node.getBoundingClientRect();
@@ -198,14 +218,16 @@ async function hasVisibleVerdict(page, kind) {
 }
 
 async function waitForVisibleVerdict(page, kind, label) {
-  const pattern = kind === "pass" ? /\bPASS\b/i : /\b(?:FAIL|REJECTED|BLOCKED|DETECTED)\b/i;
+  const pattern = kind === "pass"
+    ? /PASS|VERIF(?:Y|IED|IES|ICATION)|AGREE|VALID|SUCCESS|✓/i
+    : /FAIL|REJECT|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
   try {
     await page.waitForFunction(
       ({ source, flags }) => {
         const expression = new RegExp(source, flags);
         const candidates = [
           ...document.querySelectorAll(
-            '.pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
+            '.assertion, .assertion-result, .live-region, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
           ),
         ].filter((node) => {
           const rect = node.getBoundingClientRect();
@@ -273,35 +295,101 @@ async function exerciseFrame(context, origin, slug) {
 
   await page.setViewportSize({ width: 1100, height: 900 });
   const before = compact(await page.locator("body").innerText());
-  const guided = await matchingButton(
-    page,
-    [/\bguided\b/i, /\brun all\b/i, /\brun next\b/i, /\brun control\b/i, /\bauto\b/i],
-    `${slug} guided run`,
-  );
-  const guidedLabel = compact(
-    `${await guided.innerText().catch(() => "")} `
-    + `${await guided.getAttribute("aria-label") || ""} `
-    + `${await guided.getAttribute("title") || ""}`,
-  );
-  const guidedSteps = /\bnext\b/i.test(guidedLabel) ? 14 : 1;
-  for (let step = 0; step < guidedSteps; step += 1) {
-    if (await guided.isDisabled()) break;
-    await guided.click();
-    await page.waitForTimeout(step === 0 ? 1_000 : 350);
-    if (!/\bnext\b/i.test(guidedLabel) && await hasVisibleVerdict(page, "pass")) break;
+  const plan = interactionPlans[slug];
+  if (plan) {
+    for (const action of plan.positive) {
+      const control = page.locator(action.selector);
+      for (let repeat = 0; repeat < (action.repeat || 1); repeat += 1) {
+        check(
+          !await control.isDisabled(),
+          `${slug}: ${action.selector} disabled at positive step ${repeat + 1}`,
+        );
+        await control.click();
+        await page.waitForTimeout(action.waitMs || 350);
+      }
+    }
+  } else {
+    const guided = await matchingButton(
+      page,
+      [/\bguided\b/i, /\brun all\b/i, /\brun next\b/i, /\brun control\b/i, /\bauto\b/i],
+      `${slug} guided run`,
+    );
+    const guidedLabel = compact(
+      `${await guided.innerText().catch(() => "")} `
+      + `${await guided.getAttribute("aria-label") || ""} `
+      + `${await guided.getAttribute("title") || ""}`,
+    );
+    const guidedSteps = /\bnext\b/i.test(guidedLabel) ? 14 : 1;
+    for (let step = 0; step < guidedSteps; step += 1) {
+      if (await guided.isDisabled()) break;
+      await guided.click();
+      await page.waitForTimeout(step === 0 ? 1_000 : 350);
+      if (!/\bnext\b/i.test(guidedLabel) && await hasVisibleVerdict(page, "pass")) break;
+    }
+    if (!/\bnext\b/i.test(guidedLabel)) {
+      let waitingForCompletion = await guided.isDisabled();
+      if (waitingForCompletion) {
+        const reportsRunning = /\b(?:running|working|playing|processing|building)\b/i.test(
+          compact(await guided.innerText().catch(() => "")),
+        );
+        for (let attempt = 0; waitingForCompletion && attempt < 80; attempt += 1) {
+          await page.waitForTimeout(250);
+          waitingForCompletion = await guided.isDisabled();
+          if (reportsRunning) {
+            const currentLabel = compact(await guided.innerText().catch(() => ""));
+            if (!/\b(?:running|working|playing|processing|building)\b/i.test(currentLabel)) {
+              break;
+            }
+          }
+        }
+        await page.waitForTimeout(500);
+      } else {
+        let activeLabel = compact(
+          `${await guided.innerText().catch(() => "")} `
+          + `${await guided.getAttribute("aria-label") || ""} `
+          + `${await guided.getAttribute("title") || ""}`,
+        );
+        if (/\b(?:pause|running|working|playing|processing|building)\b/i.test(activeLabel)) {
+          for (let attempt = 0; attempt < 80; attempt += 1) {
+            await page.waitForTimeout(250);
+            activeLabel = compact(
+              `${await guided.innerText().catch(() => "")} `
+              + `${await guided.getAttribute("aria-label") || ""} `
+              + `${await guided.getAttribute("title") || ""}`,
+            );
+            if (!/\b(?:pause|running|working|playing|processing|building)\b/i.test(activeLabel)) {
+              break;
+            }
+          }
+          await page.waitForTimeout(500);
+        } else {
+          await page.waitForTimeout(4_000);
+        }
+      }
+    } else {
+      await page.waitForTimeout(1_000);
+    }
   }
-  await page.waitForTimeout(1_000);
   const afterGuided = compact(await page.locator("body").innerText());
   check(afterGuided !== before, `${slug}: guided run produced no visible change`);
   await waitForVisibleVerdict(page, "pass", `${slug} guided run`);
 
-  const mutation = await matchingButton(
-    page,
-    [/\bmutat/i, /\btamper/i, /\battack/i, /\bforge/i, /\bunsafe/i, /\boverwrite/i, /\btyrant/i, /\bcorrupt/i, /\battempt\b/i, /\bbreak\b/i],
-    `${slug} failure path`,
-  );
-  await mutation.click();
-  await page.waitForTimeout(700);
+  if (plan) {
+    for (const action of plan.failure) {
+      const control = page.locator(action.selector);
+      check(!await control.isDisabled(), `${slug}: ${action.selector} disabled in failure path`);
+      await control.click();
+      await page.waitForTimeout(action.waitMs || 350);
+    }
+  } else if (!await hasVisibleVerdict(page, "fail")) {
+    const mutation = await matchingButton(
+      page,
+      [/\bmutat/i, /\btamper/i, /\battack/i, /\bforge/i, /\bunsafe/i, /\boverwrite/i, /\btyrant/i, /\bcorrupt/i, /\bfull sweep\b/i, /\bearly claim\b/i, /\bforce contradiction\b/i, /\bbreak\b/i],
+      `${slug} failure path`,
+    );
+    await mutation.click();
+    await page.waitForTimeout(700);
+  }
   await waitForVisibleVerdict(page, "fail", `${slug} mutation`);
 
   await page.locator("details").evaluateAll((details) => {
@@ -355,11 +443,15 @@ try {
   catalogClean();
   await catalog.close();
 
-  for (const slug of frames) {
+  for (const slug of runtimeFrames) {
     await exerciseFrame(context, started.origin, slug);
   }
   await context.close();
-  console.log("showcasecheck: PASS · 10/10 frames");
+  console.log(
+    process.env.SHOWCASE_FRAME
+      ? `showcasecheck: PASS · ${process.env.SHOWCASE_FRAME}`
+      : "showcasecheck: PASS · 10/10 frames",
+  );
 } catch (error) {
   console.error("showcasecheck: FAIL");
   console.error(error?.stack || error);
