@@ -20,20 +20,29 @@ const frames = [
   "09-attack-timeline",
   "10-futures-museum",
 ];
-const interactionPlans = {
-  "03-mars-colony": {
-    positive: [{ selector: "#nextButton", repeat: 8, waitMs: 450 }],
-    failure: [
-      { selector: "#resetButton", waitMs: 300 },
-      { selector: "#injectButton", waitMs: 300 },
-      { selector: "#scanButton", waitMs: 700 },
-      { selector: "#sweepButton", waitMs: 500 },
-    ],
-  },
-  "08-teleporting-roguelike": {
-    positive: [{ selector: "#runDemo", waitMs: 8_000 }],
-    failure: [{ selector: "#forgeItem", waitMs: 500 }],
-  },
+const copySelectors = {
+  "01-many-worlds": "#copy-btn",
+  "02-soul-passport": "#copy-prompt-button",
+  "03-mars-colony": "#copyPromptButton",
+  "04-five-realities": "#copyBtn",
+  "05-causal-detective": "#copyPromptBtn",
+  "06-space-station": "#copy-prompt",
+  "07-constitution": "#copyBtn",
+  "08-teleporting-roguelike": "#copyPrompt",
+  "09-attack-timeline": "#copyBtn",
+  "10-futures-museum": "#copyPromptBtn",
+};
+const resetSelectors = {
+  "01-many-worlds": "#reset-btn",
+  "02-soul-passport": "#reset-button",
+  "03-mars-colony": "#resetButton",
+  "04-five-realities": "#resetBtn",
+  "05-causal-detective": "#resetBtn",
+  "06-space-station": "#reset",
+  "07-constitution": "#resetBtn",
+  "08-teleporting-roguelike": "#reset",
+  "09-attack-timeline": "#resetBtn",
+  "10-futures-museum": "#resetBtn",
 };
 const runtimeFrames = process.env.SHOWCASE_FRAME
   ? frames.filter((slug) => slug === process.env.SHOWCASE_FRAME)
@@ -184,66 +193,334 @@ function monitorPage(page, label, origin) {
   return () => check(errors.length === 0, `${label} emitted errors:\n${errors.join("\n")}`);
 }
 
-async function matchingButton(page, patterns, label) {
-  const buttons = page.locator("button, [role=button]");
-  let disabledMatch = null;
-  for (let index = 0; index < await buttons.count(); index += 1) {
-    const button = buttons.nth(index);
-    const text = compact(
-      `${await button.innerText().catch(() => "")} `
-      + `${await button.getAttribute("aria-label") || ""} `
-      + `${await button.getAttribute("title") || ""}`,
-    );
-    if (patterns.some((pattern) => pattern.test(text))) {
-      if (await button.isVisible() && !await button.isDisabled()) return button;
-      disabledMatch ||= button;
-    }
+async function poll(label, predicate, timeout = 30_000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (await predicate()) return;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 100));
   }
-  if (disabledMatch) throw new Error(`${label}: matching control is disabled`);
-  throw new Error(`${label}: no matching control`);
+  throw new Error(`${label}: timed out`);
 }
 
-async function hasVisibleVerdict(page, kind) {
-  const pattern = kind === "pass"
-    ? /PASS|VERIF(?:Y|IED|IES|ICATION)|AGREE|VALID|SUCCESS|✓/i
-    : /FAIL|REJECT|REFUS|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
-  return page.evaluate(({ source, flags }) => {
-    const expression = new RegExp(source, flags);
-    const candidates = [
-      ...document.querySelectorAll(
-        '.assertion, .assertion-result, .live-region, .statusline, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
-      ),
-    ].filter((node) => {
-      const rect = node.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    });
-    return candidates.some((node) => expression.test(node.textContent || ""));
-  }, { source: pattern.source, flags: pattern.flags });
+async function clickControl(page, selector, waitMs = 150) {
+  const control = page.locator(selector);
+  check(await control.count() === 1, `${selector}: expected one control`);
+  await control.waitFor({ state: "visible" });
+  await poll(`${selector} enabled`, async () => !await control.isDisabled());
+  await control.click();
+  if (waitMs) await page.waitForTimeout(waitMs);
 }
 
-async function waitForVisibleVerdict(page, kind, label) {
-  const pattern = kind === "pass"
-    ? /PASS|VERIF(?:Y|IED|IES|ICATION)|AGREE|VALID|SUCCESS|✓/i
-    : /FAIL|REJECT|REFUS|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
-  try {
-    await page.waitForFunction(
-      ({ source, flags }) => {
-        const expression = new RegExp(source, flags);
-        const candidates = [
-          ...document.querySelectorAll(
-            '.assertion, .assertion-result, .live-region, .statusline, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
-          ),
-        ].filter((node) => {
-          const rect = node.getBoundingClientRect();
-          return rect.width > 0 && rect.height > 0;
-        });
-        return candidates.some((node) => expression.test(node.textContent || ""));
-      },
-      { source: pattern.source, flags: pattern.flags },
-      { timeout: 15_000 },
+async function copyControlIfNeeded(page, control) {
+  await page.locator("details").evaluateAll((details) => {
+    details.forEach((item) => { item.open = true; });
+  });
+  await control.waitFor({ state: "visible" });
+  await poll("prompt-copy control enabled", async () => !await control.isDisabled());
+  await control.click();
+  await page.waitForTimeout(100);
+}
+
+async function textOf(page, selector) {
+  return compact(await page.locator(selector).innerText());
+}
+
+async function classesOf(page, selector) {
+  return page.locator(selector).evaluateAll((nodes) =>
+    nodes.map((node) => String(node.className)),
+  );
+}
+
+async function runFrameContract(page, slug) {
+  if (slug === "01-many-worlds") {
+    await clickControl(page, "#guided-btn", 500);
+    await poll("Frame 01 guided completion", async () =>
+      !await page.locator("#guided-btn").isDisabled()
+      && !await page.locator("#mutate-btn").isDisabled(),
     );
-  } catch {
-    throw new Error(`${label}: no visible ${kind.toUpperCase()} verdict`);
+    check(await page.locator(".branch-card.valid").count() === 3, "Frame 01 did not create three valid branches");
+    check(await page.locator(".branch-card.invalid").count() === 0, "Frame 01 had an invalid branch before mutation");
+    check(/9\/15 = 0\.6/.test(await textOf(page, "#chip-merge")), "Frame 01 merge fidelity was not derived");
+    const positiveStates = await classesOf(page, "#assertions .assertion");
+    check(positiveStates.slice(0, 6).every((state) => state.includes("pass")), "Frame 01 positive assertions did not all pass");
+    check(positiveStates[6]?.includes("wait"), "Frame 01 failure assertion did not begin waiting");
+
+    await clickControl(page, "#mutate-btn", 500);
+    check(await page.locator(".branch-card.invalid").count() === 1, "Frame 01 mutation did not isolate one branch");
+    check(/Rescue SABLE-2/i.test(await textOf(page, ".branch-card.invalid")), "Frame 01 invalidated the wrong branch");
+    check(
+      /Independent branch verification/i.test(await textOf(page, "#assertions .assertion.fail")),
+      "Frame 01 independent verifier did not turn red",
+    );
+    check(
+      /Failure is isolated/i.test(await textOf(page, "#assertions .assertion.pass:last-child")),
+      "Frame 01 isolation assertion did not pass",
+    );
+    return;
+  }
+
+  if (slug === "02-soul-passport") {
+    for (let step = 0; step < 6; step += 1) {
+      await clickControl(page, "#step-button", 350);
+    }
+    check(await page.locator("#assertion-list .assertion.pass").count() === 6, "Frame 02 continuity path did not produce six passes");
+    check(/8 RECORDS/i.test(await textOf(page, "#ledger-count")), "Frame 02 continuity ledger did not reach eight records");
+    check(!await page.locator("#forge-button").isDisabled(), "Frame 02 counterfeit control did not become available");
+
+    await clickControl(page, "#forge-button", 250);
+    check(!await page.locator("#verify-button").isDisabled(), "Frame 02 counterfeit verifier did not become available");
+    await clickControl(page, "#verify-button", 350);
+    check(/REJECTED/i.test(await textOf(page, "#mutation-diff")), "Frame 02 counterfeit was not visibly rejected");
+    check(/content_address/i.test(await textOf(page, "#mutation-diff")), "Frame 02 rejection omitted the changed identity address");
+    check(await page.locator("#assertion-list .assertion.pass").count() === 7, "Frame 02 counterfeit assertion did not pass");
+    check(/Counterfeit rejected/i.test(await textOf(page, "#live-status")), "Frame 02 did not announce counterfeit rejection");
+    return;
+  }
+
+  if (slug === "03-mars-colony") {
+    for (let step = 0; step < 8; step += 1) {
+      await clickControl(page, "#nextButton", 450);
+    }
+    check(/Scenario complete/i.test(await textOf(page, "#nextButton")), "Frame 03 guided scenario did not complete");
+    const positive = await page.locator("#assertions .assertion, .assertions .assertion").allInnerTexts();
+    for (const label of [
+      "Canonical hash chain",
+      "Scan children link to tile",
+      "Lease oracle gates succession",
+      "Contradiction-safe reattachment",
+      "Homeostatic convergence",
+    ]) {
+      const assertion = positive.find((value) => value.includes(label));
+      check(assertion && /\bpass\b/i.test(assertion), `Frame 03 did not pass ${label}`);
+    }
+
+    await clickControl(page, "#resetButton", 300);
+    await clickControl(page, "#injectButton", 300);
+    await clickControl(page, "#scanButton", 700);
+    await clickControl(page, "#sweepButton", 500);
+    const scopeAssertion = (await page.locator(".assertion").allInnerTexts())
+      .find((value) => value.includes("Repair scope equals report delta"));
+    check(scopeAssertion && /\bfail\b/i.test(scopeAssertion), "Frame 03 overbroad repair was not rejected");
+    check(/report authorized 3/i.test(await page.locator("body").innerText()), "Frame 03 failure did not expose the derived authorization");
+    return;
+  }
+
+  if (slug === "04-five-realities") {
+    await clickControl(page, "#guideBtn", 500);
+    await poll("Frame 04 guided replay", async () =>
+      /Guided run/i.test(await textOf(page, "#guideBtn"))
+      && /5 \/ 5 canonical agreement/i.test(await textOf(page, "#consensusBadge")),
+      25_000,
+    );
+    check(await page.locator("#ledgerBody tr").count() === 9, "Frame 04 did not replay all nine events");
+    check(await page.locator("#mutationBtn").getAttribute("aria-pressed") === "false", "Frame 04 began mutated");
+    await clickControl(page, "#rebuildBtn", 500);
+    check(
+      /Delete \+ rebuild reproduced consensus/i.test(await textOf(page, "#assertionList .assertion:last-child")),
+      "Frame 04 did not prove projection deletion and rebuild",
+    );
+
+    await clickControl(page, "#mutationBtn", 350);
+    check(await page.locator("#mutationBtn").getAttribute("aria-pressed") === "true", "Frame 04 mutation flag was not set");
+    check(/1 divergent view/i.test(await textOf(page, "#consensusBadge")), "Frame 04 did not report one divergent view");
+    const mutated = await page.locator("#assertionList .assertion").allInnerTexts();
+    check(mutated.some((value) => value.includes("Four honest projections still agree")), "Frame 04 lost majority agreement");
+    check(mutated.some((value) => value.includes("Exactly Command is isolated")), "Frame 04 did not identify Command");
+    return;
+  }
+
+  if (slug === "05-causal-detective") {
+    const selections = [
+      ["#slot-person", "E02"],
+      ["#slot-object", "E03"],
+      ["#slot-location", "E04"],
+      ["#slot-lifecycle", "E06"],
+      ["#slot-chronology", "E07"],
+    ];
+    for (const [selector, evidenceId] of selections) {
+      const value = await page.locator(`${selector} option`).filter({ hasText: evidenceId }).first().getAttribute("value");
+      check(value, `Frame 05 could not find ${evidenceId}`);
+      await page.locator(selector).selectOption(value);
+    }
+    await clickControl(page, "#accuseBtn", 350);
+    check((await page.locator("#verdict").getAttribute("class")).includes("ok"), "Frame 05 supported accusation was rejected");
+    check(/Accusation accepted/i.test(await textOf(page, "#verdict")), "Frame 05 omitted the positive accusation verdict");
+    check(await page.locator("#assertions .assertion.pass").count() === 4, "Frame 05 positive assertions did not all pass");
+    await clickControl(page, '.theory-btn[data-id="T-MARA"]', 150);
+    await clickControl(page, '.theory-btn[data-id="T-ELIAS"]', 150);
+    check((await page.locator("#compare").getAttribute("class")).includes("show"), "Frame 05 theory comparison did not open");
+    check(/2 FORKS/i.test(await textOf(page, "#forkCount")), "Frame 05 did not preserve two theories");
+
+    await clickControl(page, "#mutateBtn", 350);
+    check((await page.locator("#oracleLight").getAttribute("class")).includes("red"), "Frame 05 causal oracle did not turn red");
+    check(/Causal transition oracle: red/i.test(await textOf(page, "#oracleTitle")), "Frame 05 did not label the semantic failure");
+    check(
+      /Cryptographic shape/i.test(await textOf(page, "#assertions .assertion.pass:first-child")),
+      "Frame 05 cryptographic shape did not stay green",
+    );
+    check(
+      /Causal transitions/i.test(await textOf(page, "#assertions .assertion.fail")),
+      "Frame 05 semantic assertion did not fail",
+    );
+    check(await page.locator("#ledger .ledger-item.bad").count() === 1, "Frame 05 did not isolate one forged clue");
+    check(/F01/i.test(await textOf(page, "#ledger .ledger-item.bad")), "Frame 05 did not identify forged frame F01");
+    return;
+  }
+
+  if (slug === "06-space-station") {
+    await clickControl(page, "#guided", 500);
+    await poll("Frame 06 guided run", async () =>
+      /Tick 8 \/ 8/i.test(await textOf(page, "#tick-label"))
+      && /^PASS$/i.test(await textOf(page, "#verdict")),
+      30_000,
+    );
+    check(await page.locator("#assertions .assertion.pass").count() >= 4, "Frame 06 positive assertions did not pass");
+    check(/5\s*\/\s*6/.test(await textOf(page, "#fidelity")), "Frame 06 did not derive 5/6 fidelity");
+    check(/68 kPa/i.test(await page.locator("#alternatives").innerText()), "Frame 06 omitted the first airlock alternative");
+    check(/72 kPa/i.test(await page.locator("#alternatives").innerText()), "Frame 06 omitted the second airlock alternative");
+
+    await page.locator("#mutate-overwrite").evaluate((button) => {
+      button.closest("details").open = true;
+    });
+    await clickControl(page, "#mutate-overwrite", 350);
+    check(/FAIL|REJECT/i.test(await textOf(page, "#mutation-result")), "Frame 06 overwrite mutation was not rejected");
+    return;
+  }
+
+  if (slug === "07-constitution") {
+    await clickControl(page, "#guidedBtn", 350);
+    await poll("Frame 07 guided history", async () =>
+      /Guided history complete/i.test(await textOf(page, "#status")),
+    );
+    check(await page.locator("#ledgerBody tr").count() === 8, "Frame 07 guided history had the wrong frame count");
+    await clickControl(page, "#forkBtn", 350);
+    check(/Fork comparison ready/i.test(await textOf(page, "#status")), "Frame 07 lawful fork was not created");
+    check(await page.locator("#forkView .branch").count() === 2, "Frame 07 did not render two lawful societies");
+    check(await page.locator("#assertionView .assertion.pass").count() === 4, "Frame 07 positive assertions did not all pass");
+
+    await clickControl(page, "#tyrantBtn", 350);
+    check((await page.locator("#status").getAttribute("class")).includes("bad"), "Frame 07 tyrant frame did not produce a bad status");
+    check(/Replay refused frame 8/i.test(await textOf(page, "#status")), "Frame 07 did not identify the refused frame");
+    check(/Exact law: LAW-TREASURY-1/i.test(await textOf(page, "#assertionView .assertion.fail")), "Frame 07 did not identify the violated law");
+    check(/visible society remains at valid frame 7/i.test(await page.locator("#assertionView").innerText()), "Frame 07 did not preserve last valid state");
+    return;
+  }
+
+  if (slug === "08-teleporting-roguelike") {
+    await clickControl(page, "#runDemo", 250);
+    await poll("Frame 08 guided proof", async () =>
+      /STEP 8 \/ 8/i.test(await textOf(page, "#demoCounter"))
+      && !await page.locator("#runDemo").isDisabled(),
+      30_000,
+    );
+    check(await page.locator("[data-assert].pass").count() === 6, "Frame 08 guided proof did not satisfy six assertions");
+    check(await page.locator("#ledgerBody tr").count() === 6, "Frame 08 accepted ledger changed unexpectedly");
+    check(/Inventory forgery refused/i.test(await textOf(page, "#status")), "Frame 08 guided failure did not execute");
+
+    await clickControl(page, "#forgeParent", 350);
+    check(/Parent forgery refused/i.test(await textOf(page, "#status")), "Frame 08 parent forgery was not rejected");
+    check(/Last good head preserved/i.test(await textOf(page, "#status")), "Frame 08 did not preserve the verified game");
+    check((await page.locator('[data-assert="mutation"]').getAttribute("class")).includes("pass"), "Frame 08 mutation assertion did not pass");
+    return;
+  }
+
+  if (slug === "09-attack-timeline") {
+    await clickControl(page, "#controlBtn", 500);
+    check(await page.locator("#labStatus").getAttribute("data-state") === "verified", "Frame 09 control did not verify");
+    check(await page.locator("#quarantine .quarantine-item").count() === 0, "Frame 09 control quarantined healthy data");
+    check(await page.locator("#assertions .assertion[data-state=unmeasured]").count() === 9, "Frame 09 control did not leave nine detectors ready");
+
+    await clickControl(page, "#attackAllBtn", 4_500);
+    check(await page.locator("#labStatus").getAttribute("data-state") === "rejected", "Frame 09 attacks were not rejected");
+    check(await page.locator("#quarantine .quarantine-item").count() === 9, "Frame 09 did not quarantine all nine attacks");
+    check(await page.locator("#assertions .assertion[data-state=pass]").count() === 9, "Frame 09 detector mutations did not all turn red");
+    const attackAssertions = await page.locator("#assertions .assertion").allInnerTexts();
+    check(attackAssertions.every((value) => /red observed/i.test(value)), "Frame 09 reported a detector without observing red");
+    return;
+  }
+
+  if (slug === "10-futures-museum") {
+    await clickControl(page, "#playBtn", 250);
+    await poll("Frame 10 guided replay", async () =>
+      /Start guided replay/i.test(await page.locator("#playBtn").getAttribute("aria-label") || "")
+      && /7 \/ 7/.test(await textOf(page, "#assertionScore")),
+      35_000,
+    );
+    check(await page.locator("#ledgerBody tr").count() === 9, "Frame 10 replay lost museum frames");
+    check(!(await page.locator("#integrityBanner").getAttribute("class")).includes("visible"), "Frame 10 began corrupt");
+
+    await clickControl(page, "#mutateBtn", 500);
+    check((await page.locator("#integrityBanner").getAttribute("class")).includes("visible"), "Frame 10 integrity banner did not appear");
+    check(/First corrupt frame: F02/i.test(await textOf(page, "#integrityText")), "Frame 10 did not identify F02");
+    check(/Frozen on last valid F01/i.test(await textOf(page, "#integrityText")), "Frame 10 did not freeze on F01");
+    check(/7 \/ 7/.test(await textOf(page, "#assertionScore")), "Frame 10 mutation assertions did not all pass");
+    const museumAssertions = await page.locator("#assertions .assertion").allInnerTexts();
+    check(museumAssertions.some((value) => /3 affected frame/i.test(value)), "Frame 10 did not quarantine the affected path");
+    check(museumAssertions.some((value) => /independent accepted branches retained/i.test(value)), "Frame 10 lost independent branches");
+    return;
+  }
+
+  throw new Error(`${slug}: no explicit interaction contract`);
+}
+
+async function assertResetContract(page, slug) {
+  if (slug === "01-many-worlds") {
+    check(/0 \/ 3 minted/i.test(await textOf(page, "#chip-forks")), "Frame 01 reset kept branches");
+    check(await page.locator(".branch-card.invalid").count() === 0, "Frame 01 reset kept invalid state");
+    check(await page.locator("#mutate-btn").isDisabled(), "Frame 01 reset left mutation enabled");
+    return;
+  }
+  if (slug === "02-soul-passport") {
+    check(/1 RECORD/i.test(await textOf(page, "#ledger-count")), "Frame 02 reset did not return to genesis");
+    check(await page.locator("#assertion-list .assertion.pass").count() === 4, "Frame 02 reset assertions are wrong");
+    check(await page.locator("#verify-button").isDisabled(), "Frame 02 reset kept counterfeit verification enabled");
+    return;
+  }
+  if (slug === "03-mars-colony") {
+    check(await page.locator("#ledgerBody tr, #ledger .ledger-row").count() >= 1, "Frame 03 reset lost genesis");
+    check(/1 frames verified/i.test(await page.locator("body").innerText()), "Frame 03 reset did not verify one-frame genesis");
+    return;
+  }
+  if (slug === "04-five-realities") {
+    check(/5 \/ 5 canonical agreement/i.test(await textOf(page, "#consensusBadge")), "Frame 04 reset did not restore consensus");
+    check(await page.locator("#mutationBtn").getAttribute("aria-pressed") === "false", "Frame 04 reset kept mutation active");
+    return;
+  }
+  if (slug === "05-causal-detective") {
+    const values = await page.locator("#slots select").evaluateAll((nodes) => nodes.map((node) => node.value));
+    check(values.every((value) => value === ""), "Frame 05 reset kept cited causes");
+    check(!(await page.locator("#verdict").getAttribute("class")).includes("show"), "Frame 05 reset kept accusation verdict");
+    check(await page.locator("#ledger .ledger-item").count() === 10, "Frame 05 reset did not restore ten evidence frames");
+    return;
+  }
+  if (slug === "06-space-station") {
+    check(/0 verified frames/i.test(await textOf(page, "#head-count")), "Frame 06 reset kept station frames");
+    check(/NOT RUN/i.test(await textOf(page, "#verdict")), "Frame 06 reset kept a verdict");
+    return;
+  }
+  if (slug === "07-constitution") {
+    check(await page.locator("#ledgerBody tr").count() === 1, "Frame 07 reset did not return to founding frame");
+    check(/Founding constitution sealed/i.test(await textOf(page, "#status")), "Frame 07 reset status is wrong");
+    check(await page.locator("#assertionView .assertion.fail").count() === 0, "Frame 07 reset kept a failed assertion");
+    return;
+  }
+  if (slug === "08-teleporting-roguelike") {
+    check(/STEP 0 \/ 8/i.test(await textOf(page, "#demoCounter")), "Frame 08 reset kept guided progress");
+    check(await page.locator("#ledgerBody tr").count() === 1, "Frame 08 reset did not return to genesis");
+    check(/Genesis verified/i.test(await textOf(page, "#status")), "Frame 08 reset status is wrong");
+    return;
+  }
+  if (slug === "09-attack-timeline") {
+    check(await page.locator("#quarantine .quarantine-item").count() === 0, "Frame 09 reset kept quarantined attacks");
+    check(await page.locator("#assertions .assertion[data-state=unmeasured]").count() === 9, "Frame 09 reset did not clear detector evidence");
+    check(await page.locator("#labStatus").getAttribute("data-state") === "verified", "Frame 09 reset did not restore verified projection");
+    return;
+  }
+  if (slug === "10-futures-museum") {
+    check(!(await page.locator("#integrityBanner").getAttribute("class")).includes("visible"), "Frame 10 reset kept corruption banner");
+    check(/9 verified frames/i.test(await textOf(page, "#headerStatus")), "Frame 10 reset did not restore all frames");
+    check(/7 \/ 7/.test(await textOf(page, "#assertionScore")), "Frame 10 reset assertions did not recover");
+    return;
   }
 }
 
@@ -298,109 +575,11 @@ async function exerciseFrame(context, origin, slug) {
   check(undersized.length === 0, `${slug}: undersized controls ${JSON.stringify(undersized)}`);
 
   await page.setViewportSize({ width: 1100, height: 900 });
-  const before = compact(await page.locator("body").innerText());
-  const plan = interactionPlans[slug];
-  if (plan) {
-    for (const action of plan.positive) {
-      const control = page.locator(action.selector);
-      for (let repeat = 0; repeat < (action.repeat || 1); repeat += 1) {
-        check(
-          !await control.isDisabled(),
-          `${slug}: ${action.selector} disabled at positive step ${repeat + 1}`,
-        );
-        await control.click();
-        await page.waitForTimeout(action.waitMs || 350);
-      }
-    }
-  } else {
-    const guided = await matchingButton(
-      page,
-      [/\bguided\b/i, /\brun all\b/i, /\brun next\b/i, /\brun control\b/i, /\bauto\b/i],
-      `${slug} guided run`,
-    );
-    const guidedLabel = compact(
-      `${await guided.innerText().catch(() => "")} `
-      + `${await guided.getAttribute("aria-label") || ""} `
-      + `${await guided.getAttribute("title") || ""}`,
-    );
-    const guidedSteps = /\bnext\b/i.test(guidedLabel) ? 14 : 1;
-    for (let step = 0; step < guidedSteps; step += 1) {
-      if (await guided.isDisabled()) break;
-      await guided.click();
-      await page.waitForTimeout(step === 0 ? 1_000 : 350);
-      if (!/\bnext\b/i.test(guidedLabel) && await hasVisibleVerdict(page, "pass")) break;
-    }
-    if (!/\bnext\b/i.test(guidedLabel)) {
-      let waitingForCompletion = await guided.isDisabled();
-      if (waitingForCompletion) {
-        const reportsRunning = /\b(?:running|working|playing|processing|building)\b/i.test(
-          compact(await guided.innerText().catch(() => "")),
-        );
-        for (let attempt = 0; waitingForCompletion && attempt < 80; attempt += 1) {
-          await page.waitForTimeout(250);
-          waitingForCompletion = await guided.isDisabled();
-          if (reportsRunning) {
-            const currentLabel = compact(await guided.innerText().catch(() => ""));
-            if (!/\b(?:running|working|playing|processing|building)\b/i.test(currentLabel)) {
-              break;
-            }
-          }
-        }
-        await page.waitForTimeout(500);
-      } else {
-        let activeLabel = compact(
-          `${await guided.innerText().catch(() => "")} `
-          + `${await guided.getAttribute("aria-label") || ""} `
-          + `${await guided.getAttribute("title") || ""}`,
-        );
-        if (/\b(?:pause|running|working|playing|processing|building)\b/i.test(activeLabel)) {
-          for (let attempt = 0; attempt < 80; attempt += 1) {
-            await page.waitForTimeout(250);
-            activeLabel = compact(
-              `${await guided.innerText().catch(() => "")} `
-              + `${await guided.getAttribute("aria-label") || ""} `
-              + `${await guided.getAttribute("title") || ""}`,
-            );
-            if (!/\b(?:pause|running|working|playing|processing|building)\b/i.test(activeLabel)) {
-              break;
-            }
-          }
-          await page.waitForTimeout(500);
-        } else {
-          await page.waitForTimeout(4_000);
-        }
-      }
-    } else {
-      await page.waitForTimeout(1_000);
-    }
-  }
-  const afterGuided = compact(await page.locator("body").innerText());
-  check(afterGuided !== before, `${slug}: guided run produced no visible change`);
-  await waitForVisibleVerdict(page, "pass", `${slug} guided run`);
+  await runFrameContract(page, slug);
 
-  if (plan) {
-    for (const action of plan.failure) {
-      const control = page.locator(action.selector);
-      check(!await control.isDisabled(), `${slug}: ${action.selector} disabled in failure path`);
-      await control.click();
-      await page.waitForTimeout(action.waitMs || 350);
-    }
-  } else if (!await hasVisibleVerdict(page, "fail")) {
-    const mutation = await matchingButton(
-      page,
-      [/\bmutat/i, /\btamper/i, /\battack/i, /\bforge/i, /\bunsafe/i, /\boverwrite/i, /\btyrant/i, /\bcorrupt/i, /\bfull sweep\b/i, /\bearly claim\b/i, /\bforce contradiction\b/i, /\bbreak\b/i],
-      `${slug} failure path`,
-    );
-    await mutation.click();
-    await page.waitForTimeout(700);
-  }
-  await waitForVisibleVerdict(page, "fail", `${slug} mutation`);
-
-  await page.locator("details").evaluateAll((details) => {
-    details.forEach((item) => { item.open = true; });
-  });
-  const copy = await matchingButton(page, [/\bcopy\b.*\bprompt\b/i], `${slug} prompt copy`);
-  await copy.click();
+  const copy = page.locator(copySelectors[slug]);
+  check(await copy.count() === 1, `${slug}: missing exact prompt-copy control`);
+  await copyControlIfNeeded(page, copy);
   const copied = await page.evaluate(() => window.__showcaseClipboard || "");
   check(copied.trim().length > 400, `${slug}: copied proof prompt is too short`);
   check(
@@ -408,16 +587,12 @@ async function exerciseFrame(context, origin, slug) {
     `${slug}: copied proof prompt omits hashing or canonicalization`,
   );
 
-  const reset = await matchingButton(page, [/\breset\b/i], `${slug} reset`);
-  const beforeReset = compact(await page.locator("body").innerText());
-  await reset.click();
-  await page.waitForTimeout(300);
-  const afterReset = compact(await page.locator("body").innerText());
-  check(afterReset !== beforeReset, `${slug}: reset produced no visible state change`);
+  await clickControl(page, resetSelectors[slug], 400);
+  await assertResetContract(page, slug);
 
   assertClean();
   await page.close();
-  console.log(`  ✓ ${slug}: mobile, guided path, failure path, prompt copy, reset`);
+  console.log(`  ✓ ${slug}: explicit positive oracle, explicit failure oracle, prompt copy, reset`);
 }
 
 let server;
