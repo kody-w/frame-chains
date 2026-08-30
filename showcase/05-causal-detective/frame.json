@@ -1,0 +1,56 @@
+{
+  "frame": 5,
+  "slug": "05-causal-detective",
+  "title": "The Causal Detective",
+  "subtitle": "Evidence is immutable. Inference is not.",
+  "description": "A fictional locked-room mystery where canonical-JSON SHA-256 evidence frames support forkable suspect theories and exact-hash causal conclusions.",
+  "entry": "index.html",
+  "status": "complete",
+  "category": "interactive-proof",
+  "theme": "clawpilot",
+  "claim": "Immutable evidence frames can support multiple named interpretations while a deterministic causal oracle accepts only conclusions whose exact earlier hashes jointly satisfy person, object, location, lifecycle, and chronology.",
+  "invariants": [
+    "Every evidence, theory, conclusion, and mutation frame is hashed with Web Crypto SHA-256 over recursively canonicalized JSON.",
+    "Every non-genesis frame records an exact predecessor hash and every cited cause resolves to an earlier known frame.",
+    "Competing theory forks share the immutable evidence head and never rewrite canonical observations.",
+    "A conclusion is accepted only when all five causal roles cite the exact supported evidence hashes.",
+    "Duplicate evidence use, unsupported conclusions, and semantically impossible transitions are rejected independently of cryptographic validity."
+  ],
+  "positive_path": [
+    "Replay the ten canonical evidence frames and inspect their complete hashes and canonical JSON.",
+    "Connect exact earlier hashes for person, object, location, lifecycle, and chronology.",
+    "Mint the supported Mara Voss accusation and observe both cryptographic and causal assertions pass.",
+    "Fork two suspect theories and compare their shared facts with divergent interpretations."
+  ],
+  "failure_path": "Append and correctly rehash a forged clue placing Elias Finch in the Violet Map Room during his unbroken North Terrace alibi; cryptographic validation remains green while the causal transition oracle turns red. Reused evidence and unsupported accusation combinations are also rejected.",
+  "features": [
+    "recursive canonical JSON",
+    "Web Crypto SHA-256",
+    "deterministic causal transition oracle",
+    "guided solve and manual puzzle",
+    "forkable suspect theories",
+    "shared-fact and divergent-interpretation comparison",
+    "evidence replay and reset",
+    "rehashed semantic forgery mutation",
+    "live assertions and full frame ledger",
+    "responsive accessible controls",
+    "copyable any-LLM prompt"
+  ],
+  "controls": [
+    "guided-solve",
+    "manual-puzzle",
+    "replay",
+    "reset",
+    "cause-selection",
+    "mint-accusation",
+    "fork-theory",
+    "ledger-filter",
+    "mutation"
+  ],
+  "synthetic": true,
+  "synthetic_only": true,
+  "selfContained": true,
+  "networkRequired": false,
+  "network_required": false,
+  "created": "2026-08-30"
+}
