@@ -11,7 +11,9 @@
     "evidence:generate": "node evidence/generate.mjs",
     "evidence:check": "node evidence/generate.mjs --check && node evidence/verify.mjs && node evidence/privacycheck.mjs",
     "frame-loop:merge": "node scripts/merge-frame-loop.mjs showcase/loop-01.plan.json",
-    "showcase:check": "node showcasecheck.mjs",
+    "showcase:runtime": "node showcasecheck.mjs",
+    "showcase:gate-mutations": "node showcasegatecheck.mjs",
+    "showcase:check": "npm run showcase:runtime && npm run showcase:gate-mutations",
     "smoke": "node papercheck.mjs chromium smoke",
     "papercheck": "node papercheck.mjs"
   },

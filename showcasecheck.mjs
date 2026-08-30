@@ -207,6 +207,7 @@ async function clickControl(page, selector, waitMs = 150) {
   check(await control.count() === 1, `${selector}: expected one control`);
   await control.waitFor({ state: "visible" });
   await poll(`${selector} enabled`, async () => !await control.isDisabled());
+  if (process.env.SHOWCASE_SKIP_SELECTOR === selector) return;
   await control.click();
   if (waitMs) await page.waitForTimeout(waitMs);
 }
