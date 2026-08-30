@@ -292,8 +292,13 @@ async function findContrastFailures(page) {
     }
 
     const failures = [];
-    for (const element of document.querySelectorAll("p, li, dd, label, small, span")) {
-      if (element.closest("button, a, input, select, option, svg, [aria-hidden=true], .sr-only")) {
+    for (const element of document.querySelectorAll(
+      "p, li, dd, label, small, span, strong, button, a, td, th, div",
+    )) {
+      if (
+        element.closest("input, select, option, svg, [aria-hidden=true], .sr-only")
+        || element.closest("button:disabled, [aria-disabled=true]")
+      ) {
         continue;
       }
       const directText = [...element.childNodes]
@@ -413,6 +418,28 @@ async function runFrameContract(page, slug) {
     check(/Writer scope_valid=true was ignored/i.test(scopeAssertion), "Frame 03 still trusts the writer's semantic boolean");
     check(await page.locator("#ledgerBody tr").count() === acceptedRows, "Frame 03 rejected candidate changed the ledger");
     check(await textOf(page, "#headMetric") === acceptedHead, "Frame 03 rejected candidate changed the accepted head");
+
+    await clickControl(page, "#resetButton", 300);
+    await clickControl(page, "#disableButton", 250);
+    await clickControl(page, "#rank3Button", 350);
+    const leaseAssertion = (await page.locator(".assertion").allInnerTexts())
+      .find((value) => value.includes("Lease oracle gates succession"));
+    check(leaseAssertion && /\bfail\b/i.test(leaseAssertion), "Frame 03 premature DEIMOS claim was not rejected");
+    check(/DEIMOS refused: ARES rank 1 owns beat 0/i.test(leaseAssertion), "Frame 03 lease oracle did not derive the current rank");
+    check(/DEIMOS claim refused by lease oracle/i.test(await textOf(page, "#liveRegion")), "Frame 03 did not announce the DEIMOS rejection");
+    check(await page.locator("#ledgerBody tr").filter({ hasText: "lease_claim" }).count() === 1, "Frame 03 did not record the rejected lease claim");
+
+    await clickControl(page, "#resetButton", 300);
+    await clickControl(page, "#partitionButton", 250);
+    await clickControl(page, "#offlineButton", 250);
+    await clickControl(page, "#contradictButton", 350);
+    const reattachAssertion = (await page.locator(".assertion").allInnerTexts())
+      .find((value) => value.includes("Contradiction-safe reattachment"));
+    check(reattachAssertion && /\bfail\b/i.test(reattachAssertion), "Frame 03 contradictory reattachment was not rejected");
+    check(/1 contradiction/i.test(reattachAssertion), "Frame 03 did not derive the contradiction count");
+    check(/navigation_signature/i.test(await textOf(page, "#liveRegion")), "Frame 03 did not identify the conflicting declaration");
+    check(/2 frames · 1 local observations/i.test(await textOf(page, "#offlineOrbit")), "Frame 03 incorrectly assimilated the offline dimension");
+    check(await page.locator("#ledgerBody tr").filter({ hasText: "reattach" }).count() === 1, "Frame 03 did not record the rejected reattachment");
     return;
   }
 

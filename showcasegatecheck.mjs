@@ -17,6 +17,21 @@ const probes = [
     expected: "Frame 05 supported accusation was rejected",
   },
   {
+    frame: "03-mars-colony",
+    selector: "#rank3Button",
+    expected: "Frame 03 premature DEIMOS claim was not rejected",
+  },
+  {
+    frame: "03-mars-colony",
+    selector: "#contradictButton",
+    expected: "Frame 03 contradictory reattachment was not rejected",
+  },
+  {
+    frame: "06-space-station",
+    selector: "#mutate-overwrite",
+    expected: "Frame 06 overwrite mutation was not rejected",
+  },
+  {
     frame: "09-attack-timeline",
     selector: "#attackAllBtn",
     expected: "Frame 09 attacks were not rejected",
