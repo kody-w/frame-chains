@@ -42,6 +42,8 @@
   --danger-soft: rgba(177, 51, 44, .12);
   --warning: #8a5c00;
   --warning-soft: rgba(138, 92, 0, .13);
+  --scope-text: #514b55;
+  --scope-strong: #6a4300;
   --shadow: 0 28px 80px rgba(51, 39, 50, .16);
   --grid: rgba(29, 27, 32, .045);
   --focus: #006f77;
@@ -69,6 +71,8 @@ html[data-theme="dark"] {
   --danger-soft: rgba(255, 141, 132, .13);
   --warning: #f3c96c;
   --warning-soft: rgba(243, 201, 108, .12);
+  --scope-text: #d4cad6;
+  --scope-strong: #f8d889;
   --shadow: 0 34px 100px rgba(0, 0, 0, .48);
   --grid: rgba(255, 255, 255, .035);
   --focus: #65d5d2;
@@ -284,10 +288,10 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: color-mix(in srgb, var(--warning-soft) 72%, var(--panel));
-  color: var(--muted);
+  color: var(--scope-text);
   font-size: 13px;
 }
-.scope strong { color: var(--warning); }
+.scope strong { color: var(--scope-strong); }
 .control-deck {
   position: sticky;
   z-index: 20;
