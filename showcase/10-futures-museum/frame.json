@@ -1,0 +1,72 @@
+{
+  "id": "10-futures-museum",
+  "frame": 10,
+  "number": 10,
+  "order": 10,
+  "slug": "futures-museum",
+  "title": "The Museum of Possible Futures",
+  "subtitle": "One verified history, many faithful futures",
+  "description": "A deterministic, content-addressed museum where synthetic curators fork, compare, merge, and preserve contradictory possible futures without rewriting history.",
+  "claim": "A synthetic cultural history can remain fully explorable across deterministic curator forks and compatible merges because every artifact, room, narrative, motif, timeline position, and provenance statement is sealed into a canonical SHA-256 frame while contradictory interpretations remain exact parallel galleries.",
+  "entry": "showcase/10-futures-museum/index.html",
+  "path": "showcase/10-futures-museum/index.html",
+  "href": "showcase/10-futures-museum/",
+  "kind": "interactive-proof",
+  "status": "ready",
+  "theme": "clawpilot",
+  "synthetic_only": true,
+  "network_required": false,
+  "offline": true,
+  "minimumViewportWidth": 390,
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "SVG",
+    "Canvas",
+    "Web Crypto SHA-256"
+  ],
+  "invariants": [
+    "Every museum frame contains its artifact, room, narrative, motif, timeline position, curator, deterministic seed, parent IDs, and provenance before canonical SHA-256 sealing.",
+    "Every visible exhibit, lineage, branch, ledger row, and generated visual is derived from the in-memory frame collection.",
+    "Every prior verified museum self remains directly browsable and a fork appends a new child without altering its selected parent.",
+    "Deterministic artwork regenerated from the same integer frame seed and motif produces the same geometry.",
+    "A merge is admitted only when the selected frames share explicit compatibility vocabulary and the new frame names both parents.",
+    "Contradictory interpretations remain exact, independently reachable parallel galleries rather than being flattened into a merge.",
+    "Independent verification stops an affected path at its first digest mismatch and retains the last valid projection plus all unaffected accepted branches."
+  ],
+  "positive_path": [
+    "Run the cinematic guided replay across the commons, lumen, estuary, and mnemosyne histories.",
+    "Browse any immutable prior room from the timeline, lineage, topology map, or canonical ledger.",
+    "Fork a new deterministic visitor gallery from the selected verified frame.",
+    "Compare two frames and merge them only when their explicit motif vocabulary overlaps.",
+    "Confirm the compatible merge names both parents while the contradictory Dust Parliament remains independently reachable."
+  ],
+  "failure_path": "Mutate the old F02 Civic Loom artifact without updating provenance or its digest. Independent verification identifies F02 as the first corrupt frame, quarantines its affected descendants, freezes that path at verified F01, and keeps the accepted lumen and mnemosyne branches intact.",
+  "capabilities": [
+    "guided",
+    "manual",
+    "replay",
+    "fork",
+    "compare",
+    "merge",
+    "reset",
+    "ledger",
+    "assertions",
+    "mutation",
+    "seeded-generative-svg",
+    "seeded-generative-canvas"
+  ],
+  "requirements": {
+    "offline": true,
+    "syntheticDataOnly": true,
+    "networkRequests": false,
+    "dependencies": false,
+    "canonicalHash": "SHA-256",
+    "responsiveMinimumWidth": 390,
+    "keyboardAccessible": true,
+    "ariaLive": true,
+    "reducedMotion": true
+  },
+  "promptCopy": true
+}
