@@ -30,6 +30,10 @@ const interactionPlans = {
       { selector: "#sweepButton", waitMs: 500 },
     ],
   },
+  "08-teleporting-roguelike": {
+    positive: [{ selector: "#runDemo", waitMs: 8_000 }],
+    failure: [{ selector: "#forgeItem", waitMs: 500 }],
+  },
 };
 const runtimeFrames = process.env.SHOWCASE_FRAME
   ? frames.filter((slug) => slug === process.env.SHOWCASE_FRAME)
@@ -202,12 +206,12 @@ async function matchingButton(page, patterns, label) {
 async function hasVisibleVerdict(page, kind) {
   const pattern = kind === "pass"
     ? /PASS|VERIF(?:Y|IED|IES|ICATION)|AGREE|VALID|SUCCESS|✓/i
-    : /FAIL|REJECT|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
+    : /FAIL|REJECT|REFUS|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
   return page.evaluate(({ source, flags }) => {
     const expression = new RegExp(source, flags);
     const candidates = [
       ...document.querySelectorAll(
-        '.assertion, .assertion-result, .live-region, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
+        '.assertion, .assertion-result, .live-region, .statusline, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
       ),
     ].filter((node) => {
       const rect = node.getBoundingClientRect();
@@ -220,14 +224,14 @@ async function hasVisibleVerdict(page, kind) {
 async function waitForVisibleVerdict(page, kind, label) {
   const pattern = kind === "pass"
     ? /PASS|VERIF(?:Y|IED|IES|ICATION)|AGREE|VALID|SUCCESS|✓/i
-    : /FAIL|REJECT|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
+    : /FAIL|REJECT|REFUS|BLOCK|DETECT|DIVERG|MISMATCH|VIOLAT|INVALID|RED OBSERVED|QUARANTIN|[×✗]/i;
   try {
     await page.waitForFunction(
       ({ source, flags }) => {
         const expression = new RegExp(source, flags);
         const candidates = [
           ...document.querySelectorAll(
-            '.assertion, .assertion-result, .live-region, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
+            '.assertion, .assertion-result, .live-region, .statusline, .status-pill, .quarantine-item, .pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, .changed, .verdict, .ledger-result, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
           ),
         ].filter((node) => {
           const rect = node.getBoundingClientRect();
