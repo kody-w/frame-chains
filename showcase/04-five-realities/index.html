@@ -48,8 +48,8 @@
       --cp-border: #474747;
       --cp-border-strong: #5f5f5f;
       --cp-text: #dedede;
-      --cp-text-muted: #919191;
-      --cp-text-soft: #b0b0b0;
+      --cp-text-muted: #c7c7c7;
+      --cp-text-soft: #d0d0d0;
       --cp-accent: #fd8ea1;
       --cp-accent-hover: #fb7b91;
       --cp-accent-soft: rgba(253, 142, 161, 0.14);
@@ -145,11 +145,22 @@
     h3 { margin-bottom: 8px; font-size: 1rem; }
     .lede { max-width: 780px; margin-bottom: 0; color: var(--cp-text-muted); font-size: clamp(1rem, 2vw, 1.25rem); }
     .mast-stat {
+      display: grid;
+      grid-template-columns: auto minmax(150px, 1fr);
+      gap: 16px;
+      align-items: center;
       border-left: 3px solid var(--cp-accent);
       padding-left: 20px;
     }
     .mast-stat strong { display: block; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; letter-spacing: -.05em; }
     .mast-stat span { color: var(--cp-text-muted); }
+    .mast-stat-copy { min-width: 0; }
+    .mast-stat .hero-action {
+      grid-column: 1 / -1;
+      min-width: 180px;
+      min-height: 48px;
+      justify-self: stretch;
+    }
     .intro-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -440,7 +451,11 @@
     @media (max-width: 760px) {
       .shell { width: min(100% - 20px, 1500px); padding-top: 8px; }
       .masthead { grid-template-columns: 1fr; padding-top: 24px; }
-      .mast-stat { display: none; }
+      .mast-stat {
+        grid-template-columns: auto 1fr;
+        max-width: 420px;
+        padding-left: 16px;
+      }
       .intro-grid, .evidence-grid { grid-template-columns: 1fr; }
       .reality, .reality:nth-child(1), .reality:nth-child(2), .reality:last-child { grid-column: 1 / -1; }
       .scope-card, .prompt-layout { grid-template-columns: 1fr; }
@@ -476,7 +491,8 @@
       </div>
       <div class="mast-stat" aria-label="Five projections, one event history">
         <strong>5 : 1</strong>
-        <span>views to verified history</span>
+        <span class="mast-stat-copy">views to verified history</span>
+        <button class="primary hero-action" id="guideBtn" type="button" data-guide-button>▶ Guided run</button>
       </div>
     </header>
 
@@ -520,7 +536,7 @@
       <div class="control-deck">
         <div class="control-top">
           <div class="transport" role="group" aria-label="Playback controls">
-            <button class="primary" id="guideBtn" type="button">▶ Guided run</button>
+            <button class="primary" id="guideControlBtn" type="button" data-guide-button>▶ Guided run</button>
             <button id="backBtn" type="button" aria-label="Previous frame">← Back</button>
             <button id="nextBtn" type="button" aria-label="Next frame">Next →</button>
             <button id="replayBtn" type="button">↻ Replay</button>
@@ -1071,8 +1087,10 @@
       $("#prefixLabel").textContent = `${cursor} / ${history.length}`;
       $("#backBtn").disabled = cursor === 0;
       $("#nextBtn").disabled = cursor === history.length;
-      $("#guideBtn").textContent = playing ? "❚❚ Pause" : "▶ Guided run";
-      $("#guideBtn").setAttribute("aria-pressed", String(playing));
+      document.querySelectorAll("[data-guide-button]").forEach(button => {
+        button.textContent = playing ? "❚❚ Pause" : "▶ Guided run";
+        button.setAttribute("aria-pressed", String(playing));
+      });
       $("#mutationBtn").setAttribute("aria-pressed", String(mutationEnabled));
       $("#mutationBtn").textContent = mutationEnabled ? "Repair Command projector" : "Mutate Command projector";
       const event = history[cursor - 1];
@@ -1163,7 +1181,7 @@
     }
 
     function bindControls() {
-      $("#guideBtn").addEventListener("click", togglePlayback);
+      document.querySelectorAll("[data-guide-button]").forEach(button => button.addEventListener("click", togglePlayback));
       $("#backBtn").addEventListener("click", () => { stopPlayback(); cursor = Math.max(0, cursor - 1); rebuildVerified = false; render(); });
       $("#nextBtn").addEventListener("click", () => { stopPlayback(); cursor = Math.min(history.length, cursor + 1); rebuildVerified = false; render(); });
       $("#replayBtn").addEventListener("click", () => { stopPlayback(); cursor = 0; mutationEnabled = false; rebuildVerified = false; render().then(togglePlayback); });
