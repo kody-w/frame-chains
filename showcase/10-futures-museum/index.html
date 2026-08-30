@@ -434,7 +434,8 @@
       border-radius: .625rem;
       font-size: 13px;
     }
-    .assertion-icon { color: var(--cp-success); font-weight: 900; }
+    .assertion-icon { color: color-mix(in srgb, var(--cp-success) 65%, var(--cp-text)); font-weight: 900; }
+    html[data-theme="dark"] .assertion-icon { color: var(--cp-success); }
     .assertion.fail .assertion-icon { color: var(--cp-danger); }
     .prompt-panel { margin-top: 16px; padding: 24px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; }
     .prompt-panel h3 { margin: 0 0 6px; }
