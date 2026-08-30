@@ -28,9 +28,9 @@
       --cp-accent-hover: #9a1a41;
       --cp-accent-soft: rgba(177, 31, 75, 0.08);
       --cp-accent-fg: #ffffff;
-      --cp-success: #16a34a;
+      --cp-success: #0b6b2b;
       --cp-danger: #dc2626;
-      --cp-warning: #f59e0b;
+      --cp-warning: #8a4f00;
       --cp-link: #0078d4;
       --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
       --cp-overlay: rgba(255, 255, 255, 0.8);
@@ -99,6 +99,12 @@
     button.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
     button.danger { border-color: var(--cp-danger); color: var(--cp-danger); }
     button[aria-pressed="true"] { background: var(--cp-accent-soft); border-color: var(--cp-accent); color: var(--cp-accent); }
+    button.danger[aria-pressed="true"] {
+      background: var(--cp-surface);
+      border-color: var(--cp-danger);
+      color: var(--cp-danger);
+      box-shadow: inset 4px 0 0 var(--cp-danger);
+    }
     code, pre, .mono {
       font-family: Consolas, "Courier New", Courier, monospace;
       font-variant-ligatures: none;
