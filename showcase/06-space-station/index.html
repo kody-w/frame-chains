@@ -101,6 +101,7 @@ h1 { margin: 0; font-size: clamp(28px, 5vw, 52px); line-height: 1.02; letter-spa
 .hero-actions a:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 2px; }
 .guided-note { max-width: 780px; min-height: 24px; margin: 8px 0 0; color: var(--cp-text-soft); font-size: 12px; }
 .guided-note.good { color: var(--cp-text); font-weight: 650; }
+.guided-note.bad { padding-left: 8px; border-left: 3px solid var(--cp-danger); color: var(--cp-text); font-weight: 650; }
 .seed-card { min-width: 190px; padding: 12px 14px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
 .seed-card span { display: block; color: var(--cp-text-soft); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
 .seed-card strong { display: block; margin-top: 2px; font: 700 14px Consolas, "Courier New", Courier, monospace; }
@@ -290,7 +291,7 @@ pre { max-height: 300px; overflow: auto; white-space: pre-wrap; padding: 11px; b
           </g>
           <g id="module-airlock" class="module">
             <rect class="warning-fill" x="642" y="192" width="32" height="46" rx="6"/>
-            <text x="658" y="185" text-anchor="middle">68↔72 kPa</text>
+            <text id="airlock-label" x="658" y="185" text-anchor="middle">pending</text>
           </g>
           <g id="module-ghost" class="module">
             <path class="ghost" d="M307 310h62l18 32h-98z"/>
@@ -368,9 +369,11 @@ Render the station from merged state, not from an unrelated animation counter. I
 
 Create six shared interface claims. Five must agree. Life support and docking must independently choose contradictory airlock pressure rules (68 kPa and 72 kPa). Preserve both alternatives in parallel. Derive and display exact merge fidelity as mergeable shared interface slots / all shared interface slots = 5 / 6 = 0.833333. Never let the score authorize conflict erasure.
 
-Take navigation offline. Let it append a stranded frame to its own dimension while merged station work continues. Reattach it through a fixed newest-to-oldest contradiction ladder: reject two candidate bases for explicit read-set mismatches, accept the first contradiction-free base, and append a bridge carrying origin agent, local parent, accepted base, rejected candidates, and reasons.
+Encode every interface claim as a content-addressed frame. Also encode each candidate station base as a checkpoint frame whose state and source heads are independently reproduced by replay. Derive conflicts, alternatives, fidelity, and all visible labels only by verifying and replaying those frames.
 
-Add two independent negative tests. First, have one agent attempt a write to another agent's dimension; reject before hashing or append. Second, attempt to replace the two airlock alternatives with one winner; reject because the alternative set cardinality and hashes change. Both failures must prove the accepted ledger is byte-for-byte unchanged and must visibly report REJECTED or FAIL while preserving prior verified work.
+Take navigation offline. Let it append a stranded frame to its own dimension while merged station work continues. Reattach it through a newest-to-oldest ladder derived from checkpoint frames: reject two candidate bases for explicit read-set mismatches, accept the first contradiction-free base, and append a bridge carrying origin agent, local parent, accepted base hash, rejected candidate hashes, and reasons.
+
+Submit normal appends, a cross-dimension write candidate, and a one-winner overwrite proposal through the same independent semantic verifier. Render verdict words only from its returned result. Prove sensitivity: generating both airlock claims as 68 kPa must yield no conflict and 6/6; generating the power genesis frame with Aster as authority must make Aster's power candidate accepted and turn the expected-rejection assertion red.
 
 Explain the scope: content addressing proves identity and linkage, not truth or operational safety. Return only the complete runnable HTML.</pre>
       <button id="copy-prompt" type="button">Copy proof prompt</button>
@@ -389,54 +392,9 @@ const dimensions = [
   { id: "science", agent: "Curie", label: "Science" },
   { id: "docking", agent: "Latch", label: "Docking" }
 ];
-const interfaceClaims = {
-  bus_voltage: ["120 VDC", "120 VDC"],
-  data_bus: ["deterministic-v2", "deterministic-v2"],
-  thermal_loop: ["loop-B", "loop-B"],
-  emergency_code: ["amber-6", "amber-6"],
-  approach_axis: ["nadir", "nadir"],
-  airlock_pressure: ["68 kPa", "72 kPa"]
-};
-const baseSchedule = [
-  { phase: "genesis", work: dimensions.map(d => ({ dimension: d.id, owner: d.agent, action: "genesis", value: `${d.label} authority established` })) },
-  { phase: "parallel assembly", work: [
-    { dimension: "habitat", owner: "Aster", action: "assemble", value: "toroidal crew ring" },
-    { dimension: "power", owner: "Helion", action: "assemble", value: "dual solar truss" },
-    { dimension: "life_support", owner: "Moss", action: "assemble", value: "closed oxygen loop" },
-    { dimension: "navigation", owner: "Kepler", action: "assemble", value: "inertial reference" },
-    { dimension: "science", owner: "Curie", action: "assemble", value: "microgravity laboratory" },
-    { dimension: "docking", owner: "Latch", action: "assemble", value: "nadir docking collar" }
-  ]},
-  { phase: "interface declarations", work: [
-    { dimension: "habitat", owner: "Aster", action: "interface", value: "bus_voltage=120 VDC" },
-    { dimension: "power", owner: "Helion", action: "interface", value: "data_bus=deterministic-v2" },
-    { dimension: "science", owner: "Curie", action: "interface", value: "thermal_loop=loop-B" }
-  ]},
-  { phase: "independent airlock choices", work: [
-    { dimension: "life_support", owner: "Moss", action: "airlock-rule", value: "airlock_pressure=68 kPa" },
-    { dimension: "docking", owner: "Latch", action: "airlock-rule", value: "airlock_pressure=72 kPa" }
-  ]},
-  { phase: "navigation disconnects", work: [
-    { dimension: "navigation", owner: "Kepler", action: "offline", value: "radio horizon loss" }
-  ]},
-  { phase: "parallel continuation", work: [
-    { dimension: "habitat", owner: "Aster", action: "extend", value: "storm shelter" },
-    { dimension: "power", owner: "Helion", action: "extend", value: "battery spine v2" },
-    { dimension: "science", owner: "Curie", action: "extend", value: "external sample rack" },
-    { dimension: "docking", owner: "Latch", action: "extend", value: "approach beacon v2" }
-  ]},
-  { phase: "stranded navigation work", work: [
-    { dimension: "navigation", owner: "Kepler", action: "stranded", value: "star-map correction", local: true }
-  ]},
-  { phase: "deterministic reattach", work: [
-    { dimension: "navigation", owner: "Kepler", action: "reattach", value: "bridge via station@tick2" }
-  ]}
-];
-
 let state;
 let runToken = 0;
 const $ = id => document.getElementById(id);
-const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 function canonical(value) {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
@@ -463,281 +421,687 @@ function orderedWork(tick, work) {
   return work.map((item, index) => ({ item, key: random(), index }))
     .sort((a, b) => a.key - b.key || a.index - b.index).map(entry => entry.item);
 }
-function emptyState() {
+
+function scenarioSchedule(options = {}) {
+  const owners = Object.fromEntries(dimensions.map(item => [
+    item.id,
+    options.ownership?.[item.id] || item.agent
+  ]));
+  const claim = (dimension, slot, value, peer) => ({
+    kind: "dimension",
+    dimension,
+    owner: owners[dimension],
+    payload: { action: "interface_claim", slot, value, peer }
+  });
   return {
-    tick: 0,
-    frames: [],
-    localFrames: [],
-    heads: Object.fromEntries(dimensions.map(d => [d.id, "GENESIS"])),
-    modules: new Set(),
-    offline: new Set(),
-    conflict: false,
-    fidelity: null,
-    ladder: [],
-    reattached: false,
-    running: false,
-    guidedRejection: false,
-    lastMutation: null
+    owners,
+    steps: [
+      {
+        phase: "genesis",
+        work: dimensions.map(item => ({
+          kind: "dimension",
+          dimension: item.id,
+          owner: owners[item.id],
+          payload: { action: "genesis", authority: owners[item.id], label: item.label }
+        }))
+      },
+      {
+        phase: "parallel assembly",
+        work: [
+          { kind: "dimension", dimension: "habitat", owner: owners.habitat, payload: { action: "assemble", value: "toroidal crew ring" } },
+          { kind: "dimension", dimension: "power", owner: owners.power, payload: { action: "assemble", value: "dual solar truss", component: { power_component: "battery spine v1" } } },
+          { kind: "dimension", dimension: "life_support", owner: owners.life_support, payload: { action: "assemble", value: "closed oxygen loop" } },
+          { kind: "dimension", dimension: "navigation", owner: owners.navigation, payload: { action: "assemble", value: "inertial reference" } },
+          { kind: "dimension", dimension: "science", owner: owners.science, payload: { action: "assemble", value: "microgravity laboratory" } },
+          { kind: "dimension", dimension: "docking", owner: owners.docking, payload: { action: "assemble", value: "nadir docking collar", component: { docking_component: "approach beacon v1" } } }
+        ]
+      },
+      {
+        phase: "interface declarations",
+        work: [
+          claim("habitat", "bus_voltage", "120 VDC", "power"),
+          claim("power", "bus_voltage", "120 VDC", "habitat"),
+          claim("power", "data_bus", "deterministic-v2", "navigation"),
+          claim("navigation", "data_bus", "deterministic-v2", "power"),
+          claim("life_support", "thermal_loop", "loop-B", "science"),
+          claim("science", "thermal_loop", "loop-B", "life_support"),
+          claim("habitat", "emergency_code", "amber-6", "life_support"),
+          claim("life_support", "emergency_code", "amber-6", "habitat"),
+          claim("navigation", "approach_axis", "nadir", "docking"),
+          claim("docking", "approach_axis", "nadir", "navigation")
+        ]
+      },
+      {
+        phase: "independent airlock choices",
+        work: [
+          claim("life_support", "airlock_pressure", "68 kPa", "docking"),
+          claim("docking", "airlock_pressure", options.dockingPressure || "72 kPa", "life_support")
+        ]
+      },
+      {
+        phase: "navigation disconnects",
+        work: [
+          { kind: "dimension", dimension: "navigation", owner: owners.navigation, payload: { action: "offline", value: "radio horizon loss" } },
+          { kind: "dimension", dimension: "docking", owner: owners.docking, payload: { action: "component_update", component: { docking_component: "approach beacon v1.5" } } }
+        ]
+      },
+      {
+        phase: "parallel continuation",
+        work: [
+          { kind: "dimension", dimension: "habitat", owner: owners.habitat, payload: { action: "extend", value: "storm shelter" } },
+          { kind: "dimension", dimension: "power", owner: owners.power, payload: { action: "component_update", component: { power_component: "battery spine v2" } } },
+          { kind: "dimension", dimension: "science", owner: owners.science, payload: { action: "extend", value: "external sample rack" } },
+          { kind: "dimension", dimension: "docking", owner: owners.docking, payload: { action: "component_update", component: { docking_component: "approach beacon v2" } } }
+        ]
+      },
+      {
+        phase: "stranded navigation work",
+        work: [{
+          kind: "local_dimension",
+          dimension: "navigation",
+          owner: owners.navigation,
+          reads: { power_component: "battery spine v1", docking_component: "approach beacon v1" },
+          payload: { action: "stranded", value: "star-map correction" }
+        }]
+      },
+      { phase: "deterministic reattach", work: [{ kind: "reattach" }] }
+    ]
   };
 }
-function ownerFor(dimension) {
-  return dimensions.find(item => item.id === dimension)?.agent;
+
+function emptySemantic() {
+  return {
+    ownership: {},
+    heads: Object.fromEntries(dimensions.map(item => [item.id, "GENESIS"])),
+    checkpointHead: "GENESIS",
+    checkpoints: [],
+    claims: [],
+    claimsBySlot: {},
+    components: {},
+    modules: new Set(),
+    offline: new Set(),
+    localFrames: {},
+    conflicts: [],
+    alternatives: [],
+    fidelity: null,
+    ladder: [],
+    reattached: false
+  };
 }
-async function makeFrame(work, tick, local = false) {
-  const parent = state.heads[work.dimension];
-  const frame = {
-    schema: "station.frame/1",
+
+function bodyOf(frame) {
+  const body = { ...frame };
+  delete body.hash;
+  return body;
+}
+
+async function addressed(body) {
+  return { ...body, hash: await sha256(body) };
+}
+
+function frameFingerprint(frames) {
+  return canonical(frames.map(frame => frame.hash));
+}
+
+function finaliseSemantics(semantic) {
+  const grouped = {};
+  for (const claim of semantic.claims) (grouped[claim.slot] ||= []).push(claim);
+  semantic.claimsBySlot = grouped;
+  const slots = Object.keys(grouped).sort();
+  const mergeable = slots.filter(slot => new Set(grouped[slot].map(claim => claim.value)).size === 1);
+  semantic.conflicts = slots.filter(slot => new Set(grouped[slot].map(claim => claim.value)).size > 1);
+  semantic.alternatives = grouped.airlock_pressure || [];
+  semantic.fidelity = slots.length
+    ? {
+        numerator: mergeable.length,
+        denominator: slots.length,
+        decimal: (mergeable.length / slots.length).toFixed(6)
+      }
+    : null;
+  return semantic;
+}
+
+function compareReattachBases(semantic, localFrame) {
+  const candidates = [...semantic.checkpoints].sort((left, right) =>
+    right.frame.tick - left.frame.tick || right.frame.hash.localeCompare(left.frame.hash)
+  );
+  const ladder = [];
+  for (const candidate of candidates) {
+    const mismatches = Object.entries(localFrame.reads || {})
+      .filter(([key, value]) => candidate.state[key] !== value)
+      .map(([key, value]) => ({
+        key,
+        expected: value,
+        observed: candidate.state[key] ?? "missing"
+      }));
+    ladder.push({
+      base: candidate.label,
+      baseHash: candidate.frame.hash,
+      verdict: mismatches.length ? "reject" : "accept",
+      mismatches,
+      reason: mismatches.length
+        ? mismatches.map(item => `${item.key}: ${item.expected} ≠ ${item.observed}`).join("; ")
+        : "declared reads match exactly"
+    });
+    if (!mismatches.length) break;
+  }
+  return ladder;
+}
+
+async function replayHistory(frames) {
+  const semantic = emptySemantic();
+  const issues = [];
+  for (let index = 0; index < frames.length; index += 1) {
+    const frame = frames[index];
+    const computedHash = await sha256(bodyOf(frame));
+    if (computedHash !== frame.hash) {
+      issues.push({ code: "HASH_MISMATCH", index, reason: "canonical SHA-256 does not match frame body" });
+      break;
+    }
+    if (frame.kind === "checkpoint") {
+      const expectedState = {
+        power_component: semantic.components.power_component,
+        docking_component: semantic.components.docking_component
+      };
+      if (frame.parent !== semantic.checkpointHead) {
+        issues.push({ code: "CHECKPOINT_PARENT", index, reason: "checkpoint parent does not match checkpoint head" });
+        break;
+      }
+      if (canonical(frame.payload.state) !== canonical(expectedState)
+        || canonical(frame.payload.source_heads) !== canonical(semantic.heads)
+        || canonical(frame.reads?.source_heads) !== canonical(semantic.heads)) {
+        issues.push({ code: "CHECKPOINT_STATE", index, reason: "candidate base does not replay from its source heads" });
+        break;
+      }
+      semantic.checkpointHead = frame.hash;
+      semantic.checkpoints.push({ label: frame.payload.label, state: frame.payload.state, frame });
+      continue;
+    }
+    if (!dimensions.some(item => item.id === frame.dimension)) {
+      issues.push({ code: "UNKNOWN_DIMENSION", index, reason: `unknown dimension ${frame.dimension}` });
+      break;
+    }
+    const action = frame.payload?.action;
+    if (action === "genesis") {
+      if (semantic.ownership[frame.dimension] || frame.parent !== "GENESIS"
+        || frame.owner !== frame.payload.authority) {
+        issues.push({ code: "INVALID_GENESIS", index, reason: "genesis must establish its own unclaimed authority" });
+        break;
+      }
+      semantic.ownership[frame.dimension] = frame.payload.authority;
+      semantic.heads[frame.dimension] = frame.hash;
+      continue;
+    }
+    if (semantic.ownership[frame.dimension] !== frame.owner) {
+      issues.push({
+        code: "UNAUTHORIZED_OWNER",
+        index,
+        reason: `${frame.owner} does not own ${frame.dimension}; verified authority is ${semantic.ownership[frame.dimension] || "unset"}`
+      });
+      break;
+    }
+    if (frame.kind === "local_dimension") {
+      if (frame.parent !== semantic.heads[frame.dimension]) {
+        issues.push({ code: "LOCAL_PARENT", index, reason: "local frame does not descend from the last merged head" });
+        break;
+      }
+      semantic.localFrames[frame.dimension] = frame;
+      continue;
+    }
+    if (frame.parent !== semantic.heads[frame.dimension]) {
+      issues.push({ code: "PARENT_MISMATCH", index, reason: `${frame.dimension} parent does not match replayed head` });
+      break;
+    }
+    if (action === "reattach") {
+      const localFrame = semantic.localFrames[frame.dimension];
+      const ladder = localFrame ? compareReattachBases(semantic, localFrame) : [];
+      const accepted = ladder.find(rung => rung.verdict === "accept");
+      const rejected = ladder.filter(rung => rung.verdict === "reject").map(rung => ({
+        base: rung.base,
+        baseHash: rung.baseHash,
+        reason: rung.reason
+      }));
+      const expected = accepted && {
+        action: "reattach",
+        local_parent: localFrame.hash,
+        accepted_base: accepted.baseHash,
+        accepted_label: accepted.base,
+        rejected_candidates: rejected
+      };
+      if (!expected || canonical(frame.payload) !== canonical(expected)
+        || frame.reads?.accepted_base !== accepted.baseHash) {
+        issues.push({ code: "REATTACH_PROVENANCE", index, reason: "bridge does not match ordered replay comparisons" });
+        break;
+      }
+      semantic.ladder = ladder;
+      semantic.reattached = true;
+      semantic.offline.delete(frame.dimension);
+    }
+    if (action === "assemble") semantic.modules.add(frame.dimension);
+    if (action === "offline") semantic.offline.add(frame.dimension);
+    if (frame.payload.component) Object.assign(semantic.components, frame.payload.component);
+    if (action === "interface_claim") {
+      semantic.claims.push({
+        slot: frame.payload.slot,
+        value: frame.payload.value,
+        peer: frame.payload.peer,
+        owner: frame.owner,
+        dimension: frame.dimension,
+        hash: frame.hash
+      });
+    }
+    semantic.heads[frame.dimension] = frame.hash;
+  }
+  return {
+    valid: issues.length === 0,
+    issues,
+    semantic: finaliseSemantics(semantic),
+    historyFingerprint: frameFingerprint(frames)
+  };
+}
+
+async function verifyCandidate(candidate, history) {
+  const before = await replayHistory(history);
+  if (!before.valid) {
+    return {
+      accepted: false,
+      code: "INVALID_HISTORY",
+      reason: before.issues[0].reason,
+      before,
+      after: before
+    };
+  }
+  if (await sha256(bodyOf(candidate)) !== candidate.hash) {
+    return {
+      accepted: false,
+      code: "CANDIDATE_HASH",
+      reason: "candidate address does not match its canonical body",
+      before,
+      after: before
+    };
+  }
+  if (candidate.kind === "proposal" && candidate.payload.action === "replace_alternatives") {
+    const present = (before.semantic.claimsBySlot[candidate.payload.slot] || [])
+      .map(claim => claim.hash).sort();
+    const proposed = [...candidate.payload.keep_hashes].sort();
+    const accepted = canonical(present) === canonical(proposed);
+    return {
+      accepted,
+      code: accepted ? "PROPOSAL_PRESERVES_HISTORY" : "SILENT_OVERWRITE",
+      reason: accepted
+        ? "proposal preserves every verified claim frame"
+        : `proposal keeps ${proposed.length} of ${present.length} verified claim frames`,
+      before,
+      after: before
+    };
+  }
+  const after = await replayHistory([...history, candidate]);
+  return {
+    accepted: after.valid,
+    code: after.valid ? "ACCEPTED" : after.issues.at(-1)?.code || "REJECTED",
+    reason: after.valid ? "candidate satisfies hash, parent, ownership, and semantic checks" : after.issues.at(-1)?.reason,
+    before,
+    after: after.valid ? after : before
+  };
+}
+
+function scheduleOwner(dimension) {
+  return state.schedule.owners[dimension];
+}
+
+async function makeWorkFrame(work, tick) {
+  const semantic = state.audit.semantic;
+  const parent = work.kind === "checkpoint"
+    ? semantic.checkpointHead
+    : semantic.heads[work.dimension];
+  return addressed({
+    schema: "station.frame/2",
+    kind: work.kind || "dimension",
     dimension: work.dimension,
     owner: work.owner,
     tick,
     parent,
-    reads: work.action === "stranded"
-      ? { power: "battery spine v1", docking: "approach beacon v1" }
-      : {},
-    payload: { action: work.action, value: work.value },
+    reads: work.reads || {},
+    payload: work.payload,
     provenance: {
       seed: `0x${SEED.toString(16).toUpperCase()}`,
       scheduler: "mulberry32/tick",
       origin: work.owner,
-      mode: local ? "disconnected" : "merged"
+      mode: work.kind === "local_dimension" ? "disconnected" : "merged"
     }
-  };
-  frame.hash = await sha256(frame);
-  return frame;
+  });
 }
-async function appendWork(work, tick) {
-  if (ownerFor(work.dimension) !== work.owner) throw new Error("ownership violation");
-  const frame = await makeFrame(work, tick, Boolean(work.local));
-  if (work.local) {
-    state.localFrames.push(frame);
-  } else {
-    state.frames.push(frame);
-    state.heads[work.dimension] = frame.hash;
-  }
-  return frame;
+
+async function makeCheckpoint(tick) {
+  const semantic = state.audit.semantic;
+  return addressed({
+    schema: "station.frame/2",
+    kind: "checkpoint",
+    dimension: "station_state",
+    owner: "Assembler",
+    tick,
+    parent: semantic.checkpointHead,
+    reads: { source_heads: semantic.heads },
+    payload: {
+      action: "checkpoint",
+      label: `station@tick${tick}`,
+      state: {
+        power_component: semantic.components.power_component,
+        docking_component: semantic.components.docking_component
+      },
+      source_heads: { ...semantic.heads }
+    },
+    provenance: {
+      seed: `0x${SEED.toString(16).toUpperCase()}`,
+      scheduler: "replay-derived checkpoint",
+      origin: "Assembler",
+      mode: "merged"
+    }
+  });
 }
+
+async function makeReattachFrame(tick) {
+  const semantic = state.audit.semantic;
+  const localFrame = semantic.localFrames.navigation;
+  const ladder = compareReattachBases(semantic, localFrame);
+  const accepted = ladder.find(rung => rung.verdict === "accept");
+  return addressed({
+    schema: "station.frame/2",
+    kind: "dimension",
+    dimension: "navigation",
+    owner: scheduleOwner("navigation"),
+    tick,
+    parent: semantic.heads.navigation,
+    reads: { accepted_base: accepted.baseHash },
+    payload: {
+      action: "reattach",
+      local_parent: localFrame.hash,
+      accepted_base: accepted.baseHash,
+      accepted_label: accepted.base,
+      rejected_candidates: ladder.filter(rung => rung.verdict === "reject").map(rung => ({
+        base: rung.base,
+        baseHash: rung.baseHash,
+        reason: rung.reason
+      }))
+    },
+    provenance: {
+      seed: `0x${SEED.toString(16).toUpperCase()}`,
+      scheduler: "newest-to-oldest replay comparison",
+      origin: scheduleOwner("navigation"),
+      mode: "reattach"
+    }
+  });
+}
+
+async function submitAccepted(candidate) {
+  const result = await verifyCandidate(candidate, state.frames);
+  if (!result.accepted) throw new Error(`${result.code}: ${result.reason}`);
+  state.frames.push(candidate);
+  state.audit = result.after;
+  return result;
+}
+
 async function processTick(index, announce = true) {
-  if (index >= baseSchedule.length) return;
-  const step = baseSchedule[index];
+  if (index >= state.schedule.steps.length) return;
+  const step = state.schedule.steps[index];
   const tick = index + 1;
   for (const work of orderedWork(index, step.work)) {
-    if (work.action === "offline") {
-      state.offline.add("navigation");
-      const frame = await appendWork(work, tick);
-      state.heads.navigation = frame.hash;
-    } else if (work.action === "reattach") {
-      await reattachNavigation(tick);
-    } else {
-      await appendWork(work, tick);
-      if (work.action === "assemble") state.modules.add(work.dimension);
-      if (work.action === "airlock-rule") {
-        state.conflict = true;
-        state.fidelity = { numerator: 5, denominator: 6, decimal: "0.833333" };
-      }
-    }
+    const candidate = work.kind === "reattach"
+      ? await makeReattachFrame(tick)
+      : await makeWorkFrame(work, tick);
+    await submitAccepted(candidate);
   }
+  if ([2, 5, 6].includes(tick)) await submitAccepted(await makeCheckpoint(tick));
   state.tick = tick;
   render();
   if (announce) say(`Tick ${tick}: ${step.phase}.`);
 }
-async function reattachNavigation(tick) {
-  const stranded = state.localFrames.at(-1);
-  const candidates = [
-    { base: "station@tick6", verdict: "reject", reason: "power read mismatch: v1 ≠ v2" },
-    { base: "station@tick5", verdict: "reject", reason: "docking read mismatch: v1 ≠ v2" },
-    { base: "station@tick2", verdict: "accept", reason: "declared reads match exactly" }
-  ];
-  state.ladder = candidates;
-  const work = {
-    dimension: "navigation",
-    owner: "Kepler",
-    action: "reattach",
-    value: "bridge via station@tick2"
+
+async function emptyState(options = {}) {
+  const schedule = scenarioSchedule(options);
+  return {
+    tick: 0,
+    frames: [],
+    schedule,
+    scenario: options,
+    audit: await replayHistory([]),
+    running: false,
+    guidedTest: null,
+    lastMutation: null
   };
-  const frame = {
-    schema: "station.frame/1",
-    dimension: "navigation",
-    owner: "Kepler",
-    tick,
-    parent: state.heads.navigation,
-    reads: { accepted_base: "station@tick2" },
-    payload: { action: work.action, value: work.value },
-    provenance: {
-      seed: `0x${SEED.toString(16).toUpperCase()}`,
-      scheduler: "fixed newest-to-oldest contradiction ladder",
-      origin: "Kepler",
-      disconnected_at: "tick4",
-      local_parent: stranded.hash,
-      accepted_base: "station@tick2",
-      rejected_candidates: candidates.filter(c => c.verdict === "reject")
-    }
-  };
-  frame.hash = await sha256(frame);
-  state.frames.push(stranded, frame);
-  state.heads.navigation = frame.hash;
-  state.offline.delete("navigation");
-  state.reattached = true;
 }
-async function verifyFrame(frame, expectedParent) {
-  const body = { ...frame };
-  delete body.hash;
-  return frame.parent === expectedParent && frame.hash === await sha256(body);
-}
+
 async function verifyAll() {
-  const heads = Object.fromEntries(dimensions.map(d => [d.id, "GENESIS"]));
-  for (const frame of state.frames) {
-    if (frame.payload.action === "stranded") continue;
-    if (ownerFor(frame.dimension) !== frame.owner) return false;
-    if (!await verifyFrame(frame, heads[frame.dimension])) return false;
-    heads[frame.dimension] = frame.hash;
-  }
-  const stranded = state.frames.find(frame => frame.payload.action === "stranded");
-  if (stranded) {
-    const body = { ...stranded };
-    delete body.hash;
-    if (stranded.hash !== await sha256(body)) return false;
-  }
-  return true;
+  return (await replayHistory(state.frames)).valid;
 }
+
 function assertion(label, status) {
   return `<div class="assertion ${status}"><span class="mark">${status === "pass" ? "✓" : status === "fail" ? "×" : "·"}</span><span>${label}</span></div>`;
 }
-async function renderAssertions() {
-  const complete = state.tick === baseSchedule.length;
-  const verified = state.frames.length ? await verifyAll() : false;
+function verdictWord(ok) {
+  return ok ? "PASS" : "FAIL";
+}
+function testResult(label, expectedRejection, verification) {
+  const passed = expectedRejection ? !verification.accepted : verification.accepted;
+  return {
+    label,
+    passed,
+    observed: verification.accepted ? "ACCEPTED" : "REJECTED",
+    code: verification.code,
+    reason: verification.reason,
+    verdict: verdictWord(passed),
+    verification
+  };
+}
+function renderAssertions() {
+  const complete = state.tick === state.schedule.steps.length;
+  const verified = state.audit.valid && state.frames.length > 0;
+  const semantic = state.audit.semantic;
   const rows = [
     assertion("Canonical SHA-256 links verify independently", verified ? "pass" : ""),
     assertion("Every accepted write matches dimension ownership", verified ? "pass" : ""),
-    assertion("Both airlock alternatives remain addressable", state.conflict ? "pass" : ""),
-    assertion("Reattach provenance records every rejected base", state.reattached ? "pass" : "")
+    assertion(`${semantic.alternatives.length || "No"} airlock claim frames replay independently`, semantic.alternatives.length === 2 ? "pass" : ""),
+    assertion("Reattach provenance equals ordered checkpoint comparisons", semantic.reattached ? "pass" : "")
   ];
-  if (state.guidedRejection) rows.push(assertion("Guided trespass rejected before hashing; accepted ledger unchanged", "pass"));
-  if (state.lastMutation) rows.push(assertion(state.lastMutation.label, state.lastMutation.rejected ? "fail" : ""));
+  if (state.guidedTest) rows.push(assertion(
+    `${state.guidedTest.label}: ${state.guidedTest.observed} (${state.guidedTest.code})`,
+    state.guidedTest.passed ? "pass" : "fail"
+  ));
+  if (state.lastMutation) rows.push(assertion(
+    `${state.lastMutation.label}: ${state.lastMutation.observed} (${state.lastMutation.code})`,
+    state.lastMutation.passed ? "pass" : "fail"
+  ));
   $("assertions").innerHTML = rows.join("");
   const verdict = $("verdict");
-  if (state.lastMutation?.rejected) {
-    verdict.textContent = "FAIL · REJECTED";
+  const activeTest = state.lastMutation || state.guidedTest;
+  if (activeTest && !activeTest.passed) {
+    verdict.textContent = `${activeTest.verdict} · ${activeTest.observed}`;
     verdict.className = "status-chip rejected";
-  } else if (complete && verified) {
-    verdict.textContent = "PASS";
+  } else if (activeTest?.passed) {
+    verdict.textContent = `${activeTest.verdict} · ${activeTest.observed}`;
     verdict.className = "status-chip live";
+  } else if (complete) {
+    verdict.textContent = verdictWord(verified && semantic.reattached);
+    verdict.className = verified && semantic.reattached ? "status-chip live" : "status-chip rejected";
   } else {
     verdict.textContent = state.tick ? "VERIFYING" : "NOT RUN";
     verdict.className = "status-chip";
   }
 }
 function renderAgents() {
+  const semantic = state.audit.semantic;
   $("agents").innerHTML = dimensions.map(item => {
-    const built = state.modules.has(item.id);
-    const offline = state.offline.has(item.id);
-    const head = state.heads[item.id];
+    const built = semantic.modules.has(item.id);
+    const offline = semantic.offline.has(item.id);
+    const head = semantic.heads[item.id];
+    const owner = semantic.ownership[item.id] || item.agent;
     return `<div class="agent ${offline ? "offline" : built ? "active" : ""}">
-      <div class="agent-top"><span class="agent-dot"></span><strong>${item.agent} · ${item.label}</strong></div>
+      <div class="agent-top"><span class="agent-dot"></span><strong>${owner} · ${item.label}</strong></div>
       <code>${offline ? "OFFLINE · local append permitted" : head === "GENESIS" ? "awaiting frame" : head.slice(0, 12)}</code>
     </div>`;
   }).join("");
 }
 function renderLedger() {
-  const rows = [...state.frames, ...state.localFrames.filter(local => !state.frames.includes(local))]
-    .sort((a, b) => a.tick - b.tick || a.dimension.localeCompare(b.dimension))
-    .map(frame => `<div class="ledger-row"><span>${String(frame.tick).padStart(2, "0")}</span><span>${frame.owner}</span><span>${frame.dimension} · ${frame.payload.action}${frame.provenance.mode === "disconnected" ? " · local" : ""}</span><span class="hash" title="${frame.hash}">${frame.hash}</span></div>`);
+  const rows = state.frames.map(frame =>
+    `<div class="ledger-row"><span>${String(frame.tick).padStart(2, "0")}</span><span>${frame.owner}</span><span>${frame.dimension} · ${frame.payload.action}${frame.provenance.mode === "disconnected" ? " · local" : ""}</span><span class="hash" title="${frame.hash}">${frame.hash}</span></div>`
+  );
   $("ledger").innerHTML = `<div class="ledger-row"><span>tick</span><span>owner</span><span>event</span><span class="hash">canonical SHA-256</span></div>${rows.join("")}`;
-  $("ladder").innerHTML = state.ladder.length
-    ? `<strong>Fixed contradiction ladder · explicit provenance</strong>${state.ladder.map(rung => `<div class="rung ${rung.verdict}">${rung.base} · ${rung.verdict.toUpperCase()} · ${rung.reason}</div>`).join("")}`
+  const ladder = state.audit.semantic.ladder;
+  $("ladder").innerHTML = ladder.length
+    ? `<strong>Replay-derived contradiction ladder · explicit provenance</strong>${ladder.map(rung => `<div class="rung ${rung.verdict}">${rung.base} · ${rung.verdict.toUpperCase()} · ${rung.reason} · ${rung.baseHash.slice(0, 12)}</div>`).join("")}`
     : "";
 }
 function render() {
+  const semantic = state.audit.semantic;
   dimensions.forEach(item => {
     const node = $(`module-${item.id}`);
-    node.classList.toggle("built", state.modules.has(item.id));
-    node.classList.toggle("offline", state.offline.has(item.id));
-    node.classList.toggle("reattached", item.id === "navigation" && state.reattached);
+    node.classList.toggle("built", semantic.modules.has(item.id));
+    node.classList.toggle("offline", semantic.offline.has(item.id));
+    node.classList.toggle("reattached", item.id === "navigation" && semantic.reattached);
   });
-  $("module-airlock").classList.toggle("built", state.conflict);
-  $("module-ghost").classList.toggle("built", state.localFrames.length > 0 && !state.reattached);
-  $("module-life_support").classList.toggle("conflicted", state.conflict);
-  $("module-docking").classList.toggle("conflicted", state.conflict);
+  const hasConflict = semantic.conflicts.includes("airlock_pressure");
+  $("module-airlock").classList.toggle("built", semantic.alternatives.length > 0);
+  $("module-ghost").classList.toggle("built", Boolean(semantic.localFrames.navigation) && !semantic.reattached);
+  $("module-life_support").classList.toggle("conflicted", hasConflict);
+  $("module-docking").classList.toggle("conflicted", hasConflict);
+  $("airlock-label").textContent = semantic.alternatives.length
+    ? [...new Set(semantic.alternatives.map(claim => claim.value))].join(" ↔ ")
+    : "pending";
   renderAgents();
   renderLedger();
   renderAssertions();
-  $("fidelity").textContent = state.fidelity ? "5 / 6" : "—";
-  $("fidelity-detail").textContent = state.fidelity
-    ? "5 mergeable shared slots / 6 total = 0.833333 exact. Conflict is retained, never averaged."
+  $("fidelity").textContent = semantic.fidelity
+    ? `${semantic.fidelity.numerator} / ${semantic.fidelity.denominator}`
+    : "—";
+  $("fidelity-detail").textContent = semantic.fidelity
+    ? `${semantic.fidelity.numerator} replay-compatible slots / ${semantic.fidelity.denominator} content-addressed slots = ${semantic.fidelity.decimal}. ${semantic.conflicts.length ? `Parallel conflict: ${semantic.conflicts.join(", ")}.` : "No replayed conflict."}`
     : "Exact fidelity appears when shared interface claims are compared.";
-  $("alternatives").innerHTML = state.conflict
-    ? `<div class="alternative"><b>Moss · life_support</b><code>airlock_pressure = 68 kPa</code></div>
-       <div class="alternative"><b>Latch · docking</b><code>airlock_pressure = 72 kPa</code></div>`
+  $("alternatives").innerHTML = semantic.alternatives.length
+    ? semantic.alternatives.map(claim =>
+        `<div class="alternative"><b>${claim.owner} · ${claim.dimension}</b><code>airlock_pressure = ${claim.value} · ${claim.hash.slice(0, 12)}</code></div>`
+      ).join("")
     : `<div class="alternative"><b>Life support alternative</b><code>pending</code></div>
        <div class="alternative"><b>Docking alternative</b><code>pending</code></div>`;
-  const statuses = ["AWAITING GENESIS", "HEADS ESTABLISHED", "ASSEMBLY MERGED", "INTERFACES ALIGNED", "CONFLICT PRESERVED", "NAVIGATION OFFLINE", "STATION CONTINUES", "LOCAL FRAME STRANDED", "PASS · REATTACHED"];
+  const finalStatus = semantic.reattached
+    ? `${verdictWord(state.audit.valid)} · REATTACHED`
+    : "REATTACH FAILED";
+  const statuses = ["AWAITING GENESIS", "HEADS ESTABLISHED", "ASSEMBLY MERGED", "INTERFACES REPLAYED", hasConflict ? "CONFLICT PRESERVED" : "CLAIMS AGREE", "NAVIGATION OFFLINE", "STATION CONTINUES", "LOCAL FRAME STRANDED", finalStatus];
   const status = $("station-status");
   status.textContent = statuses[state.tick];
-  status.className = `status-chip ${state.tick === 8 ? "live" : state.conflict ? "conflict" : state.tick ? "live" : ""}`;
+  status.className = `status-chip ${state.tick === 8 ? (semantic.reattached ? "live" : "rejected") : hasConflict ? "conflict" : state.tick ? "live" : ""}`;
   const captions = [
     "No frames accepted. The blueprint is only a possibility.",
-    "Six genesis heads establish exclusive write authority.",
-    "Parallel work resolves into six visible station modules.",
-    "Five shared interface slots align without special handling.",
-    "The airlock disagreement stays visible as two hashed alternatives.",
-    "Kepler crosses the radio horizon; its dimension remains owned.",
-    "Five connected agents continue while navigation is absent.",
-    "Kepler appends a local navigation correction to its prior head.",
-    "The first contradiction-free base accepts a provenance-rich bridge."
+    "Six hashed genesis frames establish replayed write authority.",
+    "Parallel work resolves into six modules and a hashed tick-2 base.",
+    `${semantic.claims.length} claim frames replay into ${Object.keys(semantic.claimsBySlot).length} compatible interface slots.`,
+    hasConflict ? "Two hashed airlock claims disagree and remain parallel." : "Both hashed airlock claims agree; fidelity rises without special casing.",
+    "Kepler crosses the horizon while docking advances; tick-5 base is hashed.",
+    "Connected work advances power and docking; tick-6 base is hashed.",
+    "Kepler appends a local correction with declared component reads.",
+    semantic.reattached ? "Replayed comparisons select the first exact base and verify the bridge." : "No contradiction-free base verified."
   ];
   $("caption").textContent = captions[state.tick];
-  $("head-count").textContent = `${state.frames.length + state.localFrames.filter(f => !state.frames.includes(f)).length} verified frame${state.frames.length === 1 ? "" : "s"}`;
-  $("tick-label").textContent = `Tick ${state.tick} / 8 · ${state.tick ? baseSchedule[state.tick - 1].phase : "ready"}`;
+  $("head-count").textContent = `${state.frames.length} verified frame${state.frames.length === 1 ? "" : "s"}`;
+  $("tick-label").textContent = `Tick ${state.tick} / ${state.schedule.steps.length} · ${state.tick ? state.schedule.steps[state.tick - 1].phase : "ready"}`;
   [...$("track").children].forEach((node, index) => {
     node.classList.toggle("done", index < state.tick);
-    node.classList.toggle("current", index === state.tick && state.tick < 8);
+    node.classList.toggle("current", index === state.tick && state.tick < state.schedule.steps.length);
   });
-  $("next").disabled = state.tick >= baseSchedule.length || state.running;
-  $("guided").disabled = state.running || state.tick >= baseSchedule.length;
+  $("next").disabled = state.tick >= state.schedule.steps.length || state.running;
+  $("guided").disabled = state.running || state.tick >= state.schedule.steps.length;
 }
 function say(message) {
   $("announcer").textContent = "";
   requestAnimationFrame(() => $("announcer").textContent = message);
 }
 function snapshotHashes() {
-  return canonical(state.frames.map(frame => frame.hash));
+  return frameFingerprint(state.frames);
+}
+async function makeCrossDimensionCandidate() {
+  const semantic = state.audit.semantic;
+  return addressed({
+    schema: "station.frame/2",
+    kind: "dimension",
+    dimension: "power",
+    owner: "Aster",
+    tick: state.tick + 1,
+    parent: semantic.heads.power,
+    reads: {},
+    payload: { action: "cross_write", component: { power_component: "unauthorized reactor edit" } },
+    provenance: {
+      seed: `0x${SEED.toString(16).toUpperCase()}`,
+      scheduler: "independent semantic verifier",
+      origin: "Aster",
+      mode: "candidate"
+    }
+  });
+}
+async function runOwnershipTest(label) {
+  const before = snapshotHashes();
+  const verification = await verifyCandidate(await makeCrossDimensionCandidate(), state.frames);
+  const result = testResult(label, true, verification);
+  result.historyUnchanged = before === snapshotHashes();
+  return result;
+}
+async function makeOverwriteCandidate() {
+  const claims = state.audit.semantic.claimsBySlot.airlock_pressure || [];
+  return addressed({
+    schema: "station.proposal/1",
+    kind: "proposal",
+    dimension: "station_state",
+    owner: "Merger",
+    tick: state.tick + 1,
+    parent: state.audit.semantic.checkpointHead,
+    reads: { claim_hashes: claims.map(claim => claim.hash) },
+    payload: {
+      action: "replace_alternatives",
+      slot: "airlock_pressure",
+      keep_hashes: claims.slice(0, 1).map(claim => claim.hash)
+    },
+    provenance: {
+      seed: `0x${SEED.toString(16).toUpperCase()}`,
+      scheduler: "independent semantic verifier",
+      origin: "Merger",
+      mode: "candidate"
+    }
+  });
 }
 async function runGuided() {
-  if (state.running || state.tick >= baseSchedule.length) return;
+  if (state.running || state.tick >= state.schedule.steps.length) return;
   state.running = true;
   const token = ++runToken;
   render();
   $("feedback").className = "feedback good";
-  while (state.tick < baseSchedule.length && token === runToken) {
+  while (state.tick < state.schedule.steps.length && token === runToken) {
     await processTick(state.tick, false);
-    $("feedback").textContent = `Guided run · ${baseSchedule[state.tick - 1].phase}`;
+    $("feedback").textContent = `Guided run · ${state.schedule.steps[state.tick - 1].phase}`;
     await Promise.resolve();
   }
   if (token !== runToken) return;
-  const beforeRejection = snapshotHashes();
-  const deliberateTrespass = { dimension: "power", owner: "Aster" };
-  state.guidedRejection = ownerFor(deliberateTrespass.dimension) !== deliberateTrespass.owner
-    && beforeRejection === snapshotHashes();
+  state.guidedTest = await runOwnershipTest("Guided ownership challenge");
   state.running = false;
-  $("guided-note").className = "guided-note good";
-  $("guided-note").textContent = "PASS · DELIBERATE REJECTION: habitat agent Aster tried to edit power; ownership blocked it before hashing and all 24 accepted frames remained unchanged.";
-  $("feedback").textContent = "PASS · 24 accepted frames verify. Fidelity is exactly 5/6; both airlock rules survive; navigation reattached; the guided trespass was rejected.";
+  $("guided-note").className = `guided-note ${state.guidedTest.passed ? "good" : "bad"}`;
+  $("guided-note").textContent = `${state.guidedTest.verdict} · DELIBERATE ${state.guidedTest.observed}: ${state.guidedTest.reason}. Ledger unchanged: ${state.guidedTest.historyUnchanged}.`;
+  const fidelity = state.audit.semantic.fidelity;
+  $("feedback").textContent = `${verdictWord(state.audit.valid && state.audit.semantic.reattached && state.guidedTest.passed)} · ${state.frames.length} frames replay; fidelity ${fidelity.numerator}/${fidelity.denominator}; guided candidate ${state.guidedTest.observed.toLowerCase()}.`;
   render();
-  say("Guided run complete. The deliberate cross-dimension write was rejected and all assertions pass.");
+  say(`Guided run complete. Ownership candidate ${state.guidedTest.observed.toLowerCase()}.`);
 }
 async function nextTick() {
-  if (state.running || state.tick >= baseSchedule.length) return;
+  if (state.running || state.tick >= state.schedule.steps.length) return;
   await processTick(state.tick);
-  if (state.tick === baseSchedule.length) {
-    $("feedback").className = "feedback good";
-    $("feedback").textContent = "PASS · Deterministic schedule complete; hashes, ownership, conflict preservation, and reattach provenance verify.";
+  if (state.tick === state.schedule.steps.length) {
+    const ok = state.audit.valid && state.audit.semantic.reattached;
+    $("feedback").className = `feedback ${ok ? "good" : "bad"}`;
+    $("feedback").textContent = `${verdictWord(ok)} · Deterministic replay ${ok ? "verified hashes, semantics, and reattachment" : "reported a verification failure"}.`;
   } else {
     $("feedback").className = "feedback";
-    $("feedback").textContent = `${baseSchedule[state.tick - 1].phase} committed. Advance to the next logical tick.`;
+    $("feedback").textContent = `${state.schedule.steps[state.tick - 1].phase} committed. Advance to the next logical tick.`;
   }
 }
-function reset() {
+async function reset(options = {}) {
   runToken++;
-  state = emptyState();
+  state = await emptyState(options);
   $("feedback").className = "feedback";
   $("feedback").textContent = "Reset complete. All generated frames were discarded; deterministic seed retained.";
   $("guided-note").className = "guided-note";
@@ -748,44 +1112,43 @@ function reset() {
   say("Simulation reset.");
 }
 async function replay() {
-  reset();
+  await reset(state.scenario);
   await runGuided();
 }
 async function mutateOwner() {
   if (state.tick < 1) await processTick(0, false);
-  const before = snapshotHashes();
-  const forged = { dimension: "power", owner: "Aster", action: "cross-write", value: "unauthorized reactor edit" };
-  const rejected = ownerFor(forged.dimension) !== forged.owner;
-  const after = snapshotHashes();
-  state.lastMutation = {
-    rejected: rejected && before === after,
-    label: "Unauthorized cross-dimension write rejected; verified ledger unchanged"
-  };
-  $("mutation-result").className = "feedback bad";
-  $("mutation-result").textContent = `FAIL · REJECTED before append: Aster owns habitat, not power. Ledger fingerprint unchanged: ${before === after}. Verified work preserved.`;
+  state.lastMutation = await runOwnershipTest("Unauthorized cross-dimension candidate");
+  $("mutation-result").className = `feedback ${state.lastMutation.passed ? "good" : "bad"}`;
+  $("mutation-result").textContent = `${state.lastMutation.verdict} · ${state.lastMutation.observed}: ${state.lastMutation.reason}. Ledger unchanged: ${state.lastMutation.historyUnchanged}.`;
   render();
-  say("Unauthorized write rejected. Verified work preserved.");
+  say(`Ownership mutation test ${state.lastMutation.verdict.toLowerCase()}. Candidate ${state.lastMutation.observed.toLowerCase()}.`);
 }
 async function mutateOverwrite() {
-  if (!state.conflict) {
-    while (state.tick < 4) await processTick(state.tick, false);
+  while (!state.audit.semantic.claimsBySlot.airlock_pressure && state.tick < 4) {
+    await processTick(state.tick, false);
   }
   const before = snapshotHashes();
-  const alternativesBefore = interfaceClaims.airlock_pressure.length;
-  const proposed = [interfaceClaims.airlock_pressure[0]];
-  const rejected = proposed.length !== alternativesBefore;
-  const after = snapshotHashes();
-  state.lastMutation = {
-    rejected: rejected && before === after,
-    label: "Silent airlock overwrite rejected; both verified alternatives preserved"
-  };
-  $("mutation-result").className = "feedback bad";
-  $("mutation-result").textContent = `FAIL · REJECTED: overwrite would reduce the airlock alternative set from ${alternativesBefore} to ${proposed.length}. Ledger fingerprint unchanged: ${before === after}. Both rules remain visible.`;
+  const verification = await verifyCandidate(await makeOverwriteCandidate(), state.frames);
+  state.lastMutation = testResult("Silent airlock overwrite candidate", true, verification);
+  state.lastMutation.historyUnchanged = before === snapshotHashes();
+  $("mutation-result").className = `feedback ${state.lastMutation.passed ? "good" : "bad"}`;
+  $("mutation-result").textContent = `${state.lastMutation.verdict} · ${state.lastMutation.observed}: ${state.lastMutation.reason}. Ledger unchanged: ${state.lastMutation.historyUnchanged}.`;
   render();
-  say("Silent conflict overwrite rejected. Both alternatives preserved.");
+  say(`Overwrite mutation test ${state.lastMutation.verdict.toLowerCase()}. Candidate ${state.lastMutation.observed.toLowerCase()}.`);
 }
 
-$("track").innerHTML = baseSchedule.map(() => `<span class="tick"></span>`).join("");
+async function runScenario(options = {}) {
+  await reset(options);
+  await runGuided();
+  return {
+    valid: state.audit.valid,
+    conflict: state.audit.semantic.conflicts.includes("airlock_pressure"),
+    fidelity: state.audit.semantic.fidelity,
+    alternatives: state.audit.semantic.alternatives.map(claim => ({ value: claim.value, hash: claim.hash })),
+    guidedTest: state.guidedTest
+  };
+}
+
 $("guided").addEventListener("click", runGuided);
 $("next").addEventListener("click", nextTick);
 $("replay").addEventListener("click", replay);
@@ -806,8 +1169,20 @@ document.addEventListener("keydown", event => {
   if (event.key.toLowerCase() === "r") reset();
   if (event.key.toLowerCase() === "l") $("ledger-drawer").open = !$("ledger-drawer").open;
 });
-state = emptyState();
-render();
+window.stationProof = {
+  replayHistory,
+  verifyCandidate,
+  runScenario,
+  runOwnershipMutation: mutateOwner,
+  runOverwriteMutation: mutateOverwrite,
+  getState: () => state
+};
+
+(async () => {
+  state = await emptyState();
+  $("track").innerHTML = state.schedule.steps.map(() => `<span class="tick"></span>`).join("");
+  render();
+})();
 </script>
 </body>
 </html>
