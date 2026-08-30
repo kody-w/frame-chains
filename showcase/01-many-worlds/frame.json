@@ -1,9 +1,9 @@
 {
   "frame": 1,
-  "slug": "many-worlds",
+  "slug": "01-many-worlds",
   "title": "Many-Worlds Mission Control",
   "claim": "A historical frame can seed multiple deterministic, independently verifiable counterfactual mission histories whose compatible claims merge while genuine contradictions remain parallel with exact, inspectable merge fidelity.",
-  "entry": "showcase/01-many-worlds/index.html",
+  "entry": "index.html",
   "synthetic_only": true,
   "network_required": false,
   "invariants": [
