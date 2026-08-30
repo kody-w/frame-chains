@@ -180,6 +180,14 @@ code, pre, .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", m
 h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: 16px; font-size: clamp(40px, 7vw, 92px); line-height: .9; letter-spacing: -.065em; max-width: 960px; }
 .hero-copy { max-width: 820px; margin-bottom: 0; color: var(--muted); font-size: clamp(17px, 2vw, 21px); }
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.hero-cta span { max-width: 470px; color: var(--muted); font-size: 12px; }
 .hero-note {
   border-top: 1px solid var(--line-strong);
   padding-top: 16px;
@@ -537,7 +545,11 @@ td code { color: var(--cyan); overflow-wrap: anywhere; }
     <div>
       <p class="eyebrow">Mars colony / autonomous continuity</p>
       <h1 id="pageTitle">The colony is its own immune system.</h1>
-      <p class="hero-copy">One content-addressed scan fans across twelve function-named modules. Their linked responses become a deterministic report; only its delta may be repaired. Ranked leases preserve authority, while a partitioned dimension keeps writing and returns only when its claims do not contradict the chain.</p>
+      <p class="hero-copy">One content-addressed scan fans across twelve function-named modules. Their linked responses become a deterministic report; only its delta may be repaired. Precommitted logical-beat leases—a fixed turn-taking schedule keyed to accepted chain steps, not wall-clock time—preserve authority, while a partitioned dimension keeps writing and returns only when its claims do not contradict the chain.</p>
+      <div class="hero-cta">
+        <button class="primary" id="nextButton" type="button" aria-describedby="nextAction">Run next guided step</button>
+        <span>Start here. After each step, focus returns to this control so Enter continues the eight-step proof.</span>
+      </div>
       <div class="tag-row" aria-label="Model properties">
         <span class="status-chip">Seed MARS-IMMUNE-03</span>
         <span class="status-chip">Canonical SHA-256</span>
@@ -620,7 +632,6 @@ td code { color: var(--cyan); overflow-wrap: anywhere; }
           Three deterministic changes make the report’s delta visible.
         </div>
         <div class="controls">
-          <button class="primary" id="nextButton" type="button">Run next guided step</button>
           <div class="controls row">
             <button class="secondary" id="replayButton" type="button">Replay positive path</button>
             <button class="secondary" id="resetButton" type="button">Reset frames</button>
@@ -758,8 +769,8 @@ const ROSTER = [
 const GUIDED_STEPS = [
   {title: "01 · Seed the disturbance", body: "Three deterministic changes make the report’s delta visible.", action: injectDrift},
   {title: "02 · Fan the scan tile", body: "One parent frame produces twelve responses, each linked to its hash.", action: () => runScan(MODULE_ORDER)},
-  {title: "03 · Apply delta-bounded repair", body: "Only modules named by the deterministic report may receive repair frames.", action: repairDelta},
-  {title: "04 · Confirm convergence", body: "A focused rescan finds an empty delta and the loop goes quiet.", action: rescanRepaired},
+  {title: "03 · Prove the boundary", body: "Deliberately attempt a wasteful full sweep; the report’s three-module delta must reject it.", action: attemptFullSweep},
+  {title: "04 · Repair and converge", body: "Repair only the authorized delta, then rescan those modules until the loop goes quiet.", action: async () => { await repairDelta(); await rescanRepaired(); }},
   {title: "05 · Remove the coordinator", body: "ARES disappears; authority remains unclaimed until a valid lease begins.", action: disableCoordinator},
   {title: "06 · Follow the roster", body: "Advance logical time to beat 4, then PHOBOS claims by precommitment—not election.", action: async () => { await advanceBeat(4); await claimCoordinator("PHOBOS"); }},
   {title: "07 · Continue while partitioned", body: "Research appends a local observation to its own offline dimension.", action: async () => { await partitionResearch(); await appendOffline(); }},
@@ -1457,6 +1468,9 @@ async function guarded(action, {advanceGuide = false} = {}) {
 async function runGuidedStep() {
   if (guidedIndex >= GUIDED_STEPS.length) return;
   await guarded(GUIDED_STEPS[guidedIndex].action, {advanceGuide: true});
+  if (!$("#nextButton").disabled) {
+    requestAnimationFrame(() => $("#nextButton").focus({preventScroll: true}));
+  }
 }
 
 async function replayPositivePath() {
