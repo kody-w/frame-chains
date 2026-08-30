@@ -402,11 +402,17 @@ async function runFrameContract(page, slug) {
     await clickControl(page, "#resetButton", 300);
     await clickControl(page, "#injectButton", 300);
     await clickControl(page, "#scanButton", 700);
+    const acceptedRows = await page.locator("#ledgerBody tr").count();
+    const acceptedHead = await textOf(page, "#headMetric");
     await clickControl(page, "#sweepButton", 500);
     const scopeAssertion = (await page.locator(".assertion").allInnerTexts())
       .find((value) => value.includes("Repair scope equals report delta"));
     check(scopeAssertion && /\bfail\b/i.test(scopeAssertion), "Frame 03 overbroad repair was not rejected");
-    check(/report authorized 3/i.test(await page.locator("body").innerText()), "Frame 03 failure did not expose the derived authorization");
+    check(/Correctly hashed candidate/i.test(scopeAssertion), "Frame 03 did not verify the invalid candidate's hashes");
+    check(/authorized \[agriculture, oxygen, water\]/i.test(scopeAssertion), "Frame 03 did not derive the exact authorized delta");
+    check(/Writer scope_valid=true was ignored/i.test(scopeAssertion), "Frame 03 still trusts the writer's semantic boolean");
+    check(await page.locator("#ledgerBody tr").count() === acceptedRows, "Frame 03 rejected candidate changed the ledger");
+    check(await textOf(page, "#headMetric") === acceptedHead, "Frame 03 rejected candidate changed the accepted head");
     return;
   }
 
@@ -477,10 +483,12 @@ async function runFrameContract(page, slug) {
     await clickControl(page, "#guided", 500);
     await poll("Frame 06 guided run", async () =>
       /Tick 8 \/ 8/i.test(await textOf(page, "#tick-label"))
-      && /^PASS$/i.test(await textOf(page, "#verdict")),
+      && /PASS · REATTACHED/i.test(await textOf(page, "#station-status"))
+      && /PASS · REJECTED/i.test(await textOf(page, "#verdict")),
       30_000,
     );
-    check(await page.locator("#assertions .assertion.pass").count() >= 4, "Frame 06 positive assertions did not pass");
+    check(/35 verified frames/i.test(await textOf(page, "#head-count")), "Frame 06 did not replay 35 frames");
+    check(await page.locator("#assertions .assertion.pass").count() === 5, "Frame 06 positive assertions did not all pass");
     check(/5\s*\/\s*6/.test(await textOf(page, "#fidelity")), "Frame 06 did not derive 5/6 fidelity");
     check(/68 kPa/i.test(await page.locator("#alternatives").innerText()), "Frame 06 omitted the first airlock alternative");
     check(/72 kPa/i.test(await page.locator("#alternatives").innerText()), "Frame 06 omitted the second airlock alternative");
@@ -489,7 +497,35 @@ async function runFrameContract(page, slug) {
       button.closest("details").open = true;
     });
     await clickControl(page, "#mutate-overwrite", 350);
-    check(/FAIL|REJECT/i.test(await textOf(page, "#mutation-result")), "Frame 06 overwrite mutation was not rejected");
+    check(/PASS · REJECTED/i.test(await textOf(page, "#mutation-result")), "Frame 06 overwrite mutation was not rejected");
+    check(/1 of 2 verified claim frames/i.test(await textOf(page, "#mutation-result")), "Frame 06 overwrite rejection did not derive the lost alternative");
+    check(await page.locator("#assertions .assertion.pass").count() === 6, "Frame 06 overwrite assertion did not pass");
+
+    const agreeingAirlocks = await page.evaluate(() =>
+      window.stationProof.runScenario({ dockingPressure: "68 kPa" })
+    );
+    check(agreeingAirlocks.valid === true, "Frame 06 agreeing-airlock mutation broke the chain");
+    check(agreeingAirlocks.conflict === false, "Frame 06 hard-coded an airlock conflict");
+    check(
+      agreeingAirlocks.fidelity?.numerator === 6
+        && agreeingAirlocks.fidelity?.denominator === 6,
+      "Frame 06 hard-coded 5/6 fidelity",
+    );
+    check(
+      agreeingAirlocks.alternatives.every((claim) => claim.value === "68 kPa"),
+      "Frame 06 agreeing-airlock mutation did not come from frame claims",
+    );
+
+    const changedOwnership = await page.evaluate(() =>
+      window.stationProof.runScenario({ ownership: { power: "Aster" } })
+    );
+    check(changedOwnership.valid === true, "Frame 06 ownership mutation broke accepted history");
+    check(changedOwnership.guidedTest?.observed === "ACCEPTED", "Frame 06 ownership oracle ignored changed authority");
+    check(changedOwnership.guidedTest?.passed === false, "Frame 06 expected-rejection test could not turn red");
+    check(
+      await page.locator("#assertions .assertion.fail").count() === 1,
+      "Frame 06 broken ownership expectation did not produce one failed assertion",
+    );
     return;
   }
 
@@ -603,6 +639,11 @@ async function runFrameContract(page, slug) {
     const museumAssertions = await page.locator("#assertions .assertion").allInnerTexts();
     check(museumAssertions.some((value) => /3 affected frame/i.test(value)), "Frame 10 did not quarantine the affected path");
     check(museumAssertions.some((value) => /independent accepted branches retained/i.test(value)), "Frame 10 lost independent branches");
+    const ledgerRows = await page.locator("#ledgerBody tr").allInnerTexts();
+    check(ledgerRows.some((value) => /F02[\s\S]*DIGEST MISMATCH/i.test(value)), "Frame 10 did not label F02's digest mismatch");
+    check(ledgerRows.some((value) => /F03[\s\S]*BLOCKED BY ANCESTOR/i.test(value)), "Frame 10 did not block F03 by ancestry");
+    check(ledgerRows.some((value) => /M04[\s\S]*BLOCKED BY ANCESTOR/i.test(value)), "Frame 10 did not block M04 by ancestry");
+    check(ledgerRows.some((value) => /U01[\s\S]*VERIFIED/i.test(value)), "Frame 10 lost the independent U01 merge");
     return;
   }
 
