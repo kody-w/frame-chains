@@ -1,0 +1,119 @@
+{
+  "schema": "frame-chains.frame-loop/1",
+  "loop": 1,
+  "base_commit": "6a7c980837cf33ca8e40fd48feaafd5e63c786ee",
+  "integration_head_before_ledger": "426c3726627edd525b741a25c16b802d710d6d2e",
+  "merge_strategy": "git merge --no-ff",
+  "squash": false,
+  "frame_count": 10,
+  "frames": [
+    {
+      "frame": 1,
+      "slug": "01-many-worlds",
+      "branch": "frame/01-many-worlds",
+      "path": "showcase/01-many-worlds",
+      "commit": "cc9ef770b25fe3bb65fe639e7ccb7b1c22dae4c1",
+      "commits": [
+        "f48a17e00989040ac1d680c6e0cb148d743066cb",
+        "cc9ef770b25fe3bb65fe639e7ccb7b1c22dae4c1"
+      ]
+    },
+    {
+      "frame": 2,
+      "slug": "02-soul-passport",
+      "branch": "frame/02-soul-passport",
+      "path": "showcase/02-soul-passport",
+      "commit": "edf6a39f235729228ca8e51738e5d31fbefe3747",
+      "commits": [
+        "5cc74232da89db2dab150dcbc0817cfa2c71bd98",
+        "edf6a39f235729228ca8e51738e5d31fbefe3747"
+      ]
+    },
+    {
+      "frame": 3,
+      "slug": "03-mars-colony",
+      "branch": "frame/03-mars-colony",
+      "path": "showcase/03-mars-colony",
+      "commit": "b4a16bd4a30f4292a1267c034a1b33d71ac63b13",
+      "commits": [
+        "03b4bb2163cbb4f0184f574fdf40ceb8f173a726",
+        "b4a16bd4a30f4292a1267c034a1b33d71ac63b13"
+      ]
+    },
+    {
+      "frame": 4,
+      "slug": "04-five-realities",
+      "branch": "frame/04-five-realities",
+      "path": "showcase/04-five-realities",
+      "commit": "fe78e1c56be6e6c3631807090e49be5938be9154",
+      "commits": [
+        "44c5edc253bae12383998e0d482aacc9971f27eb",
+        "fe78e1c56be6e6c3631807090e49be5938be9154"
+      ]
+    },
+    {
+      "frame": 5,
+      "slug": "05-causal-detective",
+      "branch": "frame/05-causal-detective",
+      "path": "showcase/05-causal-detective",
+      "commit": "87eb041b0cf781dcbc5c2d0ab8ddea328e83487b",
+      "commits": [
+        "87eb041b0cf781dcbc5c2d0ab8ddea328e83487b"
+      ]
+    },
+    {
+      "frame": 6,
+      "slug": "06-space-station",
+      "branch": "frame/06-space-station",
+      "path": "showcase/06-space-station",
+      "commit": "75746bb7d2237f8721f5db81c2820759e418f2b5",
+      "commits": [
+        "75746bb7d2237f8721f5db81c2820759e418f2b5"
+      ]
+    },
+    {
+      "frame": 7,
+      "slug": "07-constitution",
+      "branch": "frame/07-constitution",
+      "path": "showcase/07-constitution",
+      "commit": "6bfa1d38c349f8d9daafc02a22489d7b90546ba5",
+      "commits": [
+        "bfff76500e4896f1c788efc3f794f5676145ba27",
+        "6bfa1d38c349f8d9daafc02a22489d7b90546ba5"
+      ]
+    },
+    {
+      "frame": 8,
+      "slug": "08-teleporting-roguelike",
+      "branch": "frame/08-teleporting-roguelike",
+      "path": "showcase/08-teleporting-roguelike",
+      "commit": "aa05697910cec1a069a565bcc2cd1a991848ba12",
+      "commits": [
+        "431d46d5719c6bb49f2b5570efb91833e649d402",
+        "aa05697910cec1a069a565bcc2cd1a991848ba12"
+      ]
+    },
+    {
+      "frame": 9,
+      "slug": "09-attack-timeline",
+      "branch": "frame/09-attack-timeline",
+      "path": "showcase/09-attack-timeline",
+      "commit": "e646debc45aae6de8b7e045c41d4a54411c11eba",
+      "commits": [
+        "f4cfcccfcf1da1fcabc86042788997aad60bbdbd",
+        "e646debc45aae6de8b7e045c41d4a54411c11eba"
+      ]
+    },
+    {
+      "frame": 10,
+      "slug": "10-futures-museum",
+      "branch": "frame/10-futures-museum",
+      "path": "showcase/10-futures-museum",
+      "commit": "8778e61c9d87cd98280502462de38f52dde9c8bb",
+      "commits": [
+        "62ba08fb4d977259d9355fcc05e71ba189317525",
+        "8778e61c9d87cd98280502462de38f52dde9c8bb"
+      ]
+    }
+  ]
+}
