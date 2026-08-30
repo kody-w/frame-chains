@@ -2,7 +2,7 @@
   "schema": "frame-chains.frame-loop/1",
   "loop": 1,
   "base_commit": "6a7c980837cf33ca8e40fd48feaafd5e63c786ee",
-  "integration_head_before_ledger": "5def9e87752e7787b38c3144976b827582f595ae",
+  "integration_head_before_ledger": "fc5fc5540d17899d14cf3ae5ad1c9df50360fdc0",
   "merge_strategy": "git merge --no-ff",
   "squash": false,
   "frame_count": 10,
@@ -38,7 +38,7 @@
       "slug": "03-mars-colony",
       "branch": "frame/03-mars-colony",
       "path": "showcase/03-mars-colony",
-      "commit": "f5ea55d320509ddbddfb9a4bf80b2f66dd30c702",
+      "commit": "b068034b5f6598dc55cdfd78e960aea1fc52e31b",
       "commits": [
         "03b4bb2163cbb4f0184f574fdf40ceb8f173a726",
         "b4a16bd4a30f4292a1267c034a1b33d71ac63b13",
@@ -46,7 +46,8 @@
         "280088721694e5405dde8fa0ff9a9a132f885e99",
         "3b0bf4559ece31a98229273dd6e2a48ab5093959",
         "a7cad293e128eb49f0006f184870c3ca45b8aee3",
-        "f5ea55d320509ddbddfb9a4bf80b2f66dd30c702"
+        "f5ea55d320509ddbddfb9a4bf80b2f66dd30c702",
+        "b068034b5f6598dc55cdfd78e960aea1fc52e31b"
       ]
     },
     {
