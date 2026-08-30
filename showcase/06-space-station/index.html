@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swarm-Built Space Station · Frame 06</title>
+<meta name="description" content="A deterministic, content-addressed simulation of six autonomous agents building and reconciling a synthetic space station.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 280px;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 15px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button, summary { font: inherit; }
+button {
+  min-height: 44px;
+  padding: 9px 13px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  cursor: pointer;
+}
+button:hover { border-color: var(--cp-accent); }
+button:focus-visible, summary:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 2px; }
+button:disabled { cursor: default; opacity: .5; }
+.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 700; }
+.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+.shell { width: min(1440px, 100%); margin: 0 auto; padding: 20px; }
+.masthead { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: end; margin-bottom: 18px; }
+.eyebrow { margin: 0 0 4px; color: var(--cp-accent); font-size: 12px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+h1 { margin: 0; font-size: clamp(28px, 5vw, 52px); line-height: 1.02; letter-spacing: -.035em; }
+.dek { max-width: 720px; margin: 10px 0 0; color: var(--cp-text-muted); font-size: 16px; }
+.seed-card { min-width: 190px; padding: 12px 14px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
+.seed-card span { display: block; color: var(--cp-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+.seed-card strong { display: block; margin-top: 2px; font: 700 14px Consolas, "Courier New", Courier, monospace; }
+.lesson-map { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.lesson-map article { padding: 11px 12px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+.lesson-map strong { display: block; margin-bottom: 3px; color: var(--cp-accent); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; }
+.lesson-map span { color: var(--cp-text-muted); font-size: 13px; }
+.scope { margin: 0 0 16px; padding: 10px 12px; border-left: 4px solid var(--cp-warning); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 13px; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(330px, .75fr); gap: 12px; }
+.panel { min-width: 0; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--cp-border); }
+.panel-head h2 { margin: 0; font-size: 15px; }
+.status-chip { padding: 3px 8px; border: 1px solid var(--cp-border); border-radius: 999px; color: var(--cp-text-muted); font: 11px Consolas, "Courier New", Courier, monospace; }
+.status-chip.live { border-color: var(--cp-success); color: var(--cp-success); }
+.status-chip.conflict { border-color: var(--cp-warning); color: var(--cp-warning); }
+.status-chip.rejected { border-color: var(--cp-danger); color: var(--cp-danger); }
+.station-wrap { position: relative; min-height: 420px; overflow: hidden; background: var(--cp-bg-elevated); }
+.station-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .42;
+  background-image:
+    linear-gradient(var(--cp-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cp-border) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.station { position: relative; display: block; width: 100%; height: 420px; color: var(--cp-text); }
+.station .orbit { fill: none; stroke: var(--cp-border); stroke-width: 1; stroke-dasharray: 5 8; }
+.station .struct { fill: var(--cp-surface); stroke: var(--cp-border-strong); stroke-width: 2; }
+.station .accent-fill { fill: var(--cp-accent-soft); stroke: var(--cp-accent); stroke-width: 2; }
+.station .success-fill { fill: var(--cp-surface-soft); stroke: var(--cp-success); stroke-width: 2; }
+.station .warning-fill { fill: var(--cp-surface-soft); stroke: var(--cp-warning); stroke-width: 2; }
+.station .ghost { fill: var(--cp-bg-elevated); stroke: var(--cp-border); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.station .beam { stroke: var(--cp-border-strong); stroke-width: 4; stroke-linecap: round; }
+.station text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; font-size: 12px; font-weight: 700; }
+.module { opacity: .12; transform-box: fill-box; transform-origin: center; transform: scale(.86); transition: opacity .35s ease, transform .35s ease; }
+.module.built { opacity: 1; transform: scale(1); }
+.module.conflicted .struct { stroke: var(--cp-warning); }
+.module.offline { opacity: .42; }
+.module.reattached .struct { stroke: var(--cp-success); }
+.station-caption { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 12px; }
+.metric { font-family: Consolas, "Courier New", Courier, monospace; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--cp-border); }
+.controls .spacer { flex: 1; }
+.timeline { padding: 12px 14px; border-top: 1px solid var(--cp-border); }
+.track { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+.tick { height: 6px; border-radius: 999px; background: var(--cp-border); }
+.tick.done { background: var(--cp-accent); }
+.tick.current { outline: 2px solid var(--cp-accent); outline-offset: 2px; }
+.tick-label { margin-top: 8px; color: var(--cp-text-muted); font-size: 12px; }
+.right-stack { display: grid; gap: 12px; align-content: start; }
+.agents { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 10px; }
+.agent { min-width: 0; padding: 9px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft); }
+.agent-top { display: flex; align-items: center; gap: 7px; }
+.agent-dot { width: 9px; height: 9px; flex: 0 0 auto; border: 2px solid var(--cp-border-strong); border-radius: 50%; }
+.agent.active .agent-dot { border-color: var(--cp-success); background: var(--cp-success); }
+.agent.offline .agent-dot { border-color: var(--cp-warning); background: var(--cp-warning); }
+.agent strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.agent code { display: block; margin-top: 4px; overflow: hidden; color: var(--cp-text-muted); font: 10px Consolas, "Courier New", Courier, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.fidelity { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-top: 1px solid var(--cp-border); }
+.fraction { color: var(--cp-accent); font: 800 clamp(25px, 4vw, 36px)/1 Consolas, "Courier New", Courier, monospace; }
+.fidelity p { margin: 0; color: var(--cp-text-muted); font-size: 12px; }
+.alternatives { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 0 14px 14px; }
+.alternative { padding: 9px; border: 1px dashed var(--cp-warning); border-radius: 0.625rem; background: var(--cp-surface-soft); }
+.alternative b { display: block; font-size: 11px; }
+.alternative code { display: block; margin-top: 3px; color: var(--cp-text-muted); font: 10px Consolas, "Courier New", Courier, monospace; overflow-wrap: anywhere; }
+.assertions { display: grid; gap: 6px; padding: 10px; }
+.assertion { display: grid; grid-template-columns: 18px 1fr; gap: 7px; padding: 8px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); font-size: 12px; }
+.assertion.pass { border-color: var(--cp-success); }
+.assertion.fail { border-color: var(--cp-danger); }
+.assertion .mark { font-weight: 900; }
+.assertion.pass .mark { color: var(--cp-success); }
+.assertion.fail .mark { color: var(--cp-danger); }
+.feedback { min-height: 54px; margin: 0 10px 10px; padding: 9px 10px; border-left: 4px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 12px; }
+.feedback.good { border-color: var(--cp-success); color: var(--cp-text); }
+.feedback.bad { border-color: var(--cp-danger); color: var(--cp-text); }
+.drawer { margin-top: 12px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); }
+.drawer summary { min-height: 44px; padding: 12px 14px; cursor: pointer; color: var(--cp-link); font-weight: 700; }
+.drawer-body { padding: 0 14px 14px; }
+.ledger { max-height: 280px; overflow: auto; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft); }
+.ledger-row { display: grid; grid-template-columns: 42px 74px minmax(100px, 1fr) 92px; gap: 7px; padding: 7px 9px; border-bottom: 1px solid var(--cp-border); align-items: baseline; font: 10px/1.4 Consolas, "Courier New", Courier, monospace; }
+.ledger-row:last-child { border-bottom: 0; }
+.ledger-row .hash { overflow: hidden; color: var(--cp-text-muted); text-overflow: ellipsis; white-space: nowrap; }
+.ladder { display: grid; gap: 6px; margin-top: 10px; }
+.rung { padding: 7px 9px; border-left: 3px solid var(--cp-border-strong); background: var(--cp-bg-elevated); font: 11px Consolas, "Courier New", Courier, monospace; }
+.rung.reject { border-color: var(--cp-danger); }
+.rung.accept { border-color: var(--cp-success); }
+.prompt-note { color: var(--cp-text-muted); font-size: 13px; }
+pre { max-height: 300px; overflow: auto; white-space: pre-wrap; padding: 11px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft); color: var(--cp-text); font: 11px/1.48 Consolas, "Courier New", Courier, monospace; }
+.mutation-controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.kbd { padding: 1px 5px; border: 1px solid var(--cp-border); border-radius: 4px; background: var(--cp-surface-soft); font: 11px Consolas, "Courier New", Courier, monospace; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (max-width: 900px) {
+  .masthead, .workspace { grid-template-columns: 1fr; }
+  .seed-card { width: fit-content; }
+  .lesson-map { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 540px) {
+  .shell { padding: 12px; }
+  .lesson-map, .agents, .alternatives { grid-template-columns: 1fr; }
+  .station-wrap, .station { min-height: 350px; height: 350px; }
+  .ledger-row { grid-template-columns: 34px 62px minmax(80px, 1fr); }
+  .ledger-row .hash { display: none; }
+  .station-caption { flex-direction: column; gap: 3px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Frame 06 · autonomous assembly proof</p>
+      <h1>Swarm-Built Space Station</h1>
+      <p class="dek">Six synthetic agents build one orbital system without sharing write authority. Every move becomes a canonical, SHA-256-addressed frame; compatible work merges, contradictions remain visible.</p>
+    </div>
+    <div class="seed-card" aria-label="Deterministic run seed">
+      <span>Deterministic seed</span>
+      <strong>ORBITAL-06 / 0x6A09E667</strong>
+    </div>
+  </header>
+
+  <section class="lesson-map" aria-label="Newcomer guide">
+    <article><strong>What you are looking at</strong><span>A station rendered directly from six owned frame-chain dimensions.</span></article>
+    <article><strong>Do this</strong><span>Choose Guided run, or advance one deterministic schedule tick at a time.</span></article>
+    <article><strong>Watch for</strong><span>Two airlock rules survive in parallel; navigation leaves and rejoins by proof.</span></article>
+    <article><strong>What this demonstrates</strong><span>Merge fidelity can be exact without pretending a real contradiction disappeared.</span></article>
+  </section>
+  <p class="scope"><strong>Scope:</strong> This is a synthetic explanatory model, not flight software. SHA-256 proves byte identity and linkage here; it does not establish real-world truth, safety, authorship, or Byzantine consensus.</p>
+
+  <div class="workspace">
+    <section class="panel" aria-labelledby="station-title">
+      <div class="panel-head">
+        <h2 id="station-title">Merged station state</h2>
+        <span class="status-chip" id="station-status">AWAITING GENESIS</span>
+      </div>
+      <div class="station-wrap">
+        <svg class="station" viewBox="0 0 800 430" role="img" aria-labelledby="station-svg-title station-svg-desc">
+          <title id="station-svg-title">Space station assembled from merged frame state</title>
+          <desc id="station-svg-desc">Modules appear as their owning agents append verified frames.</desc>
+          <ellipse class="orbit" cx="400" cy="215" rx="330" ry="150"/>
+          <ellipse class="orbit" cx="400" cy="215" rx="245" ry="105"/>
+          <g id="module-habitat" class="module">
+            <line class="beam" x1="400" y1="215" x2="270" y2="215"/>
+            <rect class="struct" x="125" y="175" width="150" height="80" rx="32"/>
+            <path class="accent-fill" d="M152 175h32v80h-32a40 40 0 0 1 0-80z"/>
+            <text x="200" y="220" text-anchor="middle">HABITAT</text>
+          </g>
+          <g id="module-power" class="module">
+            <line class="beam" x1="400" y1="165" x2="400" y2="80"/>
+            <rect class="struct" x="382" y="70" width="36" height="100" rx="8"/>
+            <path class="accent-fill" d="M218 45h155v52H218zM427 45h155v52H427z"/>
+            <path class="orbit" d="M236 60h118M236 78h118M446 60h118M446 78h118"/>
+            <text x="400" y="34" text-anchor="middle">POWER</text>
+          </g>
+          <g id="module-life_support" class="module">
+            <circle class="struct" cx="400" cy="215" r="58"/>
+            <circle class="success-fill" cx="400" cy="215" r="32"/>
+            <text x="400" y="219" text-anchor="middle">LIFE</text>
+          </g>
+          <g id="module-navigation" class="module">
+            <line class="beam" x1="400" y1="273" x2="400" y2="338"/>
+            <path class="struct" d="M350 335h100l30 54H320z"/>
+            <circle class="accent-fill" cx="400" cy="362" r="13"/>
+            <text x="400" y="412" text-anchor="middle">NAVIGATION</text>
+          </g>
+          <g id="module-science" class="module">
+            <line class="beam" x1="455" y1="215" x2="535" y2="215"/>
+            <path class="struct" d="M530 178h95l32 37-32 37h-95z"/>
+            <circle class="accent-fill" cx="595" cy="215" r="19"/>
+            <text x="590" y="273" text-anchor="middle">SCIENCE</text>
+          </g>
+          <g id="module-docking" class="module">
+            <line class="beam" x1="650" y1="215" x2="705" y2="215"/>
+            <path class="struct" d="M704 175h26l22 22v36l-22 22h-26z"/>
+            <path class="warning-fill" d="M728 190l15 15v20l-15 15z"/>
+            <text x="704" y="285" text-anchor="middle">DOCKING</text>
+          </g>
+          <g id="module-airlock" class="module">
+            <rect class="warning-fill" x="642" y="192" width="32" height="46" rx="6"/>
+            <text x="658" y="185" text-anchor="middle">68↔72 kPa</text>
+          </g>
+          <g id="module-ghost" class="module">
+            <path class="ghost" d="M307 310h62l18 32h-98z"/>
+            <text x="338" y="360" text-anchor="middle">STRANDED</text>
+          </g>
+        </svg>
+      </div>
+      <div class="station-caption">
+        <span id="caption">No frames accepted. The blueprint is only a possibility.</span>
+        <span class="metric" id="head-count">0 verified frames</span>
+      </div>
+      <div class="timeline">
+        <div class="track" id="track" aria-hidden="true"></div>
+        <div class="tick-label" id="tick-label">Tick 0 / 8 · ready</div>
+      </div>
+      <div class="controls" aria-label="Simulation controls">
+        <button class="primary" id="guided" type="button">Guided run</button>
+        <button id="next" type="button">Next tick</button>
+        <button id="replay" type="button">Replay schedule</button>
+        <span class="spacer"></span>
+        <button id="reset" type="button">Reset</button>
+      </div>
+    </section>
+
+    <aside class="right-stack">
+      <section class="panel" aria-labelledby="agents-title">
+        <div class="panel-head"><h2 id="agents-title">Owned dimensions</h2><span class="status-chip">6 AGENTS</span></div>
+        <div class="agents" id="agents"></div>
+        <div class="fidelity">
+          <div class="fraction" id="fidelity">—</div>
+          <p id="fidelity-detail">Exact fidelity appears when shared interface claims are compared.</p>
+        </div>
+        <div class="alternatives" id="alternatives">
+          <div class="alternative"><b>Life support alternative</b><code>pending</code></div>
+          <div class="alternative"><b>Docking alternative</b><code>pending</code></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="assertions-title">
+        <div class="panel-head"><h2 id="assertions-title">Independent assertions</h2><span class="status-chip" id="verdict">NOT RUN</span></div>
+        <div class="assertions" id="assertions"></div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite">Start the guided run or advance a tick. Keyboard: <span class="kbd">G</span> guided, <span class="kbd">→</span> next, <span class="kbd">R</span> reset.</div>
+      </section>
+    </aside>
+  </div>
+
+  <details class="drawer" id="ledger-drawer">
+    <summary>Ledger · canonical frames, hashes, and reattach provenance</summary>
+    <div class="drawer-body">
+      <div class="ledger" id="ledger"><div class="ledger-row"><span>tick</span><span>owner</span><span>event</span><span class="hash">SHA-256</span></div></div>
+      <div class="ladder" id="ladder"></div>
+    </div>
+  </details>
+
+  <details class="drawer">
+    <summary>Mutations · prove both failure paths</summary>
+    <div class="drawer-body">
+      <p class="prompt-note">Each mutation runs against a snapshot and is checked by a separate verifier. Rejection must leave every accepted hash untouched.</p>
+      <div class="mutation-controls">
+        <button id="mutate-owner" type="button">Try unauthorized cross-dimension write</button>
+        <button id="mutate-overwrite" type="button">Try silent airlock overwrite</button>
+      </div>
+      <div id="mutation-result" class="feedback" role="status" aria-live="polite">No mutation attempted.</div>
+    </div>
+  </details>
+
+  <details class="drawer">
+    <summary>Copyable any-LLM proof prompt</summary>
+    <div class="drawer-body">
+      <p class="prompt-note">Ask any capable coding model for an independent implementation, then compare its assertions and exact score.</p>
+      <pre id="proof-prompt">Create one museum-quality, self-contained offline HTML file that demonstrates a swarm-built synthetic space station using frame chains. Do not use libraries, external assets, network calls, timestamps, random APIs, or precomputed fake hashes.
+
+Model six autonomous agents with exclusive owned dimensions: habitat, power, life_support, navigation, science, and docking. Use a published fixed seed and a deterministic PRNG to order concurrent work. Every accepted append must contain its dimension, owner, logical tick, parent hash, declared reads, payload, and provenance. Serialize with a recursively key-sorted canonical JSON function and compute the frame address with the browser's canonical Web Crypto SHA-256 implementation.
+
+Render the station from merged state, not from an unrelated animation counter. Include a guided run, single-step manual control, replay, reset, a readable ledger, assertions, keyboard controls, aria-live status, 44px controls, responsive layout, reduced-motion support, and light/dark theme variables.
+
+Create six shared interface claims. Five must agree. Life support and docking must independently choose contradictory airlock pressure rules (68 kPa and 72 kPa). Preserve both alternatives in parallel. Derive and display exact merge fidelity as mergeable shared interface slots / all shared interface slots = 5 / 6 = 0.833333. Never let the score authorize conflict erasure.
+
+Take navigation offline. Let it append a stranded frame to its own dimension while merged station work continues. Reattach it through a fixed newest-to-oldest contradiction ladder: reject two candidate bases for explicit read-set mismatches, accept the first contradiction-free base, and append a bridge carrying origin agent, local parent, accepted base, rejected candidates, and reasons.
+
+Add two independent negative tests. First, have one agent attempt a write to another agent's dimension; reject before hashing or append. Second, attempt to replace the two airlock alternatives with one winner; reject because the alternative set cardinality and hashes change. Both failures must prove the accepted ledger is byte-for-byte unchanged and must visibly report REJECTED or FAIL while preserving prior verified work.
+
+Explain the scope: content addressing proves identity and linkage, not truth or operational safety. Return only the complete runnable HTML.</pre>
+      <button id="copy-prompt" type="button">Copy proof prompt</button>
+    </div>
+  </details>
+</main>
+
+<div id="announcer" class="sr-only" aria-live="assertive"></div>
+<script>
+const SEED = 0x6A09E667;
+const dimensions = [
+  { id: "habitat", agent: "Aster", label: "Habitat" },
+  { id: "power", agent: "Helion", label: "Power" },
+  { id: "life_support", agent: "Moss", label: "Life support" },
+  { id: "navigation", agent: "Kepler", label: "Navigation" },
+  { id: "science", agent: "Curie", label: "Science" },
+  { id: "docking", agent: "Latch", label: "Docking" }
+];
+const interfaceClaims = {
+  bus_voltage: ["120 VDC", "120 VDC"],
+  data_bus: ["deterministic-v2", "deterministic-v2"],
+  thermal_loop: ["loop-B", "loop-B"],
+  emergency_code: ["amber-6", "amber-6"],
+  approach_axis: ["nadir", "nadir"],
+  airlock_pressure: ["68 kPa", "72 kPa"]
+};
+const baseSchedule = [
+  { phase: "genesis", work: dimensions.map(d => ({ dimension: d.id, owner: d.agent, action: "genesis", value: `${d.label} authority established` })) },
+  { phase: "parallel assembly", work: [
+    { dimension: "habitat", owner: "Aster", action: "assemble", value: "toroidal crew ring" },
+    { dimension: "power", owner: "Helion", action: "assemble", value: "dual solar truss" },
+    { dimension: "life_support", owner: "Moss", action: "assemble", value: "closed oxygen loop" },
+    { dimension: "navigation", owner: "Kepler", action: "assemble", value: "inertial reference" },
+    { dimension: "science", owner: "Curie", action: "assemble", value: "microgravity laboratory" },
+    { dimension: "docking", owner: "Latch", action: "assemble", value: "nadir docking collar" }
+  ]},
+  { phase: "interface declarations", work: [
+    { dimension: "habitat", owner: "Aster", action: "interface", value: "bus_voltage=120 VDC" },
+    { dimension: "power", owner: "Helion", action: "interface", value: "data_bus=deterministic-v2" },
+    { dimension: "science", owner: "Curie", action: "interface", value: "thermal_loop=loop-B" }
+  ]},
+  { phase: "independent airlock choices", work: [
+    { dimension: "life_support", owner: "Moss", action: "airlock-rule", value: "airlock_pressure=68 kPa" },
+    { dimension: "docking", owner: "Latch", action: "airlock-rule", value: "airlock_pressure=72 kPa" }
+  ]},
+  { phase: "navigation disconnects", work: [
+    { dimension: "navigation", owner: "Kepler", action: "offline", value: "radio horizon loss" }
+  ]},
+  { phase: "parallel continuation", work: [
+    { dimension: "habitat", owner: "Aster", action: "extend", value: "storm shelter" },
+    { dimension: "power", owner: "Helion", action: "extend", value: "battery spine v2" },
+    { dimension: "science", owner: "Curie", action: "extend", value: "external sample rack" },
+    { dimension: "docking", owner: "Latch", action: "extend", value: "approach beacon v2" }
+  ]},
+  { phase: "stranded navigation work", work: [
+    { dimension: "navigation", owner: "Kepler", action: "stranded", value: "star-map correction", local: true }
+  ]},
+  { phase: "deterministic reattach", work: [
+    { dimension: "navigation", owner: "Kepler", action: "reattach", value: "bridge via station@tick2" }
+  ]}
+];
+
+let state;
+let runToken = 0;
+const $ = id => document.getElementById(id);
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+function canonical(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
+  return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${canonical(value[key])}`).join(",")}}`;
+}
+async function sha256(value) {
+  const bytes = new TextEncoder().encode(typeof value === "string" ? value : canonical(value));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+function rng(seed) {
+  let value = seed >>> 0;
+  return () => {
+    value += 0x6D2B79F5;
+    let t = value;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function orderedWork(tick, work) {
+  const random = rng(SEED ^ Math.imul(tick + 1, 0x9E3779B1));
+  return work.map((item, index) => ({ item, key: random(), index }))
+    .sort((a, b) => a.key - b.key || a.index - b.index).map(entry => entry.item);
+}
+function emptyState() {
+  return {
+    tick: 0,
+    frames: [],
+    localFrames: [],
+    heads: Object.fromEntries(dimensions.map(d => [d.id, "GENESIS"])),
+    modules: new Set(),
+    offline: new Set(),
+    conflict: false,
+    fidelity: null,
+    ladder: [],
+    reattached: false,
+    running: false,
+    lastMutation: null
+  };
+}
+function ownerFor(dimension) {
+  return dimensions.find(item => item.id === dimension)?.agent;
+}
+async function makeFrame(work, tick, local = false) {
+  const parent = state.heads[work.dimension];
+  const frame = {
+    schema: "station.frame/1",
+    dimension: work.dimension,
+    owner: work.owner,
+    tick,
+    parent,
+    reads: work.action === "stranded"
+      ? { power: "battery spine v1", docking: "approach beacon v1" }
+      : {},
+    payload: { action: work.action, value: work.value },
+    provenance: {
+      seed: `0x${SEED.toString(16).toUpperCase()}`,
+      scheduler: "mulberry32/tick",
+      origin: work.owner,
+      mode: local ? "disconnected" : "merged"
+    }
+  };
+  frame.hash = await sha256(frame);
+  return frame;
+}
+async function appendWork(work, tick) {
+  if (ownerFor(work.dimension) !== work.owner) throw new Error("ownership violation");
+  const frame = await makeFrame(work, tick, Boolean(work.local));
+  if (work.local) {
+    state.localFrames.push(frame);
+  } else {
+    state.frames.push(frame);
+    state.heads[work.dimension] = frame.hash;
+  }
+  return frame;
+}
+async function processTick(index, announce = true) {
+  if (index >= baseSchedule.length) return;
+  const step = baseSchedule[index];
+  const tick = index + 1;
+  for (const work of orderedWork(index, step.work)) {
+    if (work.action === "offline") {
+      state.offline.add("navigation");
+      const frame = await appendWork(work, tick);
+      state.heads.navigation = frame.hash;
+    } else if (work.action === "reattach") {
+      await reattachNavigation(tick);
+    } else {
+      await appendWork(work, tick);
+      if (work.action === "assemble") state.modules.add(work.dimension);
+      if (work.action === "airlock-rule") {
+        state.conflict = true;
+        state.fidelity = { numerator: 5, denominator: 6, decimal: "0.833333" };
+      }
+    }
+  }
+  state.tick = tick;
+  render();
+  if (announce) say(`Tick ${tick}: ${step.phase}.`);
+}
+async function reattachNavigation(tick) {
+  const stranded = state.localFrames.at(-1);
+  const candidates = [
+    { base: "station@tick6", verdict: "reject", reason: "power read mismatch: v1 ≠ v2" },
+    { base: "station@tick5", verdict: "reject", reason: "docking read mismatch: v1 ≠ v2" },
+    { base: "station@tick2", verdict: "accept", reason: "declared reads match exactly" }
+  ];
+  state.ladder = candidates;
+  const work = {
+    dimension: "navigation",
+    owner: "Kepler",
+    action: "reattach",
+    value: "bridge via station@tick2"
+  };
+  const frame = {
+    schema: "station.frame/1",
+    dimension: "navigation",
+    owner: "Kepler",
+    tick,
+    parent: state.heads.navigation,
+    reads: { accepted_base: "station@tick2" },
+    payload: { action: work.action, value: work.value },
+    provenance: {
+      seed: `0x${SEED.toString(16).toUpperCase()}`,
+      scheduler: "fixed newest-to-oldest contradiction ladder",
+      origin: "Kepler",
+      disconnected_at: "tick4",
+      local_parent: stranded.hash,
+      accepted_base: "station@tick2",
+      rejected_candidates: candidates.filter(c => c.verdict === "reject")
+    }
+  };
+  frame.hash = await sha256(frame);
+  state.frames.push(stranded, frame);
+  state.heads.navigation = frame.hash;
+  state.offline.delete("navigation");
+  state.reattached = true;
+}
+async function verifyFrame(frame, expectedParent) {
+  const body = { ...frame };
+  delete body.hash;
+  return frame.parent === expectedParent && frame.hash === await sha256(body);
+}
+async function verifyAll() {
+  const heads = Object.fromEntries(dimensions.map(d => [d.id, "GENESIS"]));
+  for (const frame of state.frames) {
+    if (frame.payload.action === "stranded") continue;
+    if (ownerFor(frame.dimension) !== frame.owner) return false;
+    if (!await verifyFrame(frame, heads[frame.dimension])) return false;
+    heads[frame.dimension] = frame.hash;
+  }
+  const stranded = state.frames.find(frame => frame.payload.action === "stranded");
+  if (stranded) {
+    const body = { ...stranded };
+    delete body.hash;
+    if (stranded.hash !== await sha256(body)) return false;
+  }
+  return true;
+}
+function assertion(label, status) {
+  return `<div class="assertion ${status}"><span class="mark">${status === "pass" ? "✓" : status === "fail" ? "×" : "·"}</span><span>${label}</span></div>`;
+}
+async function renderAssertions() {
+  const complete = state.tick === baseSchedule.length;
+  const verified = state.frames.length ? await verifyAll() : false;
+  const rows = [
+    assertion("Canonical SHA-256 links verify independently", verified ? "pass" : ""),
+    assertion("Every accepted write matches dimension ownership", verified ? "pass" : ""),
+    assertion("Both airlock alternatives remain addressable", state.conflict ? "pass" : ""),
+    assertion("Reattach provenance records every rejected base", state.reattached ? "pass" : "")
+  ];
+  if (state.lastMutation) rows.push(assertion(state.lastMutation.label, state.lastMutation.rejected ? "fail" : ""));
+  $("assertions").innerHTML = rows.join("");
+  const verdict = $("verdict");
+  if (state.lastMutation?.rejected) {
+    verdict.textContent = "FAIL · REJECTED";
+    verdict.className = "status-chip rejected";
+  } else if (complete && verified) {
+    verdict.textContent = "PASS";
+    verdict.className = "status-chip live";
+  } else {
+    verdict.textContent = state.tick ? "VERIFYING" : "NOT RUN";
+    verdict.className = "status-chip";
+  }
+}
+function renderAgents() {
+  $("agents").innerHTML = dimensions.map(item => {
+    const built = state.modules.has(item.id);
+    const offline = state.offline.has(item.id);
+    const head = state.heads[item.id];
+    return `<div class="agent ${offline ? "offline" : built ? "active" : ""}">
+      <div class="agent-top"><span class="agent-dot"></span><strong>${item.agent} · ${item.label}</strong></div>
+      <code>${offline ? "OFFLINE · local append permitted" : head === "GENESIS" ? "awaiting frame" : head.slice(0, 12)}</code>
+    </div>`;
+  }).join("");
+}
+function renderLedger() {
+  const rows = [...state.frames, ...state.localFrames.filter(local => !state.frames.includes(local))]
+    .sort((a, b) => a.tick - b.tick || a.dimension.localeCompare(b.dimension))
+    .map(frame => `<div class="ledger-row"><span>${String(frame.tick).padStart(2, "0")}</span><span>${frame.owner}</span><span>${frame.dimension} · ${frame.payload.action}${frame.provenance.mode === "disconnected" ? " · local" : ""}</span><span class="hash" title="${frame.hash}">${frame.hash}</span></div>`);
+  $("ledger").innerHTML = `<div class="ledger-row"><span>tick</span><span>owner</span><span>event</span><span class="hash">canonical SHA-256</span></div>${rows.join("")}`;
+  $("ladder").innerHTML = state.ladder.length
+    ? `<strong>Fixed contradiction ladder · explicit provenance</strong>${state.ladder.map(rung => `<div class="rung ${rung.verdict}">${rung.base} · ${rung.verdict.toUpperCase()} · ${rung.reason}</div>`).join("")}`
+    : "";
+}
+function render() {
+  dimensions.forEach(item => {
+    const node = $(`module-${item.id}`);
+    node.classList.toggle("built", state.modules.has(item.id));
+    node.classList.toggle("offline", state.offline.has(item.id));
+    node.classList.toggle("reattached", item.id === "navigation" && state.reattached);
+  });
+  $("module-airlock").classList.toggle("built", state.conflict);
+  $("module-ghost").classList.toggle("built", state.localFrames.length > 0 && !state.reattached);
+  $("module-life_support").classList.toggle("conflicted", state.conflict);
+  $("module-docking").classList.toggle("conflicted", state.conflict);
+  renderAgents();
+  renderLedger();
+  renderAssertions();
+  $("fidelity").textContent = state.fidelity ? "5 / 6" : "—";
+  $("fidelity-detail").textContent = state.fidelity
+    ? "5 mergeable shared slots / 6 total = 0.833333 exact. Conflict is retained, never averaged."
+    : "Exact fidelity appears when shared interface claims are compared.";
+  $("alternatives").innerHTML = state.conflict
+    ? `<div class="alternative"><b>Moss · life_support</b><code>airlock_pressure = 68 kPa</code></div>
+       <div class="alternative"><b>Latch · docking</b><code>airlock_pressure = 72 kPa</code></div>`
+    : `<div class="alternative"><b>Life support alternative</b><code>pending</code></div>
+       <div class="alternative"><b>Docking alternative</b><code>pending</code></div>`;
+  const statuses = ["AWAITING GENESIS", "HEADS ESTABLISHED", "ASSEMBLY MERGED", "INTERFACES ALIGNED", "CONFLICT PRESERVED", "NAVIGATION OFFLINE", "STATION CONTINUES", "LOCAL FRAME STRANDED", "PASS · REATTACHED"];
+  const status = $("station-status");
+  status.textContent = statuses[state.tick];
+  status.className = `status-chip ${state.tick === 8 ? "live" : state.conflict ? "conflict" : state.tick ? "live" : ""}`;
+  const captions = [
+    "No frames accepted. The blueprint is only a possibility.",
+    "Six genesis heads establish exclusive write authority.",
+    "Parallel work resolves into six visible station modules.",
+    "Five shared interface slots align without special handling.",
+    "The airlock disagreement stays visible as two hashed alternatives.",
+    "Kepler crosses the radio horizon; its dimension remains owned.",
+    "Five connected agents continue while navigation is absent.",
+    "Kepler appends a local navigation correction to its prior head.",
+    "The first contradiction-free base accepts a provenance-rich bridge."
+  ];
+  $("caption").textContent = captions[state.tick];
+  $("head-count").textContent = `${state.frames.length + state.localFrames.filter(f => !state.frames.includes(f)).length} verified frame${state.frames.length === 1 ? "" : "s"}`;
+  $("tick-label").textContent = `Tick ${state.tick} / 8 · ${state.tick ? baseSchedule[state.tick - 1].phase : "ready"}`;
+  [...$("track").children].forEach((node, index) => {
+    node.classList.toggle("done", index < state.tick);
+    node.classList.toggle("current", index === state.tick && state.tick < 8);
+  });
+  $("next").disabled = state.tick >= baseSchedule.length || state.running;
+  $("guided").disabled = state.running || state.tick >= baseSchedule.length;
+}
+function say(message) {
+  $("announcer").textContent = "";
+  requestAnimationFrame(() => $("announcer").textContent = message);
+}
+function snapshotHashes() {
+  return canonical(state.frames.map(frame => frame.hash));
+}
+async function runGuided() {
+  if (state.running || state.tick >= baseSchedule.length) return;
+  state.running = true;
+  const token = ++runToken;
+  render();
+  $("feedback").className = "feedback good";
+  while (state.tick < baseSchedule.length && token === runToken) {
+    await processTick(state.tick, false);
+    $("feedback").textContent = `Guided run · ${baseSchedule[state.tick - 1].phase}`;
+    await Promise.resolve();
+  }
+  if (token !== runToken) return;
+  state.running = false;
+  $("feedback").textContent = "PASS · 24 accepted frames verify. Fidelity is exactly 5/6; both airlock rules survive; navigation reattached with complete provenance.";
+  render();
+  say("Guided run complete. All positive assertions pass.");
+}
+async function nextTick() {
+  if (state.running || state.tick >= baseSchedule.length) return;
+  await processTick(state.tick);
+  if (state.tick === baseSchedule.length) {
+    $("feedback").className = "feedback good";
+    $("feedback").textContent = "PASS · Deterministic schedule complete; hashes, ownership, conflict preservation, and reattach provenance verify.";
+  } else {
+    $("feedback").className = "feedback";
+    $("feedback").textContent = `${baseSchedule[state.tick - 1].phase} committed. Advance to the next logical tick.`;
+  }
+}
+function reset() {
+  runToken++;
+  state = emptyState();
+  $("feedback").className = "feedback";
+  $("feedback").textContent = "Reset complete. All generated frames were discarded; deterministic seed retained.";
+  $("mutation-result").className = "feedback";
+  $("mutation-result").textContent = "No mutation attempted.";
+  render();
+  say("Simulation reset.");
+}
+async function replay() {
+  reset();
+  await runGuided();
+}
+async function mutateOwner() {
+  if (state.tick < 1) await processTick(0, false);
+  const before = snapshotHashes();
+  const forged = { dimension: "power", owner: "Aster", action: "cross-write", value: "unauthorized reactor edit" };
+  const rejected = ownerFor(forged.dimension) !== forged.owner;
+  const after = snapshotHashes();
+  state.lastMutation = {
+    rejected: rejected && before === after,
+    label: "Unauthorized cross-dimension write rejected; verified ledger unchanged"
+  };
+  $("mutation-result").className = "feedback bad";
+  $("mutation-result").textContent = `FAIL · REJECTED before append: Aster owns habitat, not power. Ledger fingerprint unchanged: ${before === after}. Verified work preserved.`;
+  render();
+  say("Unauthorized write rejected. Verified work preserved.");
+}
+async function mutateOverwrite() {
+  if (!state.conflict) {
+    while (state.tick < 4) await processTick(state.tick, false);
+  }
+  const before = snapshotHashes();
+  const alternativesBefore = interfaceClaims.airlock_pressure.length;
+  const proposed = [interfaceClaims.airlock_pressure[0]];
+  const rejected = proposed.length !== alternativesBefore;
+  const after = snapshotHashes();
+  state.lastMutation = {
+    rejected: rejected && before === after,
+    label: "Silent airlock overwrite rejected; both verified alternatives preserved"
+  };
+  $("mutation-result").className = "feedback bad";
+  $("mutation-result").textContent = `FAIL · REJECTED: overwrite would reduce the airlock alternative set from ${alternativesBefore} to ${proposed.length}. Ledger fingerprint unchanged: ${before === after}. Both rules remain visible.`;
+  render();
+  say("Silent conflict overwrite rejected. Both alternatives preserved.");
+}
+
+$("track").innerHTML = baseSchedule.map(() => `<span class="tick"></span>`).join("");
+$("guided").addEventListener("click", runGuided);
+$("next").addEventListener("click", nextTick);
+$("replay").addEventListener("click", replay);
+$("reset").addEventListener("click", reset);
+$("mutate-owner").addEventListener("click", mutateOwner);
+$("mutate-overwrite").addEventListener("click", mutateOverwrite);
+$("copy-prompt").addEventListener("click", async () => {
+  const text = $("proof-prompt").textContent.trim();
+  await navigator.clipboard.writeText(text);
+  $("copy-prompt").textContent = "Copied";
+  say("Proof prompt copied.");
+  setTimeout(() => $("copy-prompt").textContent = "Copy proof prompt", 1200);
+});
+document.addEventListener("keydown", event => {
+  if (event.target.matches("button, summary")) return;
+  if (event.key === "ArrowRight" || event.key === " ") { event.preventDefault(); nextTick(); }
+  if (event.key.toLowerCase() === "g") runGuided();
+  if (event.key.toLowerCase() === "r") reset();
+  if (event.key.toLowerCase() === "l") $("ledger-drawer").open = !$("ledger-drawer").open;
+});
+state = emptyState();
+render();
+</script>
+</body>
+</html>

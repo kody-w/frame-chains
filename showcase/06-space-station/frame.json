@@ -1,0 +1,20 @@
+{
+  "frame": 6,
+  "slug": "06-space-station",
+  "title": "Swarm-Built Space Station",
+  "entry": "index.html",
+  "synthetic_only": true,
+  "network_required": false,
+  "claim": "Seeded autonomous schedules can grow a multi-dimensional station from content-addressed frames while preserving conflicts, ownership, and disconnected provenance.",
+  "invariants": [
+    "Each agent may append only to its owned dimension and every accepted frame is linked by canonical Web Crypto SHA-256.",
+    "Contradictory airlock pressure rules remain as parallel alternatives and reduce exact merge fidelity to five sixths.",
+    "A disconnected navigation frame reattaches at the first contradiction-free base in a fixed newest-to-oldest ladder with provenance intact.",
+    "Rejected cross-dimension writes and silent conflict overwrites leave all previously verified frame hashes unchanged."
+  ],
+  "positive_path": [
+    "Run the seeded schedule to append and merge six dimensions, preserving two airlock alternatives.",
+    "Take navigation offline, append stranded work, and deterministically reattach it through the contradiction ladder."
+  ],
+  "failure_path": "Attempt an unauthorized cross-dimension write or silently overwrite one airlock alternative; independent assertions reject both mutations without disturbing verified work."
+}
