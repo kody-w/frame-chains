@@ -1,0 +1,51 @@
+name: Verify paper
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-full:
+    name: Chromium full gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: xvfb-run -a npm run check
+
+  browser-smoke:
+    name: ${{ matrix.browser }} smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
+    strategy:
+      fail-fast: false
+      matrix:
+        browser:
+          - chromium
+          - firefox
+          - webkit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: xvfb-run -a npm run papercheck -- ${{ matrix.browser }} smoke

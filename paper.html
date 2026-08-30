@@ -4,40 +4,140 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Frame Chains — Self-Healing, Leader-Redundant Orchestration of a Distributed AI Estate</title>
+<meta name="description" content="A RAPP paper on verifiable frame-chain orchestration, with a newcomer guide and six standalone interactive proofs.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
 <style>
-  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; --bg:#ffffff; }
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+  :root{
+    --ink:var(--cp-text); --mut:var(--cp-text-muted); --line:var(--cp-border);
+    --accent:var(--cp-accent); --bg:var(--cp-bg); --paper-link:#005a9e;
+    --card-shadow:0 0 2px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.14);
+  }
+  html[data-theme="dark"]{ --mut:#b8b8b8; --paper-link:#6bb6ff; --card-shadow:0 0 2px rgba(0,0,0,.42),0 1px 2px rgba(0,0,0,.36); }
   *{ box-sizing:border-box; }
   body{ margin:0; background:var(--bg); color:var(--ink);
-    font:17px/1.65 Georgia, "Times New Roman", serif; }
+    font:16.5px/1.65 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
   main{ max-width:46rem; margin:0 auto; padding:3rem 1.2rem 5rem; }
   h1{ font-size:1.7rem; line-height:1.3; margin:0 0 .4rem; }
   .meta{ color:var(--mut); font-size:.95rem; margin-bottom:.4rem; }
   .note{ font-size:.9rem; color:var(--mut); border-left:3px solid var(--accent);
-    padding:.5rem .9rem; background:#f6f8fb; margin:1.2rem 0; }
+    padding:.7rem .9rem; background:var(--cp-bg-elevated); border-radius:.625rem; margin:1.2rem 0; }
   h2{ font-size:1.2rem; margin:2.2rem 0 .6rem; border-bottom:1px solid var(--line); padding-bottom:.25rem; }
   h3{ font-size:1.02rem; margin:1.4rem 0 .35rem; }
   p, li{ text-align:justify; hyphens:auto; }
   .abstract{ font-size:.98rem; }
   .abstract:first-line{ }
   ol li, ul li{ margin:.35rem 0; }
-  code{ font:.85em ui-monospace, Menlo, monospace; background:#f4f4f5; padding:.05em .3em; border-radius:3px; }
+  code{ font:.85em Consolas, "Courier New", Courier, monospace; background:var(--cp-surface-soft); padding:.05em .3em; border-radius:.625rem; }
   em.den{ color:var(--mut); }
   footer{ margin-top:3rem; color:var(--mut); font-size:.85rem; border-top:1px solid var(--line); padding-top:1rem; }
   figure{ margin:1.4rem 0; }
   figure svg{ width:100%; height:auto; display:block; border:1px solid var(--line);
-    border-radius:10px; background:#fcfcfd; }
-  figcaption{ font:.85rem/1.45 system-ui; color:var(--mut); margin-top:.4rem; }
+    border-radius:10px; background:var(--cp-surface); }
+  figcaption{ font:.85rem/1.45 "Segoe UI", Aptos, Calibri, sans-serif; color:var(--mut); margin-top:.4rem; }
+  a{ color:var(--paper-link); }
+  a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:.625rem}
+  .paper-nav{ display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1.4rem; font-size:.85rem; }
+  .claim{ margin:1rem 0 1.4rem; padding:1rem; border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:16px; background:var(--cp-surface); box-shadow:var(--card-shadow); }
+  .exercise{ margin:1.4rem 0 1.8rem; padding:.8rem; border:1px solid var(--line); border-radius:16px; background:var(--cp-bg-elevated); }
+  .exercise>p{ margin:.1rem 0 .55rem; color:var(--accent); font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .exercise iframe{ display:block; width:100%; height:760px; border:1px solid var(--line); border-radius:.625rem; background:var(--cp-surface); }
+  .proof-prompt{ margin:.65rem 0 0; padding:.65rem; border:1px solid var(--line); border-radius:.625rem; background:var(--cp-surface); }
+  .proof-prompt summary{ cursor:pointer; color:var(--paper-link); font-weight:700; }
+  .proof-prompt pre{ max-height:16rem; overflow:auto; white-space:pre-wrap; padding:.7rem; border:1px solid var(--line); border-radius:.625rem; background:var(--cp-surface-soft); color:var(--ink); font:12px/1.45 Consolas, "Courier New", Courier, monospace; }
+  .copy-prompt{ padding:.5rem .75rem; border:1px solid var(--accent); border-radius:.625rem; background:var(--cp-surface); color:var(--accent); font:600 .85rem "Segoe UI", Aptos, Calibri, sans-serif; cursor:pointer; }
+  @media(max-width:640px){ p,li{text-align:left}.exercise iframe{height:820px} }
+  @media print{
+    :root{ --cp-bg:#fff; --cp-bg-elevated:#fff; --cp-surface:#fff; --cp-surface-soft:#f5f5f5; --cp-text:#111; --cp-text-muted:#444; --cp-border:#aaa; --paper-link:#111; }
+    .paper-nav,.copy-prompt{display:none}
+    main{max-width:none;padding:0}
+    .exercise,.claim,figure{break-inside:avoid}
+    .exercise iframe{height:420px}
+    .proof-prompt{display:block}
+    .proof-prompt:not([open])>*:not(summary){display:block}
+    a{color:inherit;text-decoration:none}
+  }
 </style>
 </head>
 <body>
 <main>
+<nav class="paper-nav" aria-label="Publication navigation">
+  <a href="guide.html">Start with the guided demo</a>
+  <a href="index.html">Project home</a>
+  <a href="https://github.com/kody-w/frame-chains">Source</a>
+  <a href="https://kody-w.github.io/papers/">All papers</a>
+</nav>
 <h1>Frame Chains: Self-Healing, Leader-Redundant Orchestration of a Distributed AI Estate via Signed Content-Addressed Frame Chains</h1>
 <p class="meta">Kody Wildfeuer · RapterBox LLC · First public disclosure: August&nbsp;27,&nbsp;2026</p>
-<p class="note">Preprint. Conceived and reduced to practice 2026-08-24/25 on the author's
-eight-device estate; the engineering record of every experiment below is maintained by the
-author. The substrate protocol (rapp/1) is separately published at
-<code>github.com/kody-w/rapp-1</code>; this paper discloses the orchestration methods built on
-it. © 2026 RapterBox LLC.</p>
+<p class="note"><b>RAPP paper.</b> This version pairs cited technical claims and honest
+limitations with standalone embedded proof pages and copyable prompts that let a reader
+rebuild or challenge each core idea with any LLM. Conceived and reduced to practice
+2026-08-24/25 on the author's eight-device estate; the engineering record of every
+experiment below is maintained by the author. The substrate protocol (rapp/1) is separately
+published at <code>github.com/kody-w/rapp-1</code>; this paper discloses the orchestration
+methods built on it. © 2026 RapterBox LLC.</p>
+<div class="claim"><b>New to distributed systems?</b> Begin with the
+<a href="guide.html">eight-minute guided evidence path</a>. It explains what each demo is,
+what to do, what to watch, and what conclusion the interaction supports before introducing
+the formal vocabulary.</div>
 
 <h2>Abstract</h2>
 <p class="abstract">
@@ -48,14 +148,16 @@ and devices (an “AI estate”) as <i>verifiable state</i> on an append-only, c
 content-addressed substrate — with no central server, no election traffic, and no reliance
 on synchronized clocks. One signed genesis frame (a <i>scan tile</i>) fans an estate-wide
 observation across devices; child frames return findings content-linked to the tile; a
-deterministic merge yields a single report whose payload (the <i>data exhaust</i>) is the
-sole trigger set for subsequent work, making follow-up cost O(delta) rather than
-O(estate). A homeostatic loop (scan → deterministic repair on isolated branches → diff →
+deterministic merge yields a single report whose payload (the <i>data exhaust</i>), together
+with locally signaled changes, bounds subsequent work. In the implementation, follow-up
+cost therefore scales with implicated or changed nodes rather than an unconditional
+O(estate) sweep. A homeostatic loop (scan → deterministic repair on isolated branches → diff →
 append tick) converges the estate to a stable floor without human input. Leadership is
 governed by lease-and-roster frames with staggered-by-rank succession, structurally
-preventing split-brain without elections. Because chain validity derives from content
-addresses rather than recency, a dimension disconnected for arbitrarily long resumes by
-appending to its own head, and a purely local estate can enrich itself from federated
+rejecting premature or out-of-rank takeover in the tested common-head model without
+elections. Because chain validity derives from content
+addresses rather than recency, a dimension disconnected for arbitrarily long can resume
+by appending to its retained head, and a purely local estate can enrich itself from federated
 public chains through a one-way membrane. Logical time is carried by the chain itself: on
 live hardware with a 17.6-second clock disagreement, ordering was unaffected. We report
 the system reduced to practice on a real eight-device estate: a five-frame verifiable
@@ -73,7 +175,8 @@ inventoried roughly twenty undeclared local AI services on one node, autonomous 
 running unwatched, four-way version drift, and three incompatible “frame” shapes. The
 thesis of this work is that estate health should be <i>verifiable state on an append-only
 substrate</i> — not a dashboard's opinion — and that next actions should derive from a
-signed state delta, never from polling everything again.</p>
+signed state delta or a locally observed change rather than an unconditional full-estate
+poll on every cycle.</p>
 <p>Contributions: scan-tile orchestration; exhaust-driven O(delta) precision; homeostatic
 convergence; a recursive dimension drill; lease/roster succession without elections;
 structural (non-temporal) resume; a deterministic re-attach ladder requiring no model
@@ -83,8 +186,10 @@ global heartbeat; and graded merge fidelity between independently formed histori
 <h2>2&nbsp;·&nbsp;Substrate</h2>
 <p>The substrate is the separately published rapp/1 protocol: content-addressed eleven-key
 frames, mint-once identity, deterministic eggs, with a public specification, reference
-implementation, and conformance suite. The substrate is prior art by the same author and
-is not claimed here; this paper claims the orchestration methods built on it.</p>
+implementation, and conformance suite <a href="#ref-1">[1]</a>. Its canonicalization and
+SHA-256 addressing build on established standards <a href="#ref-2">[2]</a>
+<a href="#ref-3">[3]</a>. The substrate is prior art by the same author and is not claimed
+here; this paper claims the orchestration methods built on it.</p>
 
 <figure>
 <svg viewBox="0 0 720 130" role="img" aria-label="A frame chain: each frame holds the fingerprint of the previous one" font-family="system-ui" font-size="13">
@@ -111,8 +216,9 @@ is not claimed here; this paper claims the orchestration methods built on it.</p
   </g>
 </svg>
 <figcaption><b>The substrate in one picture.</b> A frame chain: every entry embeds the
-SHA-256 fingerprint of its predecessor, so the sequence proves itself — no clock, no
-server, no trust in whoever wrote it down.</figcaption>
+SHA-256 fingerprint of its predecessor, so a verifier with a trusted anchor can detect
+changed content or linkage without using wall-clock order. Hash linkage alone does not
+prove authorship or semantic validity.</figcaption>
 </figure>
 
 <h2>3&nbsp;·&nbsp;Design</h2>
@@ -161,9 +267,12 @@ a child frame that <i>holds the tile's fingerprint</i>; a deterministic merge yi
 report. The whole observation verifies end to end.</figcaption>
 </figure>
 <h3>3.2 Exhaust-driven precision</h3>
-<p>The report's payload is the <i>only</i> trigger set for the next round: unimplicated nodes
-bear zero cost, and successive tiles are diffed so work is O(delta), not O(estate). The
-estate's current truth becomes an addressable object — a virtual table.</p>
+<p>The prior report's payload, plus device-local change signals, forms the trigger set for
+the next round: unchanged, unimplicated nodes bear zero follow-up cost, and successive
+tiles are diffed so work is O(delta) in the number of implicated or changed nodes rather
+than an unconditional O(estate) sweep. A periodic baseline scan is still required when
+local change signaling cannot be trusted. The estate's observed truth becomes an
+addressable object — a virtual table.</p>
 <figure>
 <svg viewBox="0 0 720 215" role="img" aria-label="Only devices named by the exhaust are touched; the rest cost nothing" font-family="system-ui" font-size="13">
   <defs><marker id="mC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
@@ -183,9 +292,9 @@ estate's current truth becomes an addressable object — a virtual table.</p>
     <line x1="380" y1="70" x2="362" y2="134" stroke="#0b5cad" stroke-width="1.7" marker-end="url(#mC)"/>
   </g>
 </svg>
-<figcaption><b>§3.2 — Work is O(delta), not O(estate).</b> The exhaust is the <i>only</i>
-trigger set: devices it doesn't name are never invoked. Follow-up cost scales with what
-changed, not with how big the fleet is.</figcaption>
+<figcaption><b>§3.2 — Follow-up is bounded by the delta.</b> Prior exhaust plus local-change
+signals select the next targets; unchanged, unimplicated devices are skipped. Baseline
+scans remain O(estate), while follow-up cost scales with what changed.</figcaption>
 </figure>
 <h3>3.3 Homeostatic convergence</h3>
 <p>Loop: scan tile → deterministic, identity-preserving repairs on isolated branches → diff
@@ -209,6 +318,20 @@ reversible.</p>
 <figcaption><b>§3.3 — Homeostasis.</b> The loop that ran live: 66 findings → healed floor →
 quiet, no human in it. Repairs happen on branches; the owner stays the merge authority.</figcaption>
 </figure>
+<div class="exercise" id="scan-proof">
+  <p>Live proof · scan, exhaust, and convergence</p>
+  <iframe src="play/scan-tile.html" title="Interactive proof: scan tiles and the healing loop" loading="lazy"></iframe>
+  <details class="proof-prompt" id="prompt-scan"><summary>Rebuild this proof with any LLM</summary>
+    <pre>Create one self-contained HTML file that proves scan-tile orchestration and O(delta) follow-up.
+
+Use a fleet of at least five devices with explicit finding counts. Mint one scan-tile frame, compute its SHA-256, and create child response frames that each reference the tile hash. Deterministically merge the responses into one report whose payload is the data exhaust.
+
+On the next round, invoke only devices named by the prior exhaust or whose state changed. Show exact full-fleet cost versus actual invoked-device cost. Add deterministic repairs, append tick frames, and declare convergence only after two unchanged ticks. Include Reset, Introduce drift, Scan, and Heal controls; visible frame data; explicit assertions; and one mutation that incorrectly polls every device so the O(delta) assertion turns red.
+
+Return the complete runnable HTML, not a prose explanation.</pre>
+    <button class="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</div>
 <h3>3.4 Recursive dimension drill</h3>
 <p>An event on the top tile (a drifted node) spawns a finer sub-chain scoped to that node,
 whose findings are re-dimensioned by required-fix class and reassimilated under the
@@ -218,8 +341,11 @@ applied to attention itself.</p>
 <p>Who may <i>mint new intent</i> on a stream is governed by (a) a signed roster frame fixing
 succession rank, (b) a lease declared in each tick, (c) staggered-by-rank entitlement
 after expiry (rank r waits (r−1)×grace), and (d) signed succession/resumption frames.
-Continuation requires no authority; history is never rewritten; latency cannot cause a
-false takeover; split-brain is structurally impossible with zero election traffic.</p>
+Within a shared verified head and the stated lease assumptions, late observation can only
+delay a lower-ranked claimant, not advance it; no election messages are required and
+history is never rewritten. A network partition can still create competing branches, which
+must be surfaced and reconciled rather than described as impossible. This places the lease
+mechanism in the lineage of bounded authority intervals <a href="#ref-5">[5]</a>.</p>
 <figure>
 <svg viewBox="0 0 720 225" role="img" aria-label="Lease timeline: leader dies, lease expires, rank 2 waits its grace and succeeds; the returned leader defers to the boundary" font-family="system-ui" font-size="13">
   <text x="15" y="72" font-weight="700">rank 1</text>
@@ -242,24 +368,40 @@ false takeover; split-brain is structurally impossible with zero election traffi
   <text x="540" y="72" fill="#1e7d32" font-size="12.5">❤️ rank 1 returns — <tspan font-weight="700">defers</tspan> to the live lease</text>
   <text x="672" y="132" text-anchor="middle" fill="#5f5f64" font-size="11.5">…until the</text>
   <text x="672" y="147" text-anchor="middle" fill="#5f5f64" font-size="11.5">boundary</text>
-  <text x="360" y="188" text-anchor="middle" fill="#5f5f64" font-size="12.5">rank 3 would wait 2× grace — hearing late only ever ADDS waiting. Latency cannot crown anyone.</text>
+  <text x="360" y="188" text-anchor="middle" fill="#5f5f64" font-size="12.5">rank 3 waits 2× grace — in this model, hearing late only adds waiting.</text>
 </svg>
 <figcaption><b>§3.5 — Succession without elections.</b> The roster is signed in advance; the
 lease drains in public; ranks act only after their staggered wait; the returning leader
 re-enters at a boundary with a resumption frame. History is append-only throughout.</figcaption>
 </figure>
+<div class="exercise" id="succession-proof">
+  <p>Live proof · succession without elections</p>
+  <iframe src="play/succession.html" title="Interactive proof: lease and roster succession" loading="lazy"></iframe>
+  <details class="proof-prompt" id="prompt-succession"><summary>Rebuild this proof with any LLM</summary>
+    <pre>Create one self-contained HTML file that proves rank-staggered succession without election traffic.
+
+Model a precommitted roster with ranks 1, 2, and 3; a lease measured in logical beats; and grace = 3 beats. Rank r may mint only after lease expiry plus (r-1) × grace. Let me kill rank 1, make rank 3 receive messages late, advance one beat at a time, and bring rank 1 back.
+
+Show an append-only, SHA-256-linked control-frame log. Assert visibly that no follower mints while the lease is live, rank 2 cannot act before its grace completes, lag only increases waiting, rank 3 never jumps rank 2, and the returning rank 1 defers until the active lease boundary. Add an unauthorized rank-3 claim before eligibility and make an independent semantic assertion turn red. State that the model does not authenticate the roster or prove liveness under arbitrary partitions.
+
+Return complete runnable HTML with keyboard-accessible controls.</pre>
+    <button class="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</div>
 <h3>3.6 Structural resume and the membrane</h3>
 <p>Validity is hash-structural, not temporal: a dimension dark for a month resumes by
 appending to its own head, and parallel dimensions of one organism merge at read time. A
 fully private estate participates in the global federation read-only — pulling and
-assimilating public chain data while its own frames never leave the boundary. Disconnection
-tolerance and privacy are the same mechanism at different budget settings.</p>
+assimilating public chain data while the designated transfer layer rejects private-frame
+egress. This is a protocol boundary, not proof against separate side channels or compromised
+keys. Disconnection tolerance and privacy use the same directional mechanism at different
+budget settings.</p>
 <figure>
 <svg viewBox="0 0 720 185" role="img" aria-label="The one-way membrane: a private estate reads from public chains; nothing flows out" font-family="system-ui" font-size="13">
   <defs><marker id="mF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0b5cad"/></marker></defs>
   <rect x="25" y="30" width="285" height="120" rx="12" fill="#f2f7fd" stroke="#9ec5ec"/>
   <text x="167" y="60" text-anchor="middle" font-weight="700">YOUR ESTATE (private)</text>
-  <text x="167" y="82" text-anchor="middle" font-size="12" fill="#5f5f64">its frames never leave</text>
+  <text x="167" y="82" text-anchor="middle" font-size="12" fill="#5f5f64">transfer gate blocks frame egress</text>
   <text x="167" y="122" text-anchor="middle" font-size="24">🏠</text>
   <rect x="425" y="30" width="270" height="120" rx="12" fill="#fff" stroke="#c9c9ce"/>
   <text x="560" y="60" text-anchor="middle" font-weight="700">PUBLIC FEDERATED CHAINS</text>
@@ -268,12 +410,25 @@ tolerance and privacy are the same mechanism at different budget settings.</p>
   <line x1="420" y1="70" x2="318" y2="70" stroke="#0b5cad" stroke-width="2" marker-end="url(#mF)"/>
   <text x="368" y="58" text-anchor="middle" fill="#0b5cad" font-size="11.5" font-weight="700">reads IN — verified, contradiction-gated</text>
   <line x1="315" y1="115" x2="418" y2="115" stroke="#c9c9ce" stroke-width="2" stroke-dasharray="6 5"/>
-  <text x="368" y="139" text-anchor="middle" fill="#b3261e" font-size="13" font-weight="800">✗ nothing goes out</text>
+  <text x="368" y="139" text-anchor="middle" fill="#b3261e" font-size="13" font-weight="800">✗ private-frame export refused</text>
 </svg>
-<figcaption><b>§3.6 — The membrane.</b> Privacy and enrichment are not a trade-off: the
-same mechanism that tolerates disconnection makes federation one-way. Reads in; nothing
-out.</figcaption>
+<figcaption><b>§3.6 — The membrane.</b> At the modeled transfer gate, verified reads may
+enter while private-frame exports are refused and public bytes remain unchanged.</figcaption>
 </figure>
+<div class="exercise" id="membrane-proof">
+  <p>Live proof · the one-way membrane</p>
+  <iframe src="play/membrane.html" title="Interactive proof: verified public data flows into a private estate while private frames stay inside" loading="lazy"></iframe>
+  <details class="proof-prompt" id="prompt-membrane"><summary>Rebuild this proof with any LLM</summary>
+    <pre>Create one self-contained HTML file that proves a one-way data membrane.
+
+Maintain separate public and private frame stores. Public frames have computed SHA-256 hashes and may be verified, contradiction-checked, and copied into a private derived view. The modeled transfer API must reject every private-to-public request.
+
+Provide controls for: verify and read public data inward; attempt private-to-public export; inject a conflicting public frame; reset. Display exact public/private counts and hashes before and after each action. Assert that valid public data enriches the private view, conflicts are refused, and every outward attempt leaves public bytes unchanged. Include a deliberate mutation that enables outward writes and turns the privacy assertion red.
+
+Return the complete runnable HTML and a plain-language statement that limits the result to the modeled transfer gate rather than claiming absence of every possible side channel.</pre>
+    <button class="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</div>
 <h3>3.7 Deterministic re-attach and the quantum drill</h3>
 <p>Frames declare their reads as {name → content-address}. A stranded frame conflicts with a
 candidate base iff the base's upstream declares a different address for a declared read —
@@ -283,8 +438,23 @@ no-op, not an error. Transplants carry <code>grafted_from</code> provenance; sup
 originals are preserved. Search is anytime: the first hit bounds latency, and each further
 non-contradicting dimension found monotonically enriches the frame, re-gated by the
 contradiction check at merge time — search budget controls completeness, never
-correctness. An interruption is not an error path but the trigger for assimilation: a
-frame emerges from disconnection richer, not stalled.</p>
+correctness, provided the declared read set and candidate ladder are complete for the
+dependencies that matter. An interruption is not an error path but the trigger for
+assimilation: a frame may emerge from disconnection richer rather than stalled.</p>
+<div class="exercise" id="reattach-proof">
+  <p>Live proof · deterministic re-attachment</p>
+  <iframe src="play/reattach.html" title="Interactive proof: reattach a stranded frame to the first contradiction-free base" loading="lazy"></iframe>
+  <details class="proof-prompt" id="prompt-reattach"><summary>Rebuild this proof with any LLM</summary>
+    <pre>Create one self-contained HTML file that proves deterministic re-attachment without an LLM decision.
+
+A stranded frame declares reads as name → content-address. Provide at least four candidate bases across an ordered ladder: local head, another local dimension, and public federated histories. A candidate conflicts when it declares a different address for any read name used by the stranded frame.
+
+Compute and independently verify the stranded-frame and candidate-base hashes, then compute the conflict set exactly. Search candidates in fixed order and select the first contradiction-free base. If none qualify, return a dry-hole no-op without changing either history. When grafting, append provenance fields naming the original frame and selected base; preserve the superseded original. Include a tamper control that changes one declared address and visibly changes the deterministic choice. State that correctness depends on a complete declared read set and candidate ladder.
+
+Return complete runnable HTML with the compared read sets and pass/fail assertions visible.</pre>
+    <button class="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</div>
 <h3>3.8 Tick-granular logical time</h3>
 <p>The atomic unit of trackable time is the tick frame: one sequence increment, one dependent
 frame. Ordering authority is the dependency chain, never the wall clock — the timestamp is
@@ -314,13 +484,43 @@ and deepens by continuity of stewardship and adoption, not tick density.</p>
 is its <i>dimension</i> — frames from any device attaching to that instant, conflict-gated.
 On real hardware, a 17.6-second clock error changed nothing.</figcaption>
 </figure>
+<div class="exercise" id="clock-proof">
+  <p>Live proof · chain order survives clock disagreement</p>
+  <iframe src="play/chain-is-the-clock.html" title="Interactive proof: chain links determine order even when clocks disagree" loading="lazy"></iframe>
+  <details class="proof-prompt" id="prompt-clock"><summary>Rebuild this proof with any LLM</summary>
+    <pre>Create one self-contained HTML file that proves dependency order is independent of wall-clock time.
+
+Use two simulated devices with adjustable clock skew. Every action must create a frame containing seq, device, claimed timestamp, prev hash, and a SHA-256 frame hash computed from canonical JSON. Let the devices interleave actions.
+
+Show two views: dependency-chain order and claimed-time order. Verify hashes and prev links independently. Drag one clock at least two minutes wrong and prove chain order still validates while time sorting can place a child before its predecessor. Include a tamper action and an assertion that recomputation detects it.
+
+Return complete runnable HTML; do not hard-code the verified order.</pre>
+    <button class="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</div>
 <h3>3.9 Merge fidelity</h3>
 <p>When two frame histories that formed with no contact meet, the boolean drill generalizes
 to a graded score: join both histories on the tick key; a dimension is mergeable iff its
 declarations are contradiction-free across every shared tick; the score is mergeable over
 shared dimensions. Aligned dimensions merge and continue; conflicted ones remain parallel,
 never forced; one-sided dimensions assimilate freely. The computation is deterministic on
-every node.</p>
+every node. The reported ratio weights shared dimensions equally; it is an inspectable
+compatibility measure, not a universal measure of semantic importance. The preservation
+strategy is related to, but not equivalent to, CRDT convergence <a href="#ref-6">[6]</a>.</p>
+<div class="exercise" id="merge-proof">
+  <p>Live proof · graded merge fidelity</p>
+  <iframe src="play/merge-fidelity.html" title="Interactive proof: merge aligned dimensions and preserve conflicts in parallel" loading="lazy"></iframe>
+  <details class="proof-prompt" id="prompt-merge"><summary>Rebuild this proof with any LLM</summary>
+    <pre>Create one self-contained HTML file that proves deterministic graded merge fidelity.
+
+Represent two independently formed histories as dimensions keyed by name and logical tick. Give each value a content hash and fail closed if any input hash does not recompute. Include: two aligned shared dimensions, one contradictory shared dimension, and one-sided dimensions on both histories.
+
+Join on dimension and tick. A shared dimension is mergeable only when all overlapping declarations are contradiction-free. Compute fidelity = mergeable shared dimensions / all shared dimensions. Merge aligned and one-sided dimensions; preserve conflicting dimensions as parallel alternatives without choosing a winner. Show the exact numerator, denominator, and resulting state. Add a mutation that silently overwrites the conflict and make a preservation assertion turn red.
+
+Return complete runnable HTML with reset and keyboard-accessible controls. State that the equal-weight score is an inspectable compatibility measure, not a universal measure of semantic importance.</pre>
+    <button class="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</div>
 <h3>3.10 A practice note: heterogeneous chains</h3>
 <p>Because history is corrected by appending amendment frames rather than editing, every
 long-lived stream becomes heterogeneous, and consumers must filter by kind. Observed live:
@@ -328,12 +528,20 @@ a single correction frame crashed an unrelated trend computation that assumed ho
 The append-only law is sound; the cost it imposes is kind-aware readers.</p>
 
 <h2>4&nbsp;·&nbsp;Reduction to practice</h2>
+<p>The empirical results below come from the author's retained engineering record. The
+embedded exercises are executable explanatory models: they expose the algorithms and
+failure conditions, but do not substitute for the reported estate runs. The repository's
+<a href="samples/frame_chain.py">stdlib sample</a>,
+<a href="https://github.com/kody-w/frame-chains/blob/main/papercheck.mjs">automated paper gate</a>,
+and <a href="https://github.com/kody-w/frame-chains/actions/workflows/verify.yml">cross-browser CI</a>
+provide the publicly reproducible denominator.</p>
 <ol>
 <li><b>Estate survey:</b> eight devices, five reachable over the private network; the sprawl
 inventory above.</li>
 <li><b>Scan tile, live:</b> one genesis frame across all reachable devices produced a
 five-frame chain, every frame verified by the reference implementation; 15
-artifact-bearing repositories; 66 non-compliant findings across six rules.</li>
+artifact-bearing repositories; 66 non-compliant findings across six rules.
+<a href="play/scan-tile.html">Interactive model</a></li>
 <li><b>Healing:</b> exhaust-driven deterministic repairs on isolated branches took findings
 66&nbsp;→&nbsp;35 on healable repositories; a collision rule correctly skipped a repository
 with uncommitted changes; nothing was pushed; the owner authorizes by merge.</li>
@@ -347,13 +555,13 @@ during a live lease; rank&nbsp;2 succeeded only after lease+grace; a returned le
 deferred to the live interim lease; rank&nbsp;1 reclaimed at the lease boundary; all
 chains verify and history was never rewritten — plus a single-node live run under a real
 two-hour lease. <em class="den">Honest denominator: fleet rollout staged, not yet
-fleet-live at time of writing.</em></li>
+fleet-live at time of writing.</em> <a href="play/succession.html">Interactive model</a></li>
 <li><b>Structural resume:</b> a stream dark across a simulated month re-appended to its own
 head; both dimensions verify in parallel.</li>
 <li><b>Deterministic re-attach, live:</b> a stranded genesis chain re-attached with no model
 call; candidate&nbsp;0 was rejected on a real content-hash conflict; the grafted chain was
 judged compliant by the oracle; provenance was bridged and the superseded original
-preserved.</li>
+preserved. <a href="play/reattach.html">Interactive model</a></li>
 <li><b>Federated pull and independent determinism:</b> a global public chain was continued
 locally as if nothing changed — and the pulled stream's derived identity was
 byte-identical to a tail derived independently hours earlier by a separate computation.
@@ -363,34 +571,76 @@ on three machines; one clock was 17,620&nbsp;ms off and ordering was unaffected 
 chain is the clock; a sealed tick's dimension grew late with its anchor byte-identical; a
 contradicting read was refused while an agreeing read attached; spine and dimensions
 verify. A global spine runs live with CI verification and a ten-minute beat.</li>
+<li><b>Clock-skew teaching reproduction:</b> the browser model computes live SHA-256 links
+while either simulated clock can be moved ±120 seconds; dependency order remains stable
+while timestamp sorting can contradict the chain. <a href="play/chain-is-the-clock.html">Run it</a></li>
 <li><b>Merge fidelity:</b> two independently formed estates scored 0.667 — roster and notes
 merged, configuration parked parallel on a real contradiction, disjoint dimensions
-imported.</li>
+imported. <a href="play/merge-fidelity.html">Interactive model</a></li>
 </ol>
 
 <h2>5&nbsp;·&nbsp;Related work and position</h2>
-<p>Shipped systems coordinate by isolation (parallel coding agents in per-agent worktrees;
-vendor guidance describes that design as not an agent orchestration system), by
-conversation, or by a central runtime. The 2026 research trend — CRDT-based agent memory,
-event-sourced message pools — converges on pieces of this pattern but is unshipped. The
-claim here is architectural rather than “faster”: partition-native, O(delta) by
-construction, verifiable end-to-end, self-healing, with election-free leader redundancy,
-as a working combination on a signed content-addressed substrate with an identity law.</p>
+<p>The design composes established ideas rather than replacing them: causal ordering without
+wall-clock authority <a href="#ref-4">[4]</a>, bounded leases
+<a href="#ref-5">[5]</a>, convergent replicated data
+<a href="#ref-6">[6]</a>, tamper-evident audit history
+<a href="#ref-7">[7]</a>, and local-first ownership
+<a href="#ref-8">[8]</a>. The claim is the implemented composition: append-only frame
+evidence, delta-bounded follow-up, deterministic repair and re-attachment, and ranked
+succession on a signed content-addressed substrate. The results establish feasibility on
+the reported estate, not superiority over every centralized or consensus-based design.</p>
 
 <h2>6&nbsp;·&nbsp;Limitations</h2>
 <p>Single-owner estate; one evaluator; succession fleet rollout pending; scale unmeasured
-beyond eight devices; the healing floor is the oracle's, not an absolute; anytime
-enrichment trades completeness against search budget by design.</p>
+beyond eight devices. O(delta) follow-up assumes trustworthy prior exhaust or device-local
+change signals; arbitrary silent drift still requires a baseline scan. The healing floor
+is the oracle's, not an absolute. Ranked succession was tested against delayed observation,
+not arbitrary Byzantine behavior or every network partition; competing branches must be
+detected and reconciled. Membrane privacy holds only when all relevant egress traverses the
+gate. Re-attachment correctness depends on complete declared reads and candidate
+enumeration. Merge fidelity weights dimensions equally and does not encode business
+criticality. Anytime enrichment trades completeness against search budget by design.</p>
 
 <h2>7&nbsp;·&nbsp;Conclusion</h2>
 <p>An AI estate can govern itself the way its artifacts are addressed: by content, on
 chains, with authority carried in frames rather than in servers or clocks. Interruption
 becomes the trigger for enrichment; recovery and growth are the same operation.</p>
 
+<h2>8&nbsp;·&nbsp;References</h2>
+<ol>
+  <li id="ref-1">K. Wildfeuer. <a href="https://kody-w.github.io/rapp-1/">rapp/1 specification and reference implementation</a>, rev-6, 2026.</li>
+  <li id="ref-2">R. Rundgren, B. Jordan, and S. Erdtman. <a href="https://www.rfc-editor.org/rfc/rfc8785">RFC 8785: JSON Canonicalization Scheme</a>, 2020.</li>
+  <li id="ref-3">National Institute of Standards and Technology. <a href="https://csrc.nist.gov/pubs/fips/180-4/upd1/final">FIPS PUB 180-4: Secure Hash Standard</a>.</li>
+  <li id="ref-4">L. Lamport. <a href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf">Time, Clocks, and the Ordering of Events in a Distributed System</a>, 1978.</li>
+  <li id="ref-5">C. G. Gray and D. R. Cheriton. <a href="https://dl.acm.org/doi/10.1145/74851.74870">Leases: An Efficient Fault-Tolerant Mechanism for Distributed File Cache Consistency</a>, 1989.</li>
+  <li id="ref-6">M. Shapiro et al. <a href="https://inria.hal.science/inria-00555588">A Comprehensive Study of Convergent and Commutative Replicated Data Types</a>, 2011.</li>
+  <li id="ref-7">B. Schneier and J. Kelsey. <a href="https://www.schneier.com/academic/archives/1999/05/secure_audit_logs_to.html">Secure Audit Logs to Support Computer Forensics</a>, 1999.</li>
+  <li id="ref-8">M. Kleppmann et al. <a href="https://www.inkandswitch.com/local-first/">Local-first software: You own your data, in spite of the cloud</a>, 2019.</li>
+</ol>
+
 <footer>
-<p id="fc-marker">frame-chains · first public disclosure 2026-08-27 · © 2026 RapterBox LLC ·
+<p id="fc-marker">RAPP paper · frame-chains · first public disclosure 2026-08-27 · © 2026 RapterBox LLC ·
 substrate: <a href="https://kody-w.github.io/rapp-1/">rapp/1</a></p>
 </footer>
 </main>
+<script>
+document.addEventListener("click", async event => {
+  const button = event.target.closest(".copy-prompt");
+  if (!button) return;
+  const prompt = button.closest(".proof-prompt").querySelector("pre");
+  try {
+    await navigator.clipboard.writeText(prompt.textContent);
+    button.textContent = "Copied";
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(prompt);
+    const selection = getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    button.textContent = "Selected — copy normally";
+  }
+  setTimeout(() => { button.textContent = "Copy proof prompt"; }, 1600);
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The One-Way Membrane — Frame Chains</title>
+<meta name="description" content="A standalone proof of a verified public-to-private assimilation gate with blocked private-to-public transfer.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    let inherited = "";
+    try {
+      inherited = window.parent !== window
+        ? window.parent.document.documentElement.getAttribute("data-theme") || ""
+        : "";
+    } catch {}
+    const theme =
+      param || inherited || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 15px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { border-color: var(--cp-accent); }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 2px; }
+button[disabled] { cursor: default; opacity: .55; }
+code, pre, .mono { font-family: Consolas, "Courier New", Courier, monospace; }
+.shell { max-width: 920px; margin: 0 auto; padding: 18px; }
+.topline { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 22px; font-size: 13px; }
+.topline a { color: var(--cp-link); font-weight: 650; text-underline-offset: .18em; }
+.eyebrow { margin: 0 0 4px; color: var(--cp-accent); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+h1 { margin: 0; font-size: clamp(24px, 5vw, 34px); line-height: 1.15; }
+.instruction { margin: 8px 0 16px; color: var(--cp-text-muted); }
+.lesson-map {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.lesson-map div {
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.lesson-map strong { display: block; margin-bottom: 4px; color: var(--cp-accent); font-size: 12px; text-transform: uppercase; }
+.lesson-map span { color: var(--cp-text-muted); font-size: 13px; }
+.scope-note { margin: -4px 0 18px; padding: 10px 12px; border-left: 4px solid var(--cp-warning); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 13px; }
+.stage {
+  padding: 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-surface);
+  box-shadow: 0 1px 2px var(--cp-border);
+}
+.stores { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch; }
+.store {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+}
+.store h2 { margin: 0; font-size: 16px; }
+.count { margin: 3px 0 10px; color: var(--cp-text-muted); }
+.direction {
+  align-self: center;
+  min-width: 128px;
+  text-align: center;
+  color: var(--cp-accent);
+  font-weight: 700;
+}
+.direction .blocked { display: block; margin-top: 12px; color: var(--cp-danger); }
+.hash-list { margin: 0; padding: 0; list-style: none; }
+.hash-list li {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+}
+.hash-list strong { display: block; }
+.hash-list code {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--cp-text-muted);
+  font-size: 11px;
+}
+.tag { color: var(--cp-accent); font-size: 12px; font-weight: 700; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 700; }
+.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+.feedback {
+  min-height: 52px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+  color: var(--cp-text-muted);
+}
+.feedback.good { border-color: var(--cp-success); color: var(--cp-text); }
+.feedback.try { border-color: var(--cp-warning); color: var(--cp-text); }
+.assertions { display: grid; gap: 6px; margin-top: 12px; }
+.assertion {
+  padding: 8px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.assertion.pass { border-color: var(--cp-success); }
+.assertion.fail { border-color: var(--cp-danger); }
+.log {
+  max-height: 190px;
+  overflow: auto;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+  font: 12px/1.45 Consolas, "Courier New", Courier, monospace;
+}
+.log div + div { margin-top: 5px; }
+.prompt {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.prompt summary { cursor: pointer; color: var(--cp-link); font-weight: 700; }
+.prompt p { margin: 8px 0; color: var(--cp-text-muted); }
+.prompt pre {
+  max-height: 230px;
+  overflow: auto;
+  white-space: pre-wrap;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font: 12px/1.45 Consolas, "Courier New", Courier, monospace;
+}
+.copy { border-color: var(--cp-accent); color: var(--cp-accent); font-weight: 700; }
+.footer-controls { margin-top: 12px; }
+@media (max-width: 520px) {
+  .shell { padding: 14px; }
+  .lesson-map, .stores { grid-template-columns: 1fr; }
+  .direction { padding: 4px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="topline" aria-label="Publication navigation">
+    <a href="../guide.html">Guided evidence path</a>
+    <a href="../paper.html#membrane-proof">Paper section</a>
+    <a href="../index.html">Project home</a>
+  </nav>
+  <p class="eyebrow">Interactive evidence · §3.6</p>
+  <h1>The one-way membrane</h1>
+  <p class="instruction">Two real JavaScript sets hold content-addressed frames. The modeled transfer gate admits verified, non-contradictory public declarations into private state and refuses private-to-public requests.</p>
+
+  <section class="lesson-map" aria-label="How to use this exercise">
+    <div><strong>What you are looking at</strong><span>Separate public and private frame sets, full computed hashes, and one directional transfer function.</span></div>
+    <div><strong>Do this</strong><span>Read public data inward, try an outward export, then inject and test a conflict.</span></div>
+    <div><strong>Watch for</strong><span>Inward hashes join the private set; an outward attempt leaves public bytes identical.</span></div>
+    <div><strong>What this demonstrates</strong><span>A single transfer API can make enrichment directional and verification-gated while exposing a byte-level privacy assertion.</span></div>
+  </section>
+  <p class="scope-note"><strong>Scope:</strong> this proves the behavior of the transfer gate below. It does not prove that a larger application has no separate export path, side channel, compromised key, or implementation bug.</p>
+
+  <section class="stage" aria-labelledby="membrane-state-title">
+    <h2 id="membrane-state-title" class="eyebrow">Live set state</h2>
+    <div class="stores">
+      <section class="store" aria-labelledby="private-title">
+        <h2 id="private-title">Private estate</h2>
+        <p class="count" id="private-count"></p>
+        <ul class="hash-list" id="private-list"></ul>
+      </section>
+      <div class="direction" aria-hidden="true">
+        ← verified reads
+        <span class="blocked">exports → refused</span>
+      </div>
+      <section class="store" aria-labelledby="public-title">
+        <h2 id="public-title">Public federation</h2>
+        <p class="count" id="public-count"></p>
+        <ul class="hash-list" id="public-list"></ul>
+      </section>
+    </div>
+
+    <div class="controls" aria-label="Membrane controls">
+      <button class="primary" id="read-inward" type="button">Verify and read public inward</button>
+      <button id="export-outward" type="button">Attempt private → public export</button>
+      <button id="inject-conflict" type="button">Inject conflicting public frame</button>
+      <button id="test-mutation" type="button">Test unsafe membrane mutation</button>
+    </div>
+
+    <div class="assertions" aria-label="Assertions">
+      <div class="assertion" id="inward-assertion">Inward assertion: not run</div>
+      <div class="assertion" id="privacy-assertion">Privacy assertion: not run</div>
+      <div class="assertion" id="conflict-assertion">Conflict assertion: not run</div>
+    </div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite">Choose an action to begin.</div>
+    <div class="log" id="log" aria-label="Deterministic operation log">The operation log is empty.</div>
+  </section>
+
+  <div class="footer-controls">
+    <button id="reset-exercise" type="button">Reset exercise</button>
+  </div>
+
+  <details class="prompt">
+    <summary>Prove this with any LLM</summary>
+    <p>Copy this prompt into any model. It requests a self-contained implementation that can be independently verified.</p>
+    <pre id="prompt-text">Create one self-contained HTML file with no dependencies that independently proves a one-way data membrane.
+
+Requirements:
+- Maintain actual separate public and private JavaScript Sets of content-addressed frames.
+- Compute SHA-256 content addresses and frame hashes from canonical JSON in the browser; independently recompute them before assimilation.
+- Permit only verified, contradiction-free public → private assimilation.
+- Refuse every private → public attempt and prove the public set's canonical bytes and count are unchanged.
+- Include a valid public declaration that can be assimilated and a conflicting public declaration that must be refused without changing private state.
+- Display exact counts, full hashes, compared declaration addresses, assertions, and an operation log.
+- Include an isolated deliberate mutation that enables outward writes and makes the privacy assertion visibly fail without corrupting the live stores.
+- Provide reset, keyboard-accessible controls, aria-live feedback, reduced-motion handling, and light/dark theme support.
+
+Do not hard-code pass/fail answers. Derive every verdict from the current sets and recomputed hashes. Return the complete runnable HTML and one plain-language statement of what was proved.</pre>
+    <button class="copy" id="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</main>
+
+<script>
+"use strict";
+const encoder = new TextEncoder();
+const records = new Map();
+let publicSet;
+let privateSet;
+let localPrivateSet;
+let derivedPrivateSet;
+let operationLog;
+let conflictingHash;
+
+const publicList = document.getElementById("public-list");
+const privateList = document.getElementById("private-list");
+const publicCount = document.getElementById("public-count");
+const privateCount = document.getElementById("private-count");
+const feedback = document.getElementById("feedback");
+const log = document.getElementById("log");
+const inwardAssertion = document.getElementById("inward-assertion");
+const privacyAssertion = document.getElementById("privacy-assertion");
+const conflictAssertion = document.getElementById("conflict-assertion");
+
+function canonical(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
+  return "{" + Object.keys(value).sort()
+    .map(key => JSON.stringify(key) + ":" + canonical(value[key])).join(",") + "}";
+}
+
+async function digest(value) {
+  const bytes = encoder.encode(typeof value === "string" ? value : canonical(value));
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(hash)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function makeRecord(name, value, visibility) {
+  const content_address = await digest(value);
+  const preimage = { kind: "declaration", name, content_address, value, visibility };
+  return { ...preimage, frame_hash: await digest(preimage) };
+}
+
+async function verifyRecord(record) {
+  const { frame_hash, ...preimage } = record;
+  const addressMatches = await digest(record.value) === record.content_address;
+  const frameMatches = await digest(preimage) === frame_hash;
+  return { ok: addressMatches && frameMatches, addressMatches, frameMatches };
+}
+
+function setBytes(set) {
+  return canonical([...set].sort());
+}
+
+function privateDeclarations() {
+  const declarations = new Map();
+  for (const hash of privateSet) {
+    const record = records.get(hash);
+    if (!record) continue;
+    if (!declarations.has(record.name)) declarations.set(record.name, record.content_address);
+  }
+  return declarations;
+}
+
+function conflictFor(record) {
+  const existing = privateDeclarations().get(record.name);
+  return existing && existing !== record.content_address
+    ? { name: record.name, privateAddress: existing, publicAddress: record.content_address }
+    : null;
+}
+
+function appendLog(message) {
+  operationLog.push(message);
+  log.textContent = "";
+  for (const line of operationLog) {
+    const row = document.createElement("div");
+    row.textContent = line;
+    log.appendChild(row);
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+function setFeedback(message, state = "") {
+  feedback.className = "feedback" + (state ? " " + state : "");
+  feedback.textContent = message;
+}
+
+function setAssertion(element, label, passed, detail) {
+  element.className = "assertion " + (passed ? "pass" : "fail");
+  element.textContent = `${passed ? "PASS" : "FAIL"} · ${label}: ${detail}`;
+}
+
+function renderStore(list, set, privateSide) {
+  list.textContent = "";
+  for (const hash of [...set].sort()) {
+    const record = records.get(hash);
+    const item = document.createElement("li");
+    const origin = privateSide
+      ? (localPrivateSet.has(hash) ? "local private" : "assimilated public")
+      : "public";
+    item.innerHTML = `<strong>${record.name}</strong><span class="tag">${origin}</span><code>frame ${hash}</code><code>content ${record.content_address}</code>`;
+    list.appendChild(item);
+  }
+}
+
+function render() {
+  publicCount.textContent = `${publicSet.size} frame${publicSet.size === 1 ? "" : "s"} · Set size ${publicSet.size}`;
+  privateCount.textContent = `${privateSet.size} frame${privateSet.size === 1 ? "" : "s"} · ${derivedPrivateSet.size} assimilated`;
+  renderStore(publicList, publicSet, false);
+  renderStore(privateList, privateSet, true);
+}
+
+async function transfer(hash, source, target) {
+  if (source !== "public" || target !== "private") {
+    return { accepted: false, reason: "direction policy permits only public → private" };
+  }
+  if (!publicSet.has(hash)) return { accepted: false, reason: "source set does not contain frame" };
+  const record = records.get(hash);
+  const verification = await verifyRecord(record);
+  if (!verification.ok) return { accepted: false, reason: "independent SHA-256 verification failed" };
+  const conflict = conflictFor(record);
+  if (conflict) return { accepted: false, reason: "contradiction", conflict };
+  privateSet.add(hash);
+  derivedPrivateSet.add(hash);
+  return { accepted: true, reason: "verified and contradiction-free" };
+}
+
+async function reset() {
+  records.clear();
+  publicSet = new Set();
+  privateSet = new Set();
+  localPrivateSet = new Set();
+  derivedPrivateSet = new Set();
+  operationLog = [];
+  conflictingHash = null;
+
+  const sharedPolicy = { days: 30, rule: "retain" };
+  const privatePolicy = await makeRecord("policy.retention", sharedPolicy, "private");
+  const privateSecret = await makeRecord("device.secret", { token: "stays-inside" }, "private");
+  const publicPolicy = await makeRecord("policy.retention", sharedPolicy, "public");
+  const publicCatalog = await makeRecord("catalog.agent", { version: 3, status: "verified" }, "public");
+
+  for (const record of [privatePolicy, privateSecret, publicPolicy, publicCatalog]) {
+    records.set(record.frame_hash, record);
+  }
+  for (const record of [privatePolicy, privateSecret]) {
+    privateSet.add(record.frame_hash);
+    localPrivateSet.add(record.frame_hash);
+  }
+  for (const record of [publicPolicy, publicCatalog]) publicSet.add(record.frame_hash);
+
+  for (const assertion of [inwardAssertion, privacyAssertion, conflictAssertion]) {
+    assertion.className = "assertion";
+    assertion.textContent = assertion.id === "inward-assertion"
+      ? "Inward assertion: not run"
+      : assertion.id === "privacy-assertion"
+        ? "Privacy assertion: not run"
+        : "Conflict assertion: not run";
+  }
+  log.textContent = "The operation log is empty.";
+  setFeedback("Reset complete. The two Sets are separate and contain four computed frames.");
+  render();
+}
+
+document.getElementById("read-inward").addEventListener("click", async () => {
+  const before = privateSet.size;
+  let accepted = 0;
+  let conflicts = 0;
+  for (const hash of [...publicSet].sort()) {
+    const result = await transfer(hash, "public", "private");
+    const record = records.get(hash);
+    if (result.accepted) {
+      const wasNew = privateSet.size > before + accepted;
+      if (wasNew) accepted++;
+      appendLog(`IN  accepted ${record.name} · ${hash}`);
+    } else if (result.conflict) {
+      conflicts++;
+      appendLog(`IN  refused ${record.name} · private=${result.conflict.privateAddress} public=${result.conflict.publicAddress}`);
+    } else {
+      appendLog(`IN  refused ${record.name} · ${result.reason}`);
+    }
+  }
+  const allDerivedVerify = (await Promise.all([...derivedPrivateSet].map(hash => verifyRecord(records.get(hash))))).every(result => result.ok);
+  setAssertion(inwardAssertion, "verified inward assimilation", allDerivedVerify && derivedPrivateSet.size > 0, `${derivedPrivateSet.size} public frame(s) now in private derived state`);
+  if (conflicts) {
+    setAssertion(conflictAssertion, "contradiction gate", true, `${conflicts} conflicting public frame(s) refused`);
+  }
+  setFeedback(`Assimilation complete: ${accepted} new, ${conflicts} refused, ${derivedPrivateSet.size} total public-derived.`, conflicts ? "try" : "good");
+  render();
+});
+
+document.getElementById("export-outward").addEventListener("click", async () => {
+  const beforeBytes = setBytes(publicSet);
+  const beforeCount = publicSet.size;
+  const privateHash = [...localPrivateSet].sort()[0];
+  const result = await transfer(privateHash, "private", "public");
+  const unchanged = beforeBytes === setBytes(publicSet) && beforeCount === publicSet.size;
+  appendLog(`OUT refused ${records.get(privateHash).name} · ${result.reason}`);
+  setAssertion(privacyAssertion, "public bytes unchanged", !result.accepted && unchanged, `count ${beforeCount} → ${publicSet.size}; bytes identical=${unchanged}`);
+  setFeedback(`Outward transfer refused. Public count stayed ${publicSet.size}; canonical bytes are unchanged.`, "good");
+  render();
+});
+
+document.getElementById("inject-conflict").addEventListener("click", async () => {
+  if (conflictingHash) {
+    setFeedback("The conflicting public frame is already present. Read inward to test it.", "try");
+    return;
+  }
+  const conflict = await makeRecord("policy.retention", { days: 7, rule: "retain" }, "public");
+  records.set(conflict.frame_hash, conflict);
+  publicSet.add(conflict.frame_hash);
+  conflictingHash = conflict.frame_hash;
+  appendLog(`PUBLIC source added a valid but contradictory declaration · ${conflict.frame_hash}`);
+  setFeedback("A correctly hashed public frame now disagrees on policy.retention. Read inward to exercise the contradiction gate.", "try");
+  render();
+});
+
+document.getElementById("test-mutation").addEventListener("click", () => {
+  const before = setBytes(publicSet);
+  const unsafeClone = new Set(publicSet);
+  unsafeClone.add([...localPrivateSet].sort()[0]);
+  const preserved = before === setBytes(unsafeClone);
+  setAssertion(privacyAssertion, "mutation test: outward writes must be impossible", preserved, "unsafe policy changed the cloned public bytes");
+  appendLog("MUTATION caught · an unsafe cloned gate exported one private hash and failed the privacy assertion; live public Set untouched");
+  setFeedback("Mutation failure detected: the unsafe clone changed public bytes. The live stores were not modified.", "good");
+});
+
+document.getElementById("reset-exercise").addEventListener("click", reset);
+
+const promptText = document.getElementById("prompt-text");
+const copyPrompt = document.getElementById("copy-prompt");
+copyPrompt.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(promptText.textContent);
+    copyPrompt.textContent = "Copied";
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(promptText);
+    const selection = getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    copyPrompt.textContent = "Selected — copy normally";
+  }
+  setTimeout(() => { copyPrompt.textContent = "Copy proof prompt"; }, 1600);
+});
+
+reset().catch(error => setFeedback("Exercise error: " + error.message, "try"));
+</script>
+</body>
+</html>

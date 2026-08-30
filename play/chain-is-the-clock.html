@@ -4,129 +4,669 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Chain Is the Clock — Frame Chains</title>
+<meta name="description" content="A standalone SHA-256 proof that dependency order survives clock skew while timestamp sorting can contradict causality.">
+<script>
+(() => {
+  const requested = new URLSearchParams(location.search).get("scoutTheme");
+  let inherited = "";
+  try {
+    inherited = window.parent !== window
+      ? window.parent.document.documentElement.getAttribute("data-theme") || ""
+      : "";
+  } catch {}
+  const theme = requested || inherited
+    || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
 <style>
-  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; --bad:#b3261e; --ok:#1e7d32; }
-  *{ box-sizing:border-box; } body{ margin:0; font:16px/1.55 system-ui; color:var(--ink); }
-  main{ max-width:52rem; margin:0 auto; padding:2rem 1rem 4rem; }
-  h1{ font-size:1.5rem; margin:.2rem 0; } .lede{ color:var(--mut); }
-  .analogy{ background:#f6f8fb; border-left:3px solid var(--accent); padding:.6rem 1rem; border-radius:0 8px 8px 0; margin:1rem 0; }
-  .devices{ display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; }
-  .dev{ flex:1; min-width:15rem; border:1px solid var(--line); border-radius:10px; padding:.8rem 1rem; }
-  .dev h3{ margin:.1rem 0 .3rem; } .clock{ font:600 1.05rem ui-monospace,monospace; }
-  .skewed .clock{ color:var(--bad); }
-  button{ font:600 .95rem system-ui; padding:.5rem .9rem; border-radius:8px; border:1px solid var(--line);
-    background:var(--accent); color:#fff; cursor:pointer; margin:.4rem .3rem .2rem 0; }
-  button.alt{ background:#fff; color:var(--ink); }
-  input[type=range]{ width:100%; }
-  .story{ border:1px solid var(--line); border-radius:10px; padding:.8rem 1rem; margin-top:1rem; }
-  .frame{ display:flex; gap:.7rem; align-items:baseline; padding:.35rem .5rem; border-bottom:1px dashed var(--line);
-    font:.85rem ui-monospace, monospace; flex-wrap:wrap; }
-  .frame b{ font-family:system-ui; }
-  .frame .h{ color:var(--accent); } .frame .t{ color:var(--mut); } .frame .twrong{ color:var(--bad); font-weight:700; }
-  .verdict{ margin:.8rem 0 0; font-weight:700; }
-  .verdict.ok{ color:var(--ok); } .verdict.bad{ color:var(--bad); }
-  .what{ background:#fffbe8; border:1px solid #eadf9a; border-radius:8px; padding:.6rem 1rem; margin-top:1.2rem; font-size:.93rem; }
-  a{ color:var(--accent); }
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16753a;
+  --cp-success-soft: #edf8f0;
+  --cp-danger: #c42b1c;
+  --cp-danger-soft: #fff0ee;
+  --cp-warning: #8a6100;
+  --cp-warning-soft: #fff8df;
+  --cp-link: #0067b8;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #505050;
+  --cp-border-strong: #737373;
+  --cp-text: #f0f0f0;
+  --cp-text-muted: #c0c0c0;
+  --cp-text-soft: #a8a8a8;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #ffb3c0;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #62d987;
+  --cp-success-soft: #183c27;
+  --cp-danger: #ff8a80;
+  --cp-danger-soft: #4a211f;
+  --cp-warning: #ffd166;
+  --cp-warning-soft: #413717;
+  --cp-link: #69b7ff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 16px/1.55 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+a {
+  color: var(--cp-link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+a:hover { color: var(--cp-accent-hover); }
+:focus-visible {
+  outline: 3px solid var(--cp-accent);
+  outline-offset: 3px;
+}
+.shell {
+  width: calc(100% - 32px);
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 0 56px;
+}
+.topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+.kicker {
+  margin: 0 0 7px;
+  color: var(--cp-accent);
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h1, h2, p { margin-top: 0; }
+h1 {
+  max-width: 760px;
+  margin-bottom: 10px;
+  font-size: clamp(34px, 6vw, 54px);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+}
+.lede {
+  max-width: 760px;
+  color: var(--cp-text-muted);
+  font-size: 18px;
+}
+.guide-grid,
+.devices,
+.checks {
+  display: grid;
+  gap: 12px;
+}
+.guide-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 28px 0;
+}
+.guide-grid section,
+.device,
+.story,
+.prompt,
+.limits {
+  border: 1px solid var(--cp-border);
+  border-radius: 14px;
+  background: var(--cp-bg-elevated);
+}
+.guide-grid section { padding: 16px; }
+.guide-grid h2 {
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+.guide-grid p,
+.guide-grid ol {
+  margin-bottom: 0;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+}
+.guide-grid ol { padding-left: 20px; }
+.devices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 18px 0;
+}
+.device { padding: 18px; }
+.device h2 {
+  margin-bottom: 6px;
+  font-size: 20px;
+}
+.clock {
+  display: block;
+  margin-bottom: 12px;
+  font: 700 17px/1.4 Consolas, "Courier New", monospace;
+}
+.skew-value { color: var(--cp-danger); }
+label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+  font-weight: 650;
+}
+input[type="range"] {
+  width: 100%;
+  margin-bottom: 10px;
+  accent-color: var(--cp-accent);
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  margin: 14px 0;
+}
+button {
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid var(--cp-accent);
+  border-radius: 9px;
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+  font: 700 14px/1.2 inherit;
+  cursor: pointer;
+}
+button.secondary {
+  border-color: var(--cp-border-strong);
+  background: var(--cp-surface);
+  color: var(--cp-text);
+}
+button.danger {
+  border-color: var(--cp-danger);
+  background: var(--cp-danger-soft);
+  color: var(--cp-danger);
+}
+button:hover:not(:disabled) { filter: brightness(0.96); }
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+.checks {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 14px 0;
+}
+.check {
+  min-height: 78px;
+  padding: 13px 14px;
+  border: 1px solid var(--cp-border);
+  border-left: 5px solid var(--cp-border-strong);
+  border-radius: 10px;
+  background: var(--cp-surface);
+}
+.check strong {
+  display: block;
+  margin-bottom: 3px;
+}
+.check span {
+  color: var(--cp-text-muted);
+  font-size: 14px;
+}
+.check.pass { border-left-color: var(--cp-success); }
+.check.fail { border-left-color: var(--cp-danger); }
+.check.pending { border-left-color: var(--cp-warning); }
+.story { padding: 16px; }
+.story-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.story-head h2 { margin-bottom: 0; font-size: 20px; }
+.story-head span { color: var(--cp-text-muted); font-size: 13px; }
+.empty {
+  padding: 18px 4px;
+  color: var(--cp-text-muted);
+}
+.frame {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 10px 4px;
+  border-top: 1px dashed var(--cp-border);
+}
+.frame:first-child { border-top: 0; }
+.frame-seq {
+  grid-row: 1 / span 2;
+  color: var(--cp-accent);
+  font: 750 14px/1.5 Consolas, "Courier New", monospace;
+}
+.frame-main { font-weight: 650; }
+.frame-meta {
+  min-width: 0;
+  color: var(--cp-text-muted);
+  font: 12px/1.5 Consolas, "Courier New", monospace;
+  overflow-wrap: anywhere;
+}
+.frame.out-of-order { background: var(--cp-danger-soft); }
+.prompt,
+.limits {
+  margin-top: 18px;
+  padding: 18px;
+}
+.prompt h2,
+.limits h2 {
+  margin-bottom: 7px;
+  font-size: 19px;
+}
+.prompt p,
+.limits p { color: var(--cp-text-muted); }
+pre {
+  max-height: 220px;
+  margin: 12px 0;
+  padding: 13px;
+  overflow: auto;
+  border: 1px solid var(--cp-border);
+  border-radius: 9px;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+  font: 12px/1.55 Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+}
+.copy-status {
+  min-height: 1.4em;
+  margin: 8px 0 0;
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+@media (max-width: 520px) {
+  .guide-grid,
+  .devices,
+  .checks { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
 </style>
 </head>
 <body>
-<main>
-<p><a href="../index.html">← Frame Chains</a></p>
-<h1>⏱ The Chain Is the Clock</h1>
-<p class="lede">In the real experiment behind the paper, one machine's clock was
-<b>17.6&nbsp;seconds wrong</b> — and the shared story stayed in perfect order. Here's why.</p>
+<main class="shell">
+  <nav class="topline" aria-label="Publication navigation">
+    <a href="../guide.html">Guided evidence path</a>
+    <a href="../paper.html#clock-proof">Paper section</a>
+    <a href="../index.html">Project home</a>
+  </nav>
 
-<div class="analogy"><b>Analogy:</b> a relay race. You know who ran third because they took
-the baton from the second runner — not because you trusted everyone's wristwatch. Each new
-entry physically holds a fingerprint of the one before it. The <i>hand-off</i> is the order.</div>
+  <header>
+    <p class="kicker">Proof 1 of 6 · Causal order</p>
+    <h1>The chain is the clock</h1>
+    <p class="lede">Two devices can disagree about wall time and still produce one verifiable order. Each frame names the SHA-256 address of its predecessor; timestamps remain evidence, but they do not decide causality.</p>
+  </header>
 
-<div class="devices">
-  <div class="dev" id="devA">
-    <h3>💻 The Mac</h3>
-    <div>clock: <span class="clock" id="clockA">—</span></div>
-    <button onclick="act('A')">Do something on the Mac</button>
+  <section class="guide-grid" aria-label="Exercise guidance">
+    <section>
+      <h2>What you are looking at</h2>
+      <p>Two simulated devices append records to one chain. The displayed hashes are computed by your browser, not prewritten examples.</p>
+    </section>
+    <section>
+      <h2>Do this</h2>
+      <ol>
+        <li>Select <strong>Run guided sample</strong>.</li>
+        <li>Switch to wall-clock sorting.</li>
+        <li>Tamper with a predecessor link.</li>
+      </ol>
+    </section>
+    <section>
+      <h2>Watch for</h2>
+      <p>Timestamp sorting moves a later frame ahead of its dependency. Chain order stays stable. Tampering then turns chain integrity red.</p>
+    </section>
+    <section>
+      <h2>What this demonstrates</h2>
+      <p>Dependency links preserve causal order under clock skew, and recomputation detects a changed link. It does not prove signatures, transport security, or global consensus.</p>
+    </section>
+  </section>
+
+  <section class="devices" aria-label="Simulated devices">
+    <article class="device">
+      <h2>Mac</h2>
+      <span class="clock" id="clockA">--:--:--.---</span>
+      <button id="actA" type="button">Append a Mac action</button>
+    </article>
+    <article class="device">
+      <h2>Steam Deck</h2>
+      <span class="clock skew-value" id="clockB">--:--:--.---</span>
+      <label for="skew">Deck clock offset: <strong id="skewLabel">-17.6 seconds</strong></label>
+      <input id="skew" type="range" min="-120" max="120" step="0.1" value="-17.6">
+      <button id="actB" type="button">Append a Deck action</button>
+    </article>
+  </section>
+
+  <div class="controls" aria-label="Proof controls">
+    <button id="sampleBtn" type="button">Run guided sample</button>
+    <button id="sortBtn" class="secondary" type="button">Show wall-clock order</button>
+    <button id="tamperBtn" class="danger" type="button" disabled>Tamper with frame 1</button>
+    <button id="resetBtn" class="secondary" type="button">Reset</button>
   </div>
-  <div class="dev skewed" id="devB">
-    <h3>🎮 The Steam Deck</h3>
-    <div>clock: <span class="clock" id="clockB">—</span> <span style="color:var(--bad)">(wrong!)</span></div>
-    <label>how wrong is its clock? <b id="skewLabel">-17.6 s</b></label>
-    <input type="range" id="skew" min="-120" max="120" step="0.1" value="-17.6" oninput="skewChanged()">
-    <button onclick="act('B')">Do something on the Deck</button>
-  </div>
-</div>
 
-<div class="story">
-  <b>The shared story</b>
-  <button class="alt" id="sortBtn" onclick="toggleSort()">Sort by wall-clock time (the wrong way)</button>
-  <div id="frames"></div>
-  <div class="verdict" id="verdict"></div>
-</div>
+  <section class="checks" aria-label="Live assertions" aria-live="polite">
+    <div class="check pending" id="chainCheck">
+      <strong>Chain integrity: waiting</strong>
+      <span>Append at least one frame.</span>
+    </div>
+    <div class="check pending" id="orderCheck">
+      <strong>Ordering comparison: waiting</strong>
+      <span>Run the sample, then compare the two orderings.</span>
+    </div>
+  </section>
 
-<div class="what"><b>What am I looking at?</b> Every entry (“frame”) carries a real SHA-256
-fingerprint of the entry before it — computed live in your browser. <b>Chain order</b> can't
-lie: each frame provably came after the one it fingerprints. <b>Wall-clock order</b> breaks
-the moment one clock is wrong — flip the sort and watch the Deck's entries jump to the
-wrong place. That's the paper's §3.8: the timestamp is a note in the margin; the chain is
-the clock.</div>
+  <section class="story" aria-labelledby="story-title">
+    <div class="story-head">
+      <h2 id="story-title">Shared frame history</h2>
+      <span id="viewLabel">Dependency order</span>
+    </div>
+    <div id="frames"><p class="empty">No frames yet.</p></div>
+  </section>
+
+  <section class="prompt" id="proof-prompt">
+    <p class="kicker">Independent reproduction</p>
+    <h2>Ask any LLM to build a separate proof</h2>
+    <p>Copy this specification into another model. Compare its implementation and failure path with this page rather than asking it to endorse this page.</p>
+    <pre id="promptText"></pre>
+    <button id="copyBtn" type="button">Copy proof prompt</button>
+    <p class="copy-status" id="copyStatus" role="status" aria-live="polite"></p>
+  </section>
+
+  <aside class="limits">
+    <h2>Scope and limit</h2>
+    <p>This page is a local explanatory model of hash-linked causal order. The paper's reported 17.6-second disagreement is an estate observation; this browser exercise reproduces the mechanism, not that field run.</p>
+  </aside>
 </main>
+
 <script>
 "use strict";
+
+const PROOF_PROMPT = `Build one self-contained HTML file that independently demonstrates causal ordering with a SHA-256 frame chain.
+
+Requirements:
+- Use only HTML, CSS, and browser JavaScript; no libraries or network requests.
+- Simulate two devices with independently adjustable wall-clock offsets.
+- Append frames serially. Each frame must contain seq, device, action, claimedTime, prev, and hash.
+- Compute hash with crypto.subtle.digest("SHA-256", ...) over canonical JSON containing all frame fields except hash.
+- Provide both dependency-order and wall-clock-order views.
+- Recompute every hash and predecessor link in an independent verifier.
+- Include a guided sample where wall-clock order contradicts dependency order.
+- Include a deliberate tamper control that changes a predecessor link and makes verification fail.
+- Show visible PASS, FAIL, and inconclusive states; include Reset.
+- Explain what the result proves and explicitly state that it does not prove signatures, transport security, or consensus.
+- Make controls keyboard accessible, responsive, and usable with reduced motion.
+
+Return only the complete runnable HTML file.`;
+
 const chain = [];
-let skewMs = -17600, sortByClock = false, t0 = Date.now();
-async function sha(s){
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+const verbs = {
+  A: ["backed up photos", "replied to an email", "ran the tests"],
+  B: ["saved the game", "synced a mod", "updated a chart"]
+};
+let skewMs = -17600;
+let sortByClock = false;
+let busy = false;
+let generation = 0;
+let renderVersion = 0;
+
+const byId = (id) => document.getElementById(id);
+
+async function sha256(text) {
+  const bytes = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
-function fmt(ms){ const d=new Date(ms); return d.toTimeString().slice(0,8)+"."+String(d.getMilliseconds()).padStart(3,"0"); }
-function tickClocks(){
-  document.getElementById("clockA").textContent = fmt(Date.now());
-  document.getElementById("clockB").textContent = fmt(Date.now()+skewMs);
+
+function canonical(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
+  return `{${Object.keys(value).sort()
+    .map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`)
+    .join(",")}}`;
 }
-setInterval(tickClocks, 200); tickClocks();
-function skewChanged(){
-  skewMs = parseFloat(document.getElementById("skew").value)*1000;
-  document.getElementById("skewLabel").textContent = (skewMs/1000).toFixed(1)+" s";
-}
-const VERBS = { A:["backed up photos","replied to an email","ran the tests"],
-                B:["saved the game","synced a mod","updated a chart"] };
-async function act(dev){
-  const seq = chain.length;
-  const prev = seq ? chain[seq-1].hash : "genesis";
-  const what = VERBS[dev][seq % 3];
-  const claimed = Date.now() + (dev==="B" ? skewMs : 0);
-  const hash = await sha(prev + "|" + dev + "|" + what + "|" + seq);
-  chain.push({ seq, dev, what, claimed, prev, hash });
-  render();
-}
-function toggleSort(){
-  sortByClock = !sortByClock;
-  document.getElementById("sortBtn").textContent = sortByClock
-    ? "Sort by chain order (the true way)" : "Sort by wall-clock time (the wrong way)";
-  render();
-}
-function render(){
-  const box = document.getElementById("frames"); box.textContent = "";
-  const view = [...chain];
-  if (sortByClock) view.sort((a,b)=>a.claimed-b.claimed);
-  let broken = false;
-  view.forEach((f,i)=>{
-    if (f.seq !== i) broken = true;
-    const div = document.createElement("div"); div.className = "frame";
-    div.innerHTML = `<b>#${f.seq}</b> ${f.dev==="A"?"💻":"🎮"} ${f.what}
-      <span class="h">holds ${f.prev.slice(0,8)}…</span>
-      <span class="${sortByClock && f.dev==="B" ? "twrong":"t"}">claims ${fmt(f.claimed)}</span>
-      <span class="h">is ${f.hash.slice(0,8)}…</span>`;
-    box.appendChild(div);
+
+function material(frame) {
+  return canonical({
+    action: frame.action,
+    claimedTime: frame.claimedTime,
+    device: frame.device,
+    prev: frame.prev,
+    seq: frame.seq
   });
-  const v = document.getElementById("verdict");
-  if (!chain.length){ v.textContent = ""; return; }
-  if (!sortByClock){ v.className = "verdict ok";
-    v.textContent = "✓ Chain order: every frame holds the fingerprint of the one before it. Always true, any clocks."; }
-  else { v.className = "verdict " + (broken ? "bad" : "ok");
-    v.textContent = broken
-      ? "✗ Wall-clock order just rearranged history — frames now sit BEFORE the entries they provably came after."
-      : "Wall-clock order happens to match — now make the Deck's clock wrong and interleave actions…"; }
 }
+
+function formatTime(milliseconds) {
+  const date = new Date(milliseconds);
+  return `${date.toTimeString().slice(0, 8)}.${String(date.getMilliseconds()).padStart(3, "0")}`;
+}
+
+function updateClocks() {
+  byId("clockA").textContent = formatTime(Date.now());
+  byId("clockB").textContent = formatTime(Date.now() + skewMs);
+}
+
+function setBusy(next) {
+  busy = next;
+  for (const id of ["actA", "actB", "sampleBtn", "resetBtn"]) {
+    byId(id).disabled = next;
+  }
+  byId("tamperBtn").disabled = next || chain.length < 2;
+}
+
+async function append(device, forcedDelay = 0) {
+  if (forcedDelay) {
+    await new Promise((resolve) => setTimeout(resolve, forcedDelay));
+  }
+  const epoch = generation;
+  const seq = chain.length;
+  const frame = {
+    seq,
+    device,
+    action: verbs[device][seq % verbs[device].length],
+    claimedTime: Date.now() + (device === "B" ? skewMs : 0),
+    prev: seq ? chain[seq - 1].hash : "genesis"
+  };
+  frame.hash = await sha256(material(frame));
+  if (epoch !== generation) return;
+  chain.push(frame);
+}
+
+async function runExclusive(action) {
+  if (busy) return;
+  setBusy(true);
+  try {
+    await action();
+    await render();
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function verifyChain() {
+  for (let index = 0; index < chain.length; index += 1) {
+    const frame = chain[index];
+    const expectedPrev = index ? chain[index - 1].hash : "genesis";
+    if (frame.seq !== index || frame.prev !== expectedPrev) return false;
+    if (frame.hash !== await sha256(material(frame))) return false;
+  }
+  return true;
+}
+
+function setCheck(element, state, title, detail) {
+  element.className = `check ${state}`;
+  element.innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
+}
+
+async function render() {
+  const version = ++renderVersion;
+  const frames = byId("frames");
+  const view = [...chain];
+  if (sortByClock) {
+    view.sort((left, right) =>
+      left.claimedTime - right.claimedTime || left.seq - right.seq
+    );
+  }
+
+  if (!view.length) {
+    frames.innerHTML = '<p class="empty">No frames yet.</p>';
+  } else {
+    frames.textContent = "";
+    view.forEach((frame, displayIndex) => {
+      const outOfOrder = sortByClock && frame.seq !== displayIndex;
+      const row = document.createElement("div");
+      row.className = `frame${outOfOrder ? " out-of-order" : ""}`;
+      row.innerHTML = `
+        <span class="frame-seq">#${frame.seq}</span>
+        <span class="frame-main">${frame.device === "A" ? "Mac" : "Steam Deck"} · ${frame.action}</span>
+        <span class="frame-meta">claims ${formatTime(frame.claimedTime)} · prev ${frame.prev.slice(0, 12)}… · hash ${frame.hash.slice(0, 12)}…</span>`;
+      frames.appendChild(row);
+    });
+  }
+
+  byId("viewLabel").textContent = sortByClock
+    ? "Wall-clock order"
+    : "Dependency order";
+  byId("sortBtn").textContent = sortByClock
+    ? "Show dependency order"
+    : "Show wall-clock order";
+
+  const valid = await verifyChain();
+  if (version !== renderVersion) return;
+  if (!chain.length) {
+    setCheck(
+      byId("chainCheck"),
+      "pending",
+      "Chain integrity: waiting",
+      "Append at least one frame."
+    );
+  } else if (valid) {
+    setCheck(
+      byId("chainCheck"),
+      "pass",
+      "PASS · hashes and predecessor links verify",
+      `${chain.length} frame${chain.length === 1 ? "" : "s"} recomputed independently.`
+    );
+  } else {
+    setCheck(
+      byId("chainCheck"),
+      "fail",
+      "FAIL · chain mutation detected",
+      "A stored predecessor or hash no longer matches the recomputed chain."
+    );
+  }
+
+  const wallClockContradiction = sortByClock
+    && view.some((frame, index) => frame.seq !== index);
+  if (wallClockContradiction) {
+    setCheck(
+      byId("orderCheck"),
+      "fail",
+      "EXPECTED FAIL · timestamps contradict causality",
+      "Wall-clock sorting placed at least one frame before a dependency it followed."
+    );
+  } else if (sortByClock && chain.length > 1) {
+    setCheck(
+      byId("orderCheck"),
+      "pending",
+      "Inconclusive · these timestamps happen to agree",
+      "Increase the skew or alternate devices, then compare again."
+    );
+  } else if (chain.length > 1) {
+    setCheck(
+      byId("orderCheck"),
+      "pass",
+      "PASS · dependency order remains stable",
+      "Switch to wall-clock order to test whether the timestamps agree."
+    );
+  } else {
+    setCheck(
+      byId("orderCheck"),
+      "pending",
+      "Ordering comparison: waiting",
+      "Two or more frames are required."
+    );
+  }
+}
+
+function reset() {
+  generation += 1;
+  chain.length = 0;
+  skewMs = -17600;
+  sortByClock = false;
+  byId("skew").value = "-17.6";
+  byId("skewLabel").textContent = "-17.6 seconds";
+  render();
+}
+
+byId("actA").addEventListener("click", () =>
+  runExclusive(async () => append("A"))
+);
+byId("actB").addEventListener("click", () =>
+  runExclusive(async () => append("B"))
+);
+byId("sampleBtn").addEventListener("click", () =>
+  runExclusive(async () => {
+    reset();
+    await append("A");
+    await append("B", 80);
+    await append("A", 80);
+  })
+);
+byId("sortBtn").addEventListener("click", () => {
+  sortByClock = !sortByClock;
+  render();
+});
+byId("tamperBtn").addEventListener("click", () => {
+  if (chain.length < 2) return;
+  chain[1] = { ...chain[1], prev: "0".repeat(64) };
+  render();
+});
+byId("resetBtn").addEventListener("click", reset);
+byId("skew").addEventListener("input", (event) => {
+  skewMs = Number(event.target.value) * 1000;
+  byId("skewLabel").textContent = `${(skewMs / 1000).toFixed(1)} seconds`;
+  updateClocks();
+});
+byId("copyBtn").addEventListener("click", async () => {
+  const status = byId("copyStatus");
+  try {
+    await navigator.clipboard.writeText(PROOF_PROMPT);
+    status.textContent = "Proof prompt copied.";
+  } catch (error) {
+    status.textContent = `Copy failed: ${error.message}`;
+  }
+});
+
+byId("promptText").textContent = PROOF_PROMPT;
+setInterval(updateClocks, 200);
+updateClocks();
+render();
 </script>
 </body>
 </html>

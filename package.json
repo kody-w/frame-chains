@@ -1,0 +1,17 @@
+{
+  "name": "frame-chains-rapp-paper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node papercheck.mjs chromium full",
+    "smoke": "node papercheck.mjs chromium smoke",
+    "papercheck": "node papercheck.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

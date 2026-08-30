@@ -4,131 +4,866 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Succession Without Elections — Frame Chains</title>
+<meta name="description" content="A deterministic, hash-linked proof of lease expiry, ranked succession, delayed observation, and boundary-safe resumption.">
+<script>
+(() => {
+  const requested = new URLSearchParams(location.search).get("scoutTheme");
+  let inherited = "";
+  try {
+    inherited = window.parent !== window
+      ? window.parent.document.documentElement.getAttribute("data-theme") || ""
+      : "";
+  } catch {}
+  const theme = requested || inherited
+    || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
 <style>
-  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; --bad:#b3261e; --ok:#1e7d32; --warn:#8a6d00; }
-  *{ box-sizing:border-box; } body{ margin:0; font:16px/1.55 system-ui; color:var(--ink); }
-  main{ max-width:52rem; margin:0 auto; padding:2rem 1rem 4rem; }
-  h1{ font-size:1.5rem; margin:.2rem 0; } .lede{ color:var(--mut); }
-  .analogy{ background:#f6f8fb; border-left:3px solid var(--accent); padding:.6rem 1rem; border-radius:0 8px 8px 0; margin:1rem 0; }
-  .row{ display:flex; gap:.8rem; flex-wrap:wrap; margin:1rem 0; }
-  .r{ flex:1; min-width:12rem; border:1px solid var(--line); border-radius:10px; padding:.7rem .9rem; transition:.25s; }
-  .r h3{ margin:.1rem 0 .2rem; } .r .st{ font-weight:700; }
-  .r.leader{ border-color:#9ec5ec; background:#f2f7fd; } .r.leader .st{ color:var(--accent); }
-  .r.down{ opacity:.45; } .r.waiting .st{ color:var(--warn); }
-  .lease{ height:10px; background:#e9e9ec; border-radius:5px; overflow:hidden; margin-top:.5rem; }
-  .lease i{ display:block; height:100%; background:var(--accent); transition:width .2s linear; }
-  button{ font:600 .95rem system-ui; padding:.5rem .9rem; border-radius:8px; border:1px solid var(--line);
-    background:var(--accent); color:#fff; cursor:pointer; margin:.3rem .3rem .2rem 0; }
-  button.alt{ background:#fff; color:var(--ink); }
-  label{ font:.95rem system-ui; margin-right:1rem; }
-  .log{ border:1px solid var(--line); border-radius:10px; padding:.7rem 1rem; margin-top:.8rem;
-    font:.84rem ui-monospace,monospace; max-height:15rem; overflow:auto; }
-  .log .s{ color:var(--accent); font-weight:700; } .log .w{ color:var(--warn); } .log .x{ color:var(--bad); font-weight:700; }
-  .what{ background:#fffbe8; border:1px solid #eadf9a; border-radius:8px; padding:.6rem 1rem; margin-top:1.2rem; font-size:.93rem; }
-  a{ color:var(--accent); }
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16753a;
+  --cp-success-soft: #edf8f0;
+  --cp-danger: #c42b1c;
+  --cp-danger-soft: #fff0ee;
+  --cp-warning: #8a6100;
+  --cp-warning-soft: #fff8df;
+  --cp-link: #0067b8;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #505050;
+  --cp-border-strong: #737373;
+  --cp-text: #f0f0f0;
+  --cp-text-muted: #c0c0c0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #ffb3c0;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #62d987;
+  --cp-success-soft: #183c27;
+  --cp-danger: #ff8a80;
+  --cp-danger-soft: #4a211f;
+  --cp-warning: #ffd166;
+  --cp-warning-soft: #413717;
+  --cp-link: #69b7ff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 16px/1.55 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+a {
+  color: var(--cp-link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+a:hover { color: var(--cp-accent-hover); }
+:focus-visible {
+  outline: 3px solid var(--cp-accent);
+  outline-offset: 3px;
+}
+.shell {
+  width: calc(100% - 32px);
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 0 56px;
+}
+.topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+.kicker {
+  margin: 0 0 7px;
+  color: var(--cp-accent);
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  max-width: 840px;
+  margin-bottom: 10px;
+  font-size: clamp(34px, 6vw, 54px);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+}
+.lede {
+  max-width: 780px;
+  color: var(--cp-text-muted);
+  font-size: 18px;
+}
+.guide-grid,
+.nodes,
+.metrics,
+.checks {
+  display: grid;
+  gap: 12px;
+}
+.guide-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 28px 0;
+}
+.guide-grid section,
+.node,
+.metric,
+.log-panel,
+.prompt,
+.limits {
+  border: 1px solid var(--cp-border);
+  border-radius: 14px;
+  background: var(--cp-bg-elevated);
+}
+.guide-grid section { padding: 16px; }
+.guide-grid h2 { margin-bottom: 5px; font-size: 16px; }
+.guide-grid p,
+.guide-grid ol {
+  margin-bottom: 0;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+}
+.guide-grid ol { padding-left: 20px; }
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  margin: 14px 0;
+}
+button {
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid var(--cp-accent);
+  border-radius: 9px;
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+  font: 700 14px/1.2 inherit;
+  cursor: pointer;
+}
+button.secondary {
+  border-color: var(--cp-border-strong);
+  background: var(--cp-surface);
+  color: var(--cp-text);
+}
+button.danger {
+  border-color: var(--cp-danger);
+  background: var(--cp-danger-soft);
+  color: var(--cp-danger);
+}
+button:hover:not(:disabled) { filter: brightness(0.96); }
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+.lag-control {
+  display: inline-flex;
+  min-height: 42px;
+  gap: 7px;
+  align-items: center;
+  padding: 7px 11px;
+  border: 1px solid var(--cp-border);
+  border-radius: 9px;
+  background: var(--cp-surface);
+  color: var(--cp-text-muted);
+  font-size: 14px;
+  font-weight: 650;
+}
+.lag-control input { accent-color: var(--cp-accent); }
+.metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+}
+.metric { padding: 13px; }
+.metric span {
+  display: block;
+  color: var(--cp-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.metric strong {
+  display: block;
+  margin-top: 4px;
+  font: 750 21px/1.2 Consolas, "Courier New", monospace;
+}
+.nodes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+}
+.node {
+  min-height: 160px;
+  padding: 16px;
+}
+.node h3 { margin-bottom: 4px; font-size: 18px; }
+.node .rank {
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+.node .state {
+  display: block;
+  margin: 14px 0 6px;
+  font-weight: 750;
+}
+.node .detail {
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+.node.leader {
+  border-color: var(--cp-accent);
+  box-shadow: inset 0 0 0 2px var(--cp-accent-soft);
+}
+.node.down { opacity: 0.52; }
+.node.waiting .state { color: var(--cp-warning); }
+.node.leader .state { color: var(--cp-accent); }
+.checks {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+}
+.check {
+  min-height: 92px;
+  padding: 13px 14px;
+  border: 1px solid var(--cp-border);
+  border-left: 5px solid var(--cp-border-strong);
+  border-radius: 10px;
+  background: var(--cp-surface);
+}
+.check strong {
+  display: block;
+  margin-bottom: 3px;
+}
+.check span {
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+.check.pass { border-left-color: var(--cp-success); }
+.check.fail { border-left-color: var(--cp-danger); }
+.check.pending { border-left-color: var(--cp-warning); }
+.log-panel { padding: 16px; }
+.log-panel h2 { margin-bottom: 9px; font-size: 20px; }
+.log {
+  max-height: 320px;
+  overflow: auto;
+  color: var(--cp-text-muted);
+  font: 12px/1.55 Consolas, "Courier New", monospace;
+}
+.log-line {
+  padding: 7px 0;
+  border-top: 1px dashed var(--cp-border);
+  overflow-wrap: anywhere;
+}
+.log-line:first-child { border-top: 0; }
+.log-line strong { color: var(--cp-text); }
+.prompt,
+.limits {
+  margin-top: 18px;
+  padding: 18px;
+}
+.prompt h2,
+.limits h2 { margin-bottom: 7px; font-size: 19px; }
+.prompt p,
+.limits p { color: var(--cp-text-muted); }
+pre {
+  max-height: 220px;
+  margin: 12px 0;
+  padding: 13px;
+  overflow: auto;
+  border: 1px solid var(--cp-border);
+  border-radius: 9px;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+  font: 12px/1.55 Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+}
+.copy-status {
+  min-height: 1.4em;
+  margin: 8px 0 0;
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+@media (max-width: 520px) {
+  .guide-grid,
+  .checks { grid-template-columns: 1fr; }
+  .nodes { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .metrics { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
 </style>
 </head>
 <body>
-<main>
-<p><a href="../index.html">← Frame Chains</a></p>
-<h1>👑 Succession Without Elections</h1>
-<p class="lede">Knock out the leader. Nobody votes. Nobody fights. The rules were signed in
-advance — and a slow network can never crown the wrong machine.</p>
+<main class="shell">
+  <nav class="topline" aria-label="Publication navigation">
+    <a href="../guide.html">Guided evidence path</a>
+    <a href="../paper.html#succession-proof">Paper section</a>
+    <a href="../index.html">Project home</a>
+  </nav>
 
-<div class="analogy"><b>Analogy:</b> a lifeguard chair with a posted rota. The lifeguard
-renews a sand-timer while on duty. If the timer runs ALL the way out, the #2 on the rota
-waits one extra beat (and #3 waits two) before climbing up — so a #3 who merely
-<i>heard late</i> can never jump the queue. When #1 comes back, they wait for the timer's
-boundary, then take the chair back. Every change is written in the logbook, in ink.</div>
+  <header>
+    <p class="kicker">Proof 3 of 6 · Ranked succession</p>
+    <h1>Succession without elections</h1>
+    <p class="lede">A precommitted rank order and bounded leases determine who may write after failure. Delayed observation only postpones a lower-ranked candidate; it never makes that candidate earlier.</p>
+  </header>
 
-<div>
-  <button onclick="knock()" id="knockBtn">💥 Knock out the leader</button>
-  <button class="alt" onclick="revive()" id="reviveBtn" disabled>❤️ Bring rank 1 back</button>
-  <label style="margin-left:.5rem"><input type="checkbox" id="lag"> make rank 3 laggy (hears everything late)</label>
-</div>
+  <section class="guide-grid" aria-label="Exercise guidance">
+    <section>
+      <h2>What you are looking at</h2>
+      <p>Three ranked machines, a logical beat counter, a current lease boundary, and a SHA-256-linked control log.</p>
+    </section>
+    <section>
+      <h2>Do this</h2>
+      <ol>
+        <li>Leave rank 3 lag enabled and run the guided scenario.</li>
+        <li>Inspect the claim and resumption beats.</li>
+        <li>Inject an unsafe rank-3 claim.</li>
+      </ol>
+    </section>
+    <section>
+      <h2>Watch for</h2>
+      <p>Rank 2 claims only after expiry plus its grace. Rank 3's lag moves its eligibility later. Rank 1 returns only at the interim lease boundary.</p>
+    </section>
+    <section>
+      <h2>What this demonstrates</h2>
+      <p>Precommitted rank arithmetic can produce deterministic failover without an election. It does not prove liveness under partitions or authenticate the roster.</p>
+    </section>
+  </section>
 
-<div class="row" id="rappters"></div>
-<div class="log" id="log"><b>The control chain</b> — signed frames, appended only, never rewritten.</div>
+  <div class="controls" aria-label="Proof controls">
+    <button id="sampleBtn" type="button">Run guided scenario</button>
+    <button id="beatBtn" type="button">Advance one beat</button>
+    <button id="knockBtn" class="secondary" type="button">Knock out current leader</button>
+    <button id="reviveBtn" class="secondary" type="button" disabled>Bring rank 1 back</button>
+    <label class="lag-control"><input id="lagToggle" type="checkbox" checked> Rank 3 observes two beats late</label>
+    <button id="unsafeBtn" class="danger" type="button">Inject unsafe rank-3 claim</button>
+    <button id="resetBtn" class="secondary" type="button">Reset</button>
+  </div>
 
-<div class="what"><b>What am I looking at?</b> The roster (who's #1, #2, #3) is a signed
-frame minted in advance. Every tick the leader writes carries a short <b>lease</b>. Only
-when a lease fully expires may the next rank act — and rank r must wait (r−1) extra grace
-beats, so <b>latency can't cause a coup</b>: the laggy #3 just ends up waiting longer, never
-jumping in early. When the old leader returns it <i>defers</i> until the current lease's
-boundary, then writes a resumption frame. History is never edited — you can scroll the
-logbook and replay exactly who led when, and why. That's §3.5 — proven in the paper's
-five-scenario harness (A1–A5) plus a live two-hour lease.</div>
+  <section class="metrics" aria-label="Current lease state">
+    <div class="metric"><span>Logical beat</span><strong id="beatMetric">0</strong></div>
+    <div class="metric"><span>Active leader</span><strong id="leaderMetric">rank 1</strong></div>
+    <div class="metric"><span>Lease boundary</span><strong id="leaseMetric">beat 4</strong></div>
+  </section>
+
+  <section class="nodes" id="nodes" aria-label="Succession roster"></section>
+
+  <section class="checks" aria-label="Live assertions" aria-live="polite">
+    <div class="check pending" id="chainCheck">
+      <strong>Control chain: waiting</strong>
+      <span>Initializing the roster.</span>
+    </div>
+    <div class="check pending" id="safetyCheck">
+      <strong>Lease safety: waiting</strong>
+      <span>Run a succession path.</span>
+    </div>
+    <div class="check pending" id="sequenceCheck">
+      <strong>Rank and resumption: waiting</strong>
+      <span>Run the guided scenario.</span>
+    </div>
+  </section>
+
+  <section class="log-panel" aria-labelledby="log-title">
+    <h2 id="log-title">Append-only control history</h2>
+    <div class="log" id="log"><p>Initializing…</p></div>
+  </section>
+
+  <section class="prompt" id="proof-prompt">
+    <p class="kicker">Independent reproduction</p>
+    <h2>Ask any LLM to build a separate proof</h2>
+    <p>The specification requires an independent semantic verifier, not only a visualization of the same transition code.</p>
+    <pre id="promptText"></pre>
+    <button id="copyBtn" type="button">Copy proof prompt</button>
+    <p class="copy-status" id="copyStatus" role="status" aria-live="polite"></p>
+  </section>
+
+  <aside class="limits">
+    <h2>Scope and limit</h2>
+    <p>This deterministic teaching model uses logical beats, not wall-clock timers, and models a precommitted roster without implementing signatures. The paper reports a separate five-scenario harness and a two-hour live lease; this page explains the transition rule and its failure oracle.</p>
+  </aside>
 </main>
+
 <script>
 "use strict";
-const R = [
-  { name:"🤖 rappterone", rank:1, up:true },
-  { name:"🦾 rapptertwo", rank:2, up:true },
-  { name:"🖥 battlestation", rank:3, up:true },
+
+const PROOF_PROMPT = `Build one self-contained HTML file that independently demonstrates election-free ranked succession with leases.
+
+Requirements:
+- Use only HTML, CSS, and browser JavaScript; no libraries or network requests.
+- Model three nodes with fixed ranks 1, 2, and 3, a logical beat counter, and a lease boundary.
+- When a leader fails, forbid all takeover before lease expiry.
+- Give rank r a deterministic grace of GRACE * (r - 1) beats; model delayed observation as additional waiting, never less waiting.
+- Let the lowest eligible live rank claim first. A returning rank 1 must wait for the interim lease boundary before resumption.
+- Append roster, failure, renewal, succession, and resumption events to a SHA-256 predecessor chain.
+- Implement an independent verifier that recomputes hashes and checks every leadership claim from its recorded boundary and candidate eligibility data.
+- Include manual beat stepping, a guided replay, Reset, and an unsafe rank-3 claim mutation that the verifier rejects.
+- Show visible PASS, FAIL, and waiting states.
+- State that the model does not prove authentication, partition liveness, or real-time scheduling.
+- Make controls keyboard accessible, responsive, and reduced-motion safe.
+
+Return only the complete runnable HTML file.`;
+
+const LEASE_LENGTH = 4;
+const GRACE = 2;
+const nodes = [
+  { name: "Rappterone", rank: 1, up: true },
+  { name: "Rapptertwo", rank: 2, up: true },
+  { name: "Battlestation", rank: 3, up: true }
 ];
-const LEASE = 6, GRACE = 3; // beats
-let leader = 0, lease = LEASE, waitLeft = null, waiter = null, beatNo = 0, resuming = false;
-function el(id){ return document.getElementById(id); }
-function logLine(html){ const l=el("log"); const d=document.createElement("div"); d.innerHTML=`<span style="color:#999">b${String(beatNo).padStart(2,"0")}</span> `+html; l.appendChild(d); l.scrollTop=l.scrollHeight; }
-function paint(){
-  const box = el("rappters"); box.textContent = "";
-  R.forEach((r,i)=>{
-    const d = document.createElement("div");
-    d.className = "r" + (i===leader && r.up ? " leader":"") + (!r.up ? " down":"") + (i===waiter ? " waiting":"");
-    let st = !r.up ? "down" : i===leader ? "LEADER (holds the lease)" : i===waiter ? `waiting ${waitLeft} beat(s)` : "follower — refuses to mint";
-    d.innerHTML = `<h3>${r.name}</h3><div>rank ${r.rank}${el("lag")?.checked && r.rank===3 ? " · laggy":""}</div>
-      <div class="st">${st}</div><div class="lease"><i style="width:${i===leader&&r.up ? (lease/LEASE*100):0}%"></i></div>`;
-    box.appendChild(d);
-  });
+
+let beat = 0;
+let leaderIndex = 0;
+let leaseUntil = LEASE_LENGTH;
+let failedLeaseUntil = null;
+let returningRankOne = false;
+let frames = [];
+let busy = false;
+let renderVersion = 0;
+
+const byId = (id) => document.getElementById(id);
+
+async function sha256(text) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text)
+  );
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
-function knock(){
-  if (!R[leader].up) return;
-  R[leader].up = false;
-  logLine(`<span class="x">💥 ${R[leader].name} goes dark mid-lease.</span> Followers keep REFUSING to mint — the lease is still live (split-brain impossible).`);
-  el("knockBtn").disabled = true; el("reviveBtn").disabled = false;
-  paint();
+
+function frameMaterial(frame) {
+  return JSON.stringify([frame.seq, frame.type, frame.payload, frame.prev]);
 }
-function revive(){
-  R[0].up = true; resuming = true;
-  logLine(`❤️ ${R[0].name} returns — and <b>defers</b> to the live interim lease (no barging; it waits for the boundary).`);
-  el("reviveBtn").disabled = true;
-  paint();
+
+async function appendFrame(type, payload) {
+  const frame = {
+    seq: frames.length,
+    type,
+    payload,
+    prev: frames.length ? frames[frames.length - 1].hash : "genesis"
+  };
+  frame.hash = await sha256(frameMaterial(frame));
+  frames.push(frame);
+  return frame;
 }
-function beat(){
-  beatNo++;
-  if (R[leader].up){
-    lease--;
-    if (lease<=0){
-      if (resuming && leader!==0){
-        leader = 0; lease = LEASE; resuming = false; waiter=null; el("knockBtn").disabled=false;
-        logLine(`<span class="s">estate.resumption frame</span> — rank 1 reclaims AT THE LEASE BOUNDARY. Sequence preserved; nothing rewritten.`);
-      } else {
-        lease = LEASE;
-        logLine(`<span class="s">tick frame</span> by ${R[leader].name} — lease renewed (${LEASE} beats).`);
+
+function lagFor(rank) {
+  return rank === 3 && byId("lagToggle").checked ? 2 : 0;
+}
+
+function eligibleBeat(rank) {
+  if (failedLeaseUntil === null) return null;
+  return failedLeaseUntil + GRACE * (rank - 1) + lagFor(rank);
+}
+
+function candidateEvidence() {
+  return nodes
+    .filter((node) => node.up && node.rank !== nodes[leaderIndex].rank)
+    .map((node) => ({
+      rank: node.rank,
+      up: node.up,
+      eligibleBeat: eligibleBeat(node.rank)
+    }));
+}
+
+async function verifyFrames() {
+  let semanticValid = true;
+  for (let index = 0; index < frames.length; index += 1) {
+    const frame = frames[index];
+    const expectedPrev = index ? frames[index - 1].hash : "genesis";
+    if (frame.seq !== index || frame.prev !== expectedPrev) {
+      return { hashValid: false, semanticValid: false };
+    }
+    if (frame.hash !== await sha256(frameMaterial(frame))) {
+      return { hashValid: false, semanticValid: false };
+    }
+    if (frame.type === "estate.succession") {
+      const eligible = frame.payload.candidates
+        .filter((candidate) =>
+          candidate.up && candidate.eligibleBeat <= frame.payload.beat
+        )
+        .sort((left, right) => left.rank - right.rank);
+      if (
+        frame.payload.beat < frame.payload.previousLeaseUntil
+        || !eligible.length
+        || eligible[0].rank !== frame.payload.actorRank
+      ) {
+        semanticValid = false;
       }
     }
-  } else {
-    // leader dark: lease drains, then staggered entitlement
-    if (lease>0){ lease--; if(lease===0) logLine(`<span class="w">lease EXPIRED.</span> Now ranks wait their stagger: rank 2 waits ${GRACE}, rank 3 waits ${2*GRACE}${el("lag").checked?" (and it's laggy — which only ADDS waiting, never subtracts)":""}.`); }
-    else {
-      if (waiter===null){ waiter = 1; waitLeft = GRACE; }
-      else {
-        waitLeft--;
-        if (waitLeft<=0){
-          const w = waiter;
-          if (R[w].up){
-            leader = w; lease = LEASE; waiter = null;
-            logLine(`<span class="s">estate.succession frame</span> — ${R[w].name} (rank ${R[w].rank}) takes the lease AFTER the full wait. No vote happened; the roster + arithmetic decided.`);
-          } else { waiter = w+1; waitLeft = GRACE; }
-        }
+    if (frame.type === "estate.resumption") {
+      if (
+        frame.payload.actorRank !== 1
+        || frame.payload.beat < frame.payload.previousLeaseUntil
+      ) {
+        semanticValid = false;
+      }
+    }
+    if (frame.type === "lease.renew") {
+      if (frame.payload.beat >= frame.payload.previousLeaseUntil) {
+        semanticValid = false;
       }
     }
   }
-  paint();
+  return { hashValid: true, semanticValid };
 }
-setInterval(beat, 900);
-logLine(`<span class="s">roster frame</span> — signed in advance: rank 1 rappterone, rank 2 rapptertwo, rank 3 battlestation.`);
-paint();
+
+function setCheck(element, state, title, detail) {
+  element.className = `check ${state}`;
+  element.innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
+}
+
+function paintNodes() {
+  const container = byId("nodes");
+  container.textContent = "";
+  nodes.forEach((node, index) => {
+    const isLeader = index === leaderIndex && node.up;
+    const card = document.createElement("article");
+    let state = "Follower · refuses to write";
+    let detail = "No current entitlement.";
+    let waiting = false;
+    if (!node.up) {
+      state = "Down";
+      detail = "Cannot renew or claim.";
+    } else if (isLeader) {
+      state = "Leader";
+      detail = `${Math.max(0, leaseUntil - beat)} beat(s) remain before boundary.`;
+    } else if (returningRankOne && node.rank === 1) {
+      state = "Waiting to resume";
+      detail = `May return at beat ${leaseUntil}, not before.`;
+      waiting = true;
+    } else if (failedLeaseUntil !== null) {
+      state = "Waiting for entitlement";
+      detail = `Eligible at beat ${eligibleBeat(node.rank)}${lagFor(node.rank) ? " (includes observation lag)" : ""}.`;
+      waiting = true;
+    }
+    card.className = `node${isLeader ? " leader" : ""}${!node.up ? " down" : ""}${waiting ? " waiting" : ""}`;
+    card.innerHTML = `
+      <h3>${node.name}</h3>
+      <span class="rank">rank ${node.rank}</span>
+      <span class="state">${state}</span>
+      <span class="detail">${detail}</span>`;
+    container.appendChild(card);
+  });
+}
+
+function renderLog() {
+  const log = byId("log");
+  log.textContent = "";
+  frames.forEach((frame) => {
+    const line = document.createElement("div");
+    line.className = "log-line";
+    let summary = "";
+    if (frame.type === "estate.roster") {
+      summary = `ranks ${frame.payload.ranks.join(" > ")}`;
+    } else if (frame.type === "leadership.start") {
+      summary = `rank ${frame.payload.actorRank} starts; lease to beat ${frame.payload.leaseUntil}`;
+    } else if (frame.type === "node.down") {
+      summary = `rank ${frame.payload.rank} failed at beat ${frame.payload.beat}; lease remains to ${frame.payload.leaseUntil}`;
+    } else if (frame.type === "node.up") {
+      summary = `rank ${frame.payload.rank} returned at beat ${frame.payload.beat}`;
+    } else if (frame.type === "lease.renew") {
+      summary = `rank ${frame.payload.actorRank} renewed to beat ${frame.payload.nextLeaseUntil}`;
+    } else if (frame.type === "estate.succession") {
+      summary = `rank ${frame.payload.actorRank} claimed at beat ${frame.payload.beat}`;
+    } else {
+      summary = `rank 1 resumed at beat ${frame.payload.beat}`;
+    }
+    line.innerHTML = `<strong>#${frame.seq} ${frame.type}</strong> · ${summary} · ${frame.hash.slice(0, 12)}…`;
+    log.appendChild(line);
+  });
+  log.scrollTop = log.scrollHeight;
+}
+
+async function render() {
+  const version = ++renderVersion;
+  paintNodes();
+  renderLog();
+  byId("beatMetric").textContent = beat;
+  byId("leaderMetric").textContent = nodes[leaderIndex].up
+    ? `rank ${nodes[leaderIndex].rank}`
+    : "none";
+  byId("leaseMetric").textContent = `beat ${leaseUntil}`;
+  byId("knockBtn").disabled = busy || !nodes[leaderIndex].up;
+  byId("reviveBtn").disabled = busy || nodes[0].up || leaderIndex === 0;
+
+  const verification = await verifyFrames();
+  if (version !== renderVersion) return;
+  if (verification.hashValid) {
+    setCheck(
+      byId("chainCheck"),
+      "pass",
+      "PASS · control chain recomputes",
+      `${frames.length} frame${frames.length === 1 ? "" : "s"} and predecessor links verify.`
+    );
+  } else {
+    setCheck(
+      byId("chainCheck"),
+      "fail",
+      "FAIL · control chain is inconsistent",
+      "A frame no longer matches its content or predecessor."
+    );
+  }
+
+  const claims = frames.filter((frame) =>
+    frame.type === "estate.succession" || frame.type === "estate.resumption"
+  );
+  if (!verification.semanticValid) {
+    setCheck(
+      byId("safetyCheck"),
+      "fail",
+      "EXPECTED FAIL · unauthorized leadership claim",
+      "The independent verifier found a claim before its boundary or by the wrong rank."
+    );
+  } else if (claims.length) {
+    setCheck(
+      byId("safetyCheck"),
+      "pass",
+      "PASS · every leadership change is authorized",
+      "Each claim follows its recorded lease boundary and candidate eligibility data."
+    );
+  } else {
+    setCheck(
+      byId("safetyCheck"),
+      "pending",
+      "Lease safety: waiting",
+      "Knock out the leader and advance the logical clock."
+    );
+  }
+
+  const succession = frames.find((frame) => frame.type === "estate.succession");
+  const resumption = frames.find((frame) => frame.type === "estate.resumption");
+  if (succession && resumption && verification.semanticValid) {
+    setCheck(
+      byId("sequenceCheck"),
+      "pass",
+      "PASS · rank order and resumption boundary hold",
+      `Rank ${succession.payload.actorRank} claimed at beat ${succession.payload.beat}; rank 1 resumed at beat ${resumption.payload.beat}.`
+    );
+  } else if (succession && verification.semanticValid) {
+    setCheck(
+      byId("sequenceCheck"),
+      "pass",
+      "PASS · first eligible rank claimed",
+      `Rank ${succession.payload.actorRank} claimed at beat ${succession.payload.beat}; rank 1 has not yet resumed.`
+    );
+  } else {
+    setCheck(
+      byId("sequenceCheck"),
+      "pending",
+      "Rank and resumption: waiting",
+      "Run the guided scenario."
+    );
+  }
+}
+
+function setBusy(next) {
+  busy = next;
+  for (const id of ["sampleBtn", "beatBtn", "unsafeBtn", "resetBtn"]) {
+    byId(id).disabled = next;
+  }
+  byId("lagToggle").disabled = next;
+  byId("knockBtn").disabled = next || !nodes[leaderIndex].up;
+  byId("reviveBtn").disabled = next || nodes[0].up || leaderIndex === 0;
+}
+
+async function runExclusive(action) {
+  if (busy) return;
+  setBusy(true);
+  try {
+    await action();
+    await render();
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function resetState() {
+  beat = 0;
+  leaderIndex = 0;
+  leaseUntil = LEASE_LENGTH;
+  failedLeaseUntil = null;
+  returningRankOne = false;
+  frames = [];
+  nodes.forEach((node) => { node.up = true; });
+  await appendFrame("estate.roster", { ranks: [1, 2, 3] });
+  await appendFrame("leadership.start", {
+    actorRank: 1,
+    beat,
+    leaseUntil
+  });
+}
+
+async function knockLeader() {
+  const leader = nodes[leaderIndex];
+  if (!leader.up) return;
+  leader.up = false;
+  failedLeaseUntil = leaseUntil;
+  await appendFrame("node.down", {
+    rank: leader.rank,
+    beat,
+    leaseUntil
+  });
+}
+
+async function reviveRankOne() {
+  if (nodes[0].up || leaderIndex === 0) return;
+  nodes[0].up = true;
+  returningRankOne = true;
+  await appendFrame("node.up", { rank: 1, beat });
+}
+
+async function advanceBeat() {
+  beat += 1;
+  const leader = nodes[leaderIndex];
+  if (leader.up) {
+    if (returningRankOne && leader.rank !== 1) {
+      if (beat >= leaseUntil) {
+        const previousLeaseUntil = leaseUntil;
+        leaderIndex = 0;
+        returningRankOne = false;
+        failedLeaseUntil = null;
+        leaseUntil = beat + LEASE_LENGTH;
+        await appendFrame("estate.resumption", {
+          actorRank: 1,
+          beat,
+          previousLeaseUntil,
+          nextLeaseUntil: leaseUntil
+        });
+      }
+    } else if (beat === leaseUntil - 1) {
+      const previousLeaseUntil = leaseUntil;
+      leaseUntil = beat + LEASE_LENGTH;
+      await appendFrame("lease.renew", {
+        actorRank: leader.rank,
+        beat,
+        previousLeaseUntil,
+        nextLeaseUntil: leaseUntil
+      });
+    }
+    return;
+  }
+
+  if (failedLeaseUntil === null || beat < failedLeaseUntil) return;
+  const candidates = candidateEvidence();
+  const eligible = candidates
+    .filter((candidate) => candidate.eligibleBeat <= beat)
+    .sort((left, right) => left.rank - right.rank);
+  if (!eligible.length) return;
+  const winner = nodes.findIndex((node) => node.rank === eligible[0].rank);
+  const previousLeaseUntil = failedLeaseUntil;
+  leaderIndex = winner;
+  failedLeaseUntil = null;
+  leaseUntil = beat + LEASE_LENGTH;
+  await appendFrame("estate.succession", {
+    actorRank: nodes[winner].rank,
+    beat,
+    previousLeaseUntil,
+    candidates,
+    nextLeaseUntil: leaseUntil
+  });
+}
+
+async function injectUnsafeClaim() {
+  const previousLeaseUntil = failedLeaseUntil ?? leaseUntil;
+  const candidates = nodes
+    .filter((node) => node.rank !== 1)
+    .map((node) => ({
+      rank: node.rank,
+      up: node.up,
+      eligibleBeat: previousLeaseUntil + GRACE * (node.rank - 1) + lagFor(node.rank)
+    }));
+  await appendFrame("estate.succession", {
+    actorRank: 3,
+    beat,
+    previousLeaseUntil,
+    candidates,
+    nextLeaseUntil: beat + LEASE_LENGTH
+  });
+}
+
+function pauseForReplay() {
+  return matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? Promise.resolve()
+    : new Promise((resolve) => setTimeout(resolve, 120));
+}
+
+async function guidedScenario() {
+  await resetState();
+  byId("lagToggle").checked = true;
+  await knockLeader();
+  await render();
+  await pauseForReplay();
+  while (leaderIndex === 0) {
+    await advanceBeat();
+    await render();
+    await pauseForReplay();
+  }
+  await reviveRankOne();
+  await render();
+  await pauseForReplay();
+  while (leaderIndex !== 0) {
+    await advanceBeat();
+    await render();
+    await pauseForReplay();
+  }
+}
+
+byId("sampleBtn").addEventListener("click", () =>
+  runExclusive(guidedScenario)
+);
+byId("beatBtn").addEventListener("click", () =>
+  runExclusive(advanceBeat)
+);
+byId("knockBtn").addEventListener("click", () =>
+  runExclusive(knockLeader)
+);
+byId("reviveBtn").addEventListener("click", () =>
+  runExclusive(reviveRankOne)
+);
+byId("unsafeBtn").addEventListener("click", () =>
+  runExclusive(injectUnsafeClaim)
+);
+byId("resetBtn").addEventListener("click", () =>
+  runExclusive(resetState)
+);
+byId("lagToggle").addEventListener("change", render);
+byId("copyBtn").addEventListener("click", async () => {
+  const status = byId("copyStatus");
+  try {
+    await navigator.clipboard.writeText(PROOF_PROMPT);
+    status.textContent = "Proof prompt copied.";
+  } catch (error) {
+    status.textContent = `Copy failed: ${error.message}`;
+  }
+});
+
+byId("promptText").textContent = PROOF_PROMPT;
+runExclusive(resetState);
 </script>
 </body>
 </html>

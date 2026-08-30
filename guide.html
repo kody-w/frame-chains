@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frame Chains — Guided Evidence Path</title>
+<meta name="description" content="A newcomer-first guided path through six interactive proofs for the Frame Chains paper.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 16px/1.6 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+a {
+  color: var(--cp-link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+a:hover {
+  color: var(--cp-accent-hover);
+}
+a:focus-visible {
+  outline: 3px solid var(--cp-accent);
+  outline-offset: 3px;
+  border-radius: 0.625rem;
+}
+.shell {
+  width: calc(100% - 40px);
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 0 72px;
+}
+.topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-bottom: 44px;
+  font-size: 14px;
+}
+.topline a {
+  font-weight: 650;
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 28px;
+  align-items: end;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--cp-border);
+}
+.kicker {
+  margin: 0 0 8px;
+  color: var(--cp-accent);
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+h1 {
+  max-width: 800px;
+  margin-bottom: 16px;
+  font-size: clamp(38px, 5.5vw, 58px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+.lede {
+  max-width: 720px;
+  margin-bottom: 0;
+  color: var(--cp-text-muted);
+  font-size: clamp(18px, 2vw, 21px);
+}
+.question {
+  padding: 24px;
+  border: 1px solid var(--cp-border);
+  border-top: 5px solid var(--cp-accent);
+  border-radius: 16px;
+  background: var(--cp-surface);
+}
+.question p {
+  margin-bottom: 0;
+  color: var(--cp-text-muted);
+}
+.orientation {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 24px;
+  margin: 36px 0 44px;
+}
+.how,
+.terms {
+  padding: 24px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-bg-elevated);
+}
+.how h2,
+.terms h2 {
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+.how p {
+  margin-bottom: 16px;
+  color: var(--cp-text-muted);
+}
+.start {
+  display: inline-block;
+  padding: 10px 15px;
+  border: 1px solid var(--cp-accent);
+  border-radius: 0.625rem;
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+  font-weight: 700;
+  text-decoration: none;
+}
+.start:hover {
+  background: var(--cp-accent-hover);
+  color: var(--cp-accent-fg);
+}
+.term-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+.term-grid div {
+  padding-top: 12px;
+  border-top: 1px solid var(--cp-border);
+}
+.term-grid dt {
+  color: var(--cp-accent);
+  font-weight: 750;
+}
+.term-grid dd {
+  margin: 4px 0 0;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+}
+.path-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+.path-head h2 {
+  margin-bottom: 4px;
+  font-size: clamp(28px, 4vw, 38px);
+}
+.path-head p {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: var(--cp-text-muted);
+}
+.path-total {
+  padding: 7px 11px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.evidence-list {
+  display: grid;
+  gap: 24px;
+}
+.evidence-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-surface);
+  box-shadow: 0 0 0 1px var(--cp-sheen);
+  scroll-margin-top: 20px;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.step-number {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--cp-accent);
+  border-radius: 0.625rem;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  font: 750 18px/1 Consolas, "Courier New", Courier, monospace;
+}
+.step-label {
+  color: var(--cp-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.time {
+  margin: 0;
+  color: var(--cp-text-soft);
+  font-size: 14px;
+}
+.card-body h2 {
+  margin-bottom: 6px;
+  font-size: clamp(24px, 3vw, 31px);
+  line-height: 1.2;
+}
+.card-summary {
+  max-width: 720px;
+  margin-bottom: 20px;
+  color: var(--cp-text-muted);
+}
+.evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.evidence-grid section {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+}
+.evidence-grid section:last-child {
+  border-left: 4px solid var(--cp-success);
+}
+.evidence-grid h3 {
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+.evidence-grid p,
+.evidence-grid ol {
+  margin-bottom: 0;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+}
+.evidence-grid ol {
+  padding-left: 20px;
+}
+.evidence-grid li + li {
+  margin-top: 5px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  margin-top: 18px;
+}
+.launch {
+  display: inline-block;
+  padding: 9px 13px;
+  border: 1px solid var(--cp-accent);
+  border-radius: 0.625rem;
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+  font-weight: 700;
+  text-decoration: none;
+}
+.launch:hover {
+  background: var(--cp-accent-hover);
+  color: var(--cp-accent-fg);
+}
+.proof-link {
+  font-size: 14px;
+  font-weight: 650;
+}
+.failure,
+.finish {
+  margin-top: 36px;
+  padding: 24px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+}
+.failure {
+  border-left: 5px solid var(--cp-danger);
+  background: var(--cp-bg-elevated);
+}
+.failure h2,
+.finish h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+.failure p,
+.failure ul,
+.finish p {
+  color: var(--cp-text-muted);
+}
+.failure ul {
+  margin-bottom: 0;
+  padding-left: 22px;
+}
+.failure li + li {
+  margin-top: 7px;
+}
+.finish {
+  background: var(--cp-accent-soft);
+  text-align: center;
+}
+.finish p {
+  max-width: 700px;
+  margin-right: auto;
+  margin-bottom: 18px;
+  margin-left: auto;
+}
+footer {
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--cp-border);
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+@media (max-width: 780px) {
+  .hero,
+  .orientation,
+  .evidence-card {
+    grid-template-columns: 1fr;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+  .time {
+    grid-column: 2;
+  }
+}
+@media (max-width: 560px) {
+  .shell {
+    width: calc(100% - 28px);
+    padding-top: 20px;
+  }
+  .topline {
+    margin-bottom: 32px;
+  }
+  .hero {
+    gap: 20px;
+  }
+  h1 {
+    font-size: 40px;
+  }
+  .term-grid,
+  .evidence-grid {
+    grid-template-columns: 1fr;
+  }
+  .how,
+  .terms,
+  .evidence-card,
+  .failure,
+  .finish {
+    padding: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="topline" aria-label="Publication navigation">
+    <a href="index.html">Project home</a>
+    <a href="paper.html">Read the paper</a>
+    <a href="https://github.com/kody-w/frame-chains">Source repository</a>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <p class="kicker">The paper's question</p>
+      <h1>Can a fleet of AI agents and devices keep itself healthy as verifiable, append-only state—without depending on a central server, elections, or synchronized clocks?</h1>
+      <p class="lede">Six small interactions turn the paper's architecture into observable tests. Follow them in order; each adds one idea and names the evidence that matters.</p>
+    </div>
+    <aside class="question" aria-labelledby="guide-promise">
+      <p class="kicker" id="guide-promise">What this guide does</p>
+      <p>It gives each major claim a concrete action, an observable result, and a precise limit on what that result establishes.</p>
+    </aside>
+  </header>
+
+  <section class="orientation" aria-label="Guide orientation">
+    <div class="how">
+      <p class="kicker">How to use this path</p>
+      <h2>Act, observe, then interpret.</h2>
+      <p>Open each standalone proof, perform only the listed actions, and compare the result with “Watch for.” The demos are explanatory models; the paper remains the source of truth for the reported estate runs and limitations.</p>
+      <a class="start" href="#clock">Begin with chain order</a>
+    </div>
+
+    <div class="terms">
+      <p class="kicker">Six terms, in plain language</p>
+      <h2>Vocabulary for the route</h2>
+      <dl class="term-grid">
+        <div><dt>Estate</dt><dd>The whole collection of devices, agents, and services being kept in a known state.</dd></div>
+        <div><dt>Frame</dt><dd>One content-addressed record that names what happened and fingerprints the frame it follows.</dd></div>
+        <div><dt>Tile</dt><dd>A frame that asks one scoped question, such as “what is out of compliance?”</dd></div>
+        <div><dt>Exhaust</dt><dd>The findings left by a scan; they become the exact to-do list for the next step.</dd></div>
+        <div><dt>Lease</dt><dd>A bounded permission to lead. Others wait until it ends and their signed rank permits action.</dd></div>
+        <div><dt>Dimension</dt><dd>One branch or aspect of history that can grow independently and later be compared or merged.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <div class="path-head">
+    <div>
+      <p class="kicker">Ordered evidence path</p>
+      <h2>Six claims, one accumulating argument</h2>
+      <p>First establish trustworthy order. Then watch the system observe, heal, change leaders, cross a privacy boundary, recover stranded work, and reconcile independent histories.</p>
+    </div>
+    <span class="path-total">Expected total: about 8 minutes</span>
+  </div>
+
+  <section class="evidence-list" aria-label="Six guided proofs">
+    <article class="evidence-card" id="clock">
+      <div class="step">
+        <span class="step-number" aria-hidden="true">01</span>
+        <span class="step-label">Chain is the clock</span>
+        <p class="time">Expected time: 60 seconds</p>
+      </div>
+      <div class="card-body">
+        <h2>Order survives a bad clock</h2>
+        <p class="card-summary">Two devices write one shared story even though one reports the wrong time.</p>
+        <div class="evidence-grid">
+          <section><h3>What you are looking at</h3><p>Two simulated machines, their local clocks, and a frame list. Each frame contains the fingerprint of the frame before it.</p></section>
+          <section><h3>Do this</h3><ol><li>Run the guided sample.</li><li>Switch to wall-clock sorting, then back to dependency order.</li><li>Tamper with frame 1's predecessor link.</li></ol></section>
+          <section><h3>Watch for</h3><p>Time sorting can place a later action before its predecessor. Dependency order remains intact until the deliberate link mutation turns chain verification red.</p></section>
+          <section><h3>What this demonstrates</h3><p>Dependency links—not claimed timestamps—establish the sequence, and recomputation detects a changed link. The page does not model signatures or transport.</p></section>
+        </div>
+        <div class="actions">
+          <a class="launch" href="play/chain-is-the-clock.html">Open the standalone clock proof</a>
+          <a class="proof-link" href="paper.html#prompt-clock">Open its proof prompt in the paper</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="evidence-card" id="scan">
+      <div class="step">
+        <span class="step-number" aria-hidden="true">02</span>
+        <span class="step-label">Scan and healing</span>
+        <p class="time">Expected time: 90 seconds</p>
+      </div>
+      <div class="card-body">
+        <h2>Ask everyone once; touch only what changed</h2>
+        <p class="card-summary">A scan tile fans one question across the estate, and its exhaust becomes the next round's bounded work list.</p>
+        <div class="evidence-grid">
+          <section><h3>What you are looking at</h3><p>Five devices, a hash-linked evidence log, and separate meters for scan responses and repair devices touched.</p></section>
+          <section><h3>Do this</h3><ol><li>Run the guided loop.</li><li>Introduce one drift, scan, and heal it.</li><li>Run the wasteful full-sweep mutation.</li></ol></section>
+          <section><h3>Watch for</h3><p>All five devices report, but repair touches only the exhaust targets. Two identical reports declare a stable floor; the full-sweep mutation turns repair scope red.</p></section>
+          <section><h3>What this demonstrates</h3><p>A fleet-wide baseline can drive follow-up proportional to implicated or locally changed devices, then stop at a stable floor. Silent changes still require a trustworthy local signal or another baseline scan.</p></section>
+        </div>
+        <div class="actions">
+          <a class="launch" href="play/scan-tile.html">Open the standalone scan proof</a>
+          <a class="proof-link" href="paper.html#prompt-scan">Open its proof prompt in the paper</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="evidence-card" id="succession">
+      <div class="step">
+        <span class="step-number" aria-hidden="true">03</span>
+        <span class="step-label">Succession</span>
+        <p class="time">Expected time: 75 seconds</p>
+      </div>
+      <div class="card-body">
+        <h2>Replace a failed leader without a vote</h2>
+        <p class="card-summary">A signed roster and lease define who may act next before failure occurs.</p>
+        <div class="evidence-grid">
+          <section><h3>What you are looking at</h3><p>Three ranked machines, a logical beat counter, one active lease, and a SHA-256-linked control log. Rank 1 starts as leader.</p></section>
+          <section><h3>Do this</h3><ol><li>Leave rank 3's observation lag enabled.</li><li>Run the guided scenario and inspect the claim beats.</li><li>Inject the unsafe rank-3 claim.</li></ol></section>
+          <section><h3>Watch for</h3><p>Rank 2 waits through expiry and grace, rank 3 becomes eligible even later, and rank 1 returns only at the interim boundary. The unsafe claim turns the semantic verifier red.</p></section>
+          <section><h3>What this demonstrates</h3><p>Precommitted rank plus staggered waiting can produce deterministic failover without election messages. The teaching model does not authenticate the roster or prove partition liveness.</p></section>
+        </div>
+        <div class="actions">
+          <a class="launch" href="play/succession.html">Open the standalone succession proof</a>
+          <a class="proof-link" href="paper.html#prompt-succession">Open its proof prompt in the paper</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="evidence-card" id="membrane">
+      <div class="step">
+        <span class="step-number" aria-hidden="true">04</span>
+        <span class="step-label">Membrane</span>
+        <p class="time">Expected time: 60 seconds</p>
+      </div>
+      <div class="card-body">
+        <h2>Learn from public chains without publishing private ones</h2>
+        <p class="card-summary">Public data may cross inward only after verification; private estate frames have no outward path.</p>
+        <div class="evidence-grid">
+          <section><h3>What you are looking at</h3><p>Separate public and private frame stores, exact counts and hashes, and a derived private view that may incorporate accepted public facts.</p></section>
+          <section><h3>Do this</h3><ol><li>Verify and read public data inward.</li><li>Attempt a private-to-public export.</li><li>Inject a conflicting public frame and try the inward read again.</li></ol></section>
+          <section><h3>Watch for</h3><p>Valid public knowledge enriches the private view. Outward attempts leave public bytes unchanged, and conflicting input is refused.</p></section>
+          <section><h3>What this demonstrates</h3><p>The modeled transfer gate can admit verified public data while rejecting private-frame export. It does not rule out separate side channels.</p></section>
+        </div>
+        <div class="actions">
+          <a class="launch" href="play/membrane.html">Open the standalone membrane proof</a>
+          <a class="proof-link" href="paper.html#prompt-membrane">Open its proof prompt in the paper</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="evidence-card" id="reattach">
+      <div class="step">
+        <span class="step-number" aria-hidden="true">05</span>
+        <span class="step-label">Deterministic reattach</span>
+        <p class="time">Expected time: 75 seconds</p>
+      </div>
+      <div class="card-body">
+        <h2>Recover stranded work without model judgment</h2>
+        <p class="card-summary">A stranded frame declares exactly what it read, so candidate histories can be checked by comparison rather than interpretation.</p>
+        <div class="evidence-grid">
+          <section><h3>What you are looking at</h3><p>One stranded frame, its declared read names and content addresses, and an ordered ladder of possible bases across local and public dimensions.</p></section>
+          <section><h3>Do this</h3><ol><li>Compare the stranded reads with each candidate.</li><li>Run the fixed-order search and note the first accepted base.</li><li>Tamper with one declared address and run it again.</li></ol></section>
+          <section><h3>Watch for</h3><p>Contradicting bases are rejected exactly. The first contradiction-free base wins, provenance is recorded, and changing an address changes the result predictably.</p></section>
+          <section><h3>What this demonstrates</h3><p>Recovery can be a deterministic set comparison when declared reads and candidate bases are complete. No language model has to guess between the supplied histories.</p></section>
+        </div>
+        <div class="actions">
+          <a class="launch" href="play/reattach.html">Open the standalone reattach proof</a>
+          <a class="proof-link" href="paper.html#prompt-reattach">Open its proof prompt in the paper</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="evidence-card" id="merge">
+      <div class="step">
+        <span class="step-number" aria-hidden="true">06</span>
+        <span class="step-label">Merge fidelity</span>
+        <p class="time">Expected time: 75 seconds</p>
+      </div>
+      <div class="card-body">
+        <h2>Merge agreement; preserve disagreement</h2>
+        <p class="card-summary">Two histories formed apart are joined by dimension and logical tick, with compatibility scored rather than assumed.</p>
+        <div class="evidence-grid">
+          <section><h3>What you are looking at</h3><p>Two independent histories containing an aligned shared dimension, a contradictory shared dimension, and data present on only one side.</p></section>
+          <section><h3>Do this</h3><ol><li>Run the deterministic comparison.</li><li>Inspect the fidelity numerator and denominator.</li><li>Enable the overwrite mutation and compare the assertions.</li></ol></section>
+          <section><h3>Watch for</h3><p>Aligned and one-sided dimensions merge. Contradictions remain visible as parallel alternatives; the mutation turns preservation red.</p></section>
+          <section><h3>What this demonstrates</h3><p>Independent histories can combine useful agreement without hiding conflict or appointing an arbitrary winner. The equal-weight fidelity score is not a measure of business importance.</p></section>
+        </div>
+        <div class="actions">
+          <a class="launch" href="play/merge-fidelity.html">Open the standalone merge proof</a>
+          <a class="proof-link" href="paper.html#prompt-merge">Open its proof prompt in the paper</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="failure" aria-labelledby="failure-title">
+    <h2 id="failure-title">How to interpret failure</h2>
+    <ul>
+      <li><strong>A red result after a labeled mutation or tamper action is expected.</strong> It demonstrates that the proof can reject a broken rule instead of painting everything green.</li>
+      <li><strong>A red result on the normal path is evidence, not decoration.</strong> Reset once and repeat the listed steps. If it persists, treat that assertion as unproven rather than explaining it away.</li>
+      <li><strong>A teaching page is not the reported field experiment.</strong> Use the matching proof-prompt link to inspect the exact claim, then return to the paper's reduction-to-practice and limitations sections for the empirical denominator.</li>
+    </ul>
+  </section>
+
+  <section class="finish" aria-labelledby="finish-title">
+    <p class="kicker">Continue with the source of truth</p>
+    <h2 id="finish-title">Now read the machinery with the evidence in view.</h2>
+    <p>The paper connects these six proofs into one architecture, reports what ran on the eight-device estate, and states what remains limited or staged.</p>
+    <a class="start" href="paper.html">Return to the Frame Chains paper</a>
+  </section>
+
+  <footer>
+    <p>Guided evidence for <a href="paper.html">Frame Chains</a> · RAPP paper · first public disclosure 2026-08-27 · teaching models explain the claims; the paper records the evidence and limitations.</p>
+  </footer>
+</main>
+</body>
+</html>

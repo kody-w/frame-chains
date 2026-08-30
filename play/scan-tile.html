@@ -3,147 +3,782 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scan Tiles &amp; the Healing Loop — Frame Chains</title>
+<title>Scan Tiles and the Healing Loop — Frame Chains</title>
+<meta name="description" content="A standalone proof of scan fan-out, exhaust-bounded repair work, and convergence at a stable floor.">
+<script>
+(() => {
+  const requested = new URLSearchParams(location.search).get("scoutTheme");
+  let inherited = "";
+  try {
+    inherited = window.parent !== window
+      ? window.parent.document.documentElement.getAttribute("data-theme") || ""
+      : "";
+  } catch {}
+  const theme = requested || inherited
+    || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
 <style>
-  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; --bad:#b3261e; --ok:#1e7d32; --warn:#8a6d00; }
-  *{ box-sizing:border-box; } body{ margin:0; font:16px/1.55 system-ui; color:var(--ink); }
-  main{ max-width:52rem; margin:0 auto; padding:2rem 1rem 4rem; }
-  h1{ font-size:1.5rem; margin:.2rem 0; } .lede{ color:var(--mut); }
-  .analogy{ background:#f6f8fb; border-left:3px solid var(--accent); padding:.6rem 1rem; border-radius:0 8px 8px 0; margin:1rem 0; }
-  .fleet{ display:grid; grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr)); gap:.7rem; margin:1rem 0; }
-  .node{ border:1px solid var(--line); border-radius:10px; padding:.6rem .7rem; text-align:center; transition:.25s; }
-  .node .n{ font-weight:700; } .node .f{ font:700 1.3rem ui-monospace,monospace; }
-  .node.dirty{ border-color:#e2b6b3; background:#fdf3f2; } .node.dirty .f{ color:var(--bad); }
-  .node.clean{ border-color:#bfe0c3; background:#f2faf3; } .node.clean .f{ color:var(--ok); }
-  .node.skip{ opacity:.45; }
-  .node.touched{ box-shadow:0 0 0 3px #cfe3f7; }
-  button{ font:600 .95rem system-ui; padding:.5rem .9rem; border-radius:8px; border:1px solid var(--line);
-    background:var(--accent); color:#fff; cursor:pointer; margin:.3rem .3rem .2rem 0; }
-  button.alt{ background:#fff; color:var(--ink); }
-  button:disabled{ opacity:.45; cursor:not-allowed; }
-  .meters{ display:flex; gap:1.2rem; flex-wrap:wrap; margin:.6rem 0; font:.95rem system-ui; }
-  .meters b{ font-size:1.2rem; }
-  .log{ border:1px solid var(--line); border-radius:10px; padding:.7rem 1rem; margin-top:.8rem;
-    font:.84rem ui-monospace,monospace; max-height:16rem; overflow:auto; }
-  .log .tile{ color:var(--accent); font-weight:700; } .log .tick{ color:var(--warn); font-weight:700; }
-  .converged{ font-weight:800; color:var(--ok); font-size:1.05rem; margin-top:.5rem; }
-  .what{ background:#fffbe8; border:1px solid #eadf9a; border-radius:8px; padding:.6rem 1rem; margin-top:1.2rem; font-size:.93rem; }
-  a{ color:var(--accent); }
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16753a;
+  --cp-success-soft: #edf8f0;
+  --cp-danger: #c42b1c;
+  --cp-danger-soft: #fff0ee;
+  --cp-warning: #8a6100;
+  --cp-warning-soft: #fff8df;
+  --cp-link: #0067b8;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #505050;
+  --cp-border-strong: #737373;
+  --cp-text: #f0f0f0;
+  --cp-text-muted: #c0c0c0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #ffb3c0;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #62d987;
+  --cp-success-soft: #183c27;
+  --cp-danger: #ff8a80;
+  --cp-danger-soft: #4a211f;
+  --cp-warning: #ffd166;
+  --cp-warning-soft: #413717;
+  --cp-link: #69b7ff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 16px/1.55 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+a {
+  color: var(--cp-link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+a:hover { color: var(--cp-accent-hover); }
+:focus-visible {
+  outline: 3px solid var(--cp-accent);
+  outline-offset: 3px;
+}
+.shell {
+  width: calc(100% - 32px);
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 0 56px;
+}
+.topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+.kicker {
+  margin: 0 0 7px;
+  color: var(--cp-accent);
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  max-width: 820px;
+  margin-bottom: 10px;
+  font-size: clamp(34px, 6vw, 54px);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+}
+.lede {
+  max-width: 780px;
+  color: var(--cp-text-muted);
+  font-size: 18px;
+}
+.guide-grid,
+.fleet,
+.metrics,
+.checks {
+  display: grid;
+  gap: 12px;
+}
+.guide-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 28px 0;
+}
+.guide-grid section,
+.node,
+.metric,
+.log-panel,
+.prompt,
+.limits {
+  border: 1px solid var(--cp-border);
+  border-radius: 14px;
+  background: var(--cp-bg-elevated);
+}
+.guide-grid section { padding: 16px; }
+.guide-grid h2 { margin-bottom: 5px; font-size: 16px; }
+.guide-grid p,
+.guide-grid ol {
+  margin-bottom: 0;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+}
+.guide-grid ol { padding-left: 20px; }
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 14px 0;
+}
+button {
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid var(--cp-accent);
+  border-radius: 9px;
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+  font: 700 14px/1.2 inherit;
+  cursor: pointer;
+}
+button.secondary {
+  border-color: var(--cp-border-strong);
+  background: var(--cp-surface);
+  color: var(--cp-text);
+}
+button.danger {
+  border-color: var(--cp-danger);
+  background: var(--cp-danger-soft);
+  color: var(--cp-danger);
+}
+button:hover:not(:disabled) { filter: brightness(0.96); }
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+.metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 14px 0;
+}
+.metric { padding: 13px; }
+.metric span {
+  display: block;
+  color: var(--cp-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.metric strong {
+  display: block;
+  margin-top: 4px;
+  font: 750 23px/1.2 Consolas, "Courier New", monospace;
+}
+.fleet {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 14px 0;
+}
+.node {
+  min-width: 0;
+  padding: 14px;
+  transition: opacity 160ms ease, border-color 160ms ease;
+}
+.node h3 {
+  margin-bottom: 8px;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.node .count {
+  display: block;
+  color: var(--cp-danger);
+  font: 750 25px/1 Consolas, "Courier New", monospace;
+}
+.node.clean .count { color: var(--cp-success); }
+.node .detail {
+  display: block;
+  margin-top: 6px;
+  color: var(--cp-text-muted);
+  font-size: 12px;
+}
+.node.touched {
+  border-color: var(--cp-accent);
+  box-shadow: inset 0 0 0 2px var(--cp-accent-soft);
+}
+.node.skipped { opacity: 0.48; }
+.checks {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+}
+.check {
+  min-height: 92px;
+  padding: 13px 14px;
+  border: 1px solid var(--cp-border);
+  border-left: 5px solid var(--cp-border-strong);
+  border-radius: 10px;
+  background: var(--cp-surface);
+}
+.check strong {
+  display: block;
+  margin-bottom: 3px;
+}
+.check span {
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+.check.pass { border-left-color: var(--cp-success); }
+.check.fail { border-left-color: var(--cp-danger); }
+.check.pending { border-left-color: var(--cp-warning); }
+.log-panel { padding: 16px; }
+.log-panel h2 { margin-bottom: 9px; font-size: 20px; }
+.log {
+  max-height: 300px;
+  overflow: auto;
+  color: var(--cp-text-muted);
+  font: 12px/1.55 Consolas, "Courier New", monospace;
+}
+.log-line {
+  padding: 7px 0;
+  border-top: 1px dashed var(--cp-border);
+  overflow-wrap: anywhere;
+}
+.log-line:first-child { border-top: 0; }
+.log-line strong { color: var(--cp-text); }
+.prompt,
+.limits {
+  margin-top: 18px;
+  padding: 18px;
+}
+.prompt h2,
+.limits h2 { margin-bottom: 7px; font-size: 19px; }
+.prompt p,
+.limits p { color: var(--cp-text-muted); }
+pre {
+  max-height: 220px;
+  margin: 12px 0;
+  padding: 13px;
+  overflow: auto;
+  border: 1px solid var(--cp-border);
+  border-radius: 9px;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+  font: 12px/1.55 Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+}
+.copy-status {
+  min-height: 1.4em;
+  margin: 8px 0 0;
+  color: var(--cp-text-muted);
+  font-size: 13px;
+}
+@media (max-width: 840px) {
+  .fleet { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .guide-grid,
+  .checks { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .fleet,
+  .metrics { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
 </style>
 </head>
 <body>
-<main>
-<p><a href="../index.html">← Frame Chains</a></p>
-<h1>🛰 Scan Tiles &amp; the Healing Loop</h1>
-<p class="lede">Ask one question of a whole fleet with a single frame. Then only touch what
-the answer says needs touching — and watch the estate go quiet by itself.</p>
+<main class="shell">
+  <nav class="topline" aria-label="Publication navigation">
+    <a href="../guide.html">Guided evidence path</a>
+    <a href="../paper.html#scan-proof">Paper section</a>
+    <a href="../index.html">Project home</a>
+  </nav>
 
-<div class="analogy"><b>Analogy:</b> a group chat for chores. Mom posts ONE message
-(“everyone check your room”), each kid replies to <i>that message</i> with what they found,
-and the thread itself becomes the checklist. Next week she doesn't re-inspect the whole
-house — she reads the old thread and only knocks on the doors that changed.</div>
+  <header>
+    <p class="kicker">Proof 2 of 6 · Homeostatic repair</p>
+    <h1>Scan tiles and the healing loop</h1>
+    <p class="lede">One query establishes a baseline across the estate. Its report then becomes the trigger set for narrower scans and repairs, so follow-up work scales with implicated or locally changed devices rather than a blind full-fleet sweep.</p>
+  </header>
 
-<div>
-  <button id="scanBtn" onclick="scan()">🛰 Mint a scan tile</button>
-  <button id="healBtn" class="alt" onclick="heal()" disabled>🩹 Heal from the exhaust</button>
-  <button class="alt" onclick="mess()">😈 Mess up one device</button>
-  <button class="alt" onclick="reset()">Reset</button>
-</div>
-<div class="meters">
-  <span>findings: <b id="mFind">—</b></span>
-  <span>work spent this round: <b id="mWork">0</b></span>
-  <span>full-rescan cost would be: <b id="mFull">5</b></span>
-  <span>ticks: <b id="mTick">0</b></span>
-</div>
-<div class="fleet" id="fleet"></div>
-<div class="converged" id="conv"></div>
-<div class="log" id="log"><b>The chain</b> — every line is a frame; children hold the tile's fingerprint.</div>
+  <section class="guide-grid" aria-label="Exercise guidance">
+    <section>
+      <h2>What you are looking at</h2>
+      <p>Five devices answer the baseline tile. Later tiles query only devices named by the previous exhaust or marked as locally changed.</p>
+    </section>
+    <section>
+      <h2>Do this</h2>
+      <ol>
+        <li>Select <strong>Run guided loop</strong>.</li>
+        <li>Introduce one new drift, scan, and heal it.</li>
+        <li>Run the wasteful-sweep mutation.</li>
+      </ol>
+    </section>
+    <section>
+      <h2>Watch for</h2>
+      <p>The baseline gets five responses; later rounds get fewer. Repair touches only exhaust targets. Two identical reports declare a stable floor, and the mutation turns bounded work red.</p>
+    </section>
+    <section>
+      <h2>What this demonstrates</h2>
+      <p>A shared baseline can drive O(delta) follow-up and a stop condition. The model assumes each device can signal its own local change; it does not solve discovery without observation.</p>
+    </section>
+  </section>
 
-<div class="what"><b>What am I looking at?</b> The <b>scan tile</b> is one frame; every
-device answers with a child frame fingerprint-linked to it, and the merged report's payload
-(the <b>data exhaust</b>) is the ONLY to-do list for the next step — devices with nothing
-wrong cost <i>zero</i> (they grey out; the work meter doesn't move for them). Scan → heal →
-scan again: when two ticks in a row find nothing new, the loop declares
-<b>converged</b> and goes quiet. That's §3.1–3.3 of the paper — and the real estate run
-went 66 findings → healed floor → quiet, with no human input.</div>
+  <div class="controls" aria-label="Proof controls">
+    <button id="sampleBtn" type="button">Run guided loop</button>
+    <button id="scanBtn" type="button">Mint scan tile</button>
+    <button id="healBtn" class="secondary" type="button" disabled>Heal from current exhaust</button>
+    <button id="driftBtn" class="secondary" type="button">Introduce one drift</button>
+    <button id="wasteBtn" class="danger" type="button" disabled>Run wasteful full sweep</button>
+    <button id="resetBtn" class="secondary" type="button">Reset</button>
+  </div>
+
+  <section class="metrics" aria-label="Current measurements">
+    <div class="metric"><span>Findings</span><strong id="findingMetric">10</strong></div>
+    <div class="metric"><span>Responses this scan</span><strong id="responseMetric">0</strong></div>
+    <div class="metric"><span>Repair devices touched</span><strong id="repairMetric">0 / 5</strong></div>
+    <div class="metric"><span>Identical reports</span><strong id="stableMetric">0 / 2</strong></div>
+  </section>
+
+  <section class="fleet" id="fleet" aria-label="Simulated estate"></section>
+
+  <section class="checks" aria-label="Live assertions" aria-live="polite">
+    <div class="check pending" id="chainCheck">
+      <strong>Frame evidence: waiting</strong>
+      <span>Mint a scan to create hash-linked evidence.</span>
+    </div>
+    <div class="check pending" id="scopeCheck">
+      <strong>Bounded follow-up: waiting</strong>
+      <span>Run a post-baseline scan or repair.</span>
+    </div>
+    <div class="check pending" id="convergenceCheck">
+      <strong>Convergence: waiting</strong>
+      <span>Two identical reports are required.</span>
+    </div>
+  </section>
+
+  <section class="log-panel" aria-labelledby="log-title">
+    <h2 id="log-title">Append-only evidence log</h2>
+    <div class="log" id="log"><p>No frames yet.</p></div>
+  </section>
+
+  <section class="prompt" id="proof-prompt">
+    <p class="kicker">Independent reproduction</p>
+    <h2>Ask any LLM to build a separate proof</h2>
+    <p>The prompt requires the independent page to distinguish scan cost from repair cost and to include a mutation that its own assertions reject.</p>
+    <pre id="promptText"></pre>
+    <button id="copyBtn" type="button">Copy proof prompt</button>
+    <p class="copy-status" id="copyStatus" role="status" aria-live="polite"></p>
+  </section>
+
+  <aside class="limits">
+    <h2>Scope and limit</h2>
+    <p>The first scan is deliberately fleet-wide. Later targeting uses the prior exhaust plus a simulated local-change signal; the page does not prove how an offline device announces that change. The paper's 66-finding run is field evidence; this page is a smaller executable explanation.</p>
+  </aside>
 </main>
+
 <script>
 "use strict";
-const NAMES = ["💻 mac","🖥 battlestation","🎮 deck","📺 apple-tv","🤖 rappterone"];
-let nodes, lastExhaust, stableTicks, ticks, chainNo;
-async function sha(s){
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+
+const PROOF_PROMPT = `Build one self-contained HTML file that independently demonstrates a scan-tile and homeostatic repair loop.
+
+Requirements:
+- Use only HTML, CSS, and browser JavaScript; no libraries or network requests.
+- Model five devices with finding counts split into automatically repairable and human-only findings.
+- The first scan must append one query frame, one response frame per device, and one merged report frame.
+- Later scans must target only devices named by the prior exhaust or marked as locally changed, while carrying forward unchanged report values.
+- Hash-link every frame with crypto.subtle.digest("SHA-256", ...) and independently recompute the chain.
+- Treat the merged report as the only source for the automatic repair target list.
+- Measure scan responses separately from repair devices touched and compare both with a five-device full sweep.
+- Declare convergence only after two identical report vectors, including a stable non-zero human-only floor.
+- Include deterministic drift injection, Reset, and a guided replay.
+- Include a deliberate later-scan mutation that polls every device and makes the O(delta) assertion fail.
+- Show visible PASS, FAIL, and waiting states and explain the evidence limit.
+- Make controls keyboard accessible, responsive, and reduced-motion safe.
+
+Return only the complete runnable HTML file.`;
+
+const initialNodes = [
+  { name: "Mac", findings: 4, healable: 3 },
+  { name: "Battlestation", findings: 0, healable: 0 },
+  { name: "Steam Deck", findings: 3, healable: 3 },
+  { name: "Apple TV", findings: 1, healable: 1 },
+  { name: "Rappterone", findings: 2, healable: 1 }
+];
+
+let nodes = [];
+let frames = [];
+let lastReport = null;
+let currentTargets = [];
+let stableReports = 0;
+let scanCount = 0;
+let responseCount = 0;
+let repairWork = 0;
+let scopeState = "pending";
+let highlighted = [];
+let reportFresh = false;
+let driftCursor = 0;
+let busy = false;
+let renderVersion = 0;
+
+const byId = (id) => document.getElementById(id);
+
+async function sha256(text) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text)
+  );
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
-function reset(){
-  nodes = NAMES.map((n,i)=>({ name:n, findings:[4,0,3,1,2][i], healable:[3,0,3,1,1][i] }));
-  lastExhaust = null; stableTicks = 0; ticks = 0; chainNo = 0;
-  document.getElementById("log").innerHTML = "<b>The chain</b> — every line is a frame; children hold the tile's fingerprint.";
-  document.getElementById("conv").textContent = "";
-  document.getElementById("healBtn").disabled = true;
-  meters(0,"—"); paint([]);
+
+function frameMaterial(frame) {
+  return JSON.stringify([frame.seq, frame.type, frame.payload, frame.prev]);
 }
-function meters(work, find){
-  document.getElementById("mWork").textContent = work;
-  document.getElementById("mFind").textContent = find;
-  document.getElementById("mTick").textContent = ticks;
+
+async function appendFrame(type, payload) {
+  const frame = {
+    seq: frames.length,
+    type,
+    payload,
+    prev: frames.length ? frames[frames.length - 1].hash : "genesis"
+  };
+  frame.hash = await sha256(frameMaterial(frame));
+  frames.push(frame);
+  return frame;
 }
-function paint(touched){
-  const f = document.getElementById("fleet"); f.textContent = "";
-  nodes.forEach((n,i)=>{
-    const d = document.createElement("div");
-    d.className = "node " + (n.findings ? "dirty" : "clean")
-      + (touched.length && !touched.includes(i) ? " skip" : "")
-      + (touched.includes(i) ? " touched" : "");
-    d.innerHTML = `<div class="n">${n.name}</div><div class="f">${n.findings}</div><div style="font-size:.8rem;color:var(--mut)">findings</div>`;
-    f.appendChild(d);
+
+async function verifyFrames() {
+  for (let index = 0; index < frames.length; index += 1) {
+    const frame = frames[index];
+    const expectedPrev = index ? frames[index - 1].hash : "genesis";
+    if (frame.seq !== index || frame.prev !== expectedPrev) return false;
+    if (frame.hash !== await sha256(frameMaterial(frame))) return false;
+  }
+  return true;
+}
+
+function totalFindings() {
+  return nodes.reduce((sum, node) => sum + node.findings, 0);
+}
+
+function setCheck(element, state, title, detail) {
+  element.className = `check ${state}`;
+  element.innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
+}
+
+function paintFleet() {
+  const fleet = byId("fleet");
+  fleet.textContent = "";
+  nodes.forEach((node, index) => {
+    const card = document.createElement("article");
+    const touched = highlighted.includes(index);
+    card.className = `node${node.findings === 0 ? " clean" : ""}${touched ? " touched" : ""}${highlighted.length && !touched ? " skipped" : ""}`;
+    const humanOnly = Math.max(0, node.findings - node.healable);
+    card.innerHTML = `
+      <h3>${node.name}</h3>
+      <span class="count">${node.findings}</span>
+      <span class="detail">${node.healable} automatic · ${humanOnly} human-only</span>`;
+    fleet.appendChild(card);
   });
 }
-function logLine(html){ const l=document.getElementById("log"); const d=document.createElement("div"); d.innerHTML=html; l.appendChild(d); l.scrollTop=l.scrollHeight; }
-async function scan(){
-  const tileHash = await sha("tile|" + (chainNo++));
-  logLine(`<span class="tile">SCAN TILE #${ticks} → ${tileHash.slice(0,8)}…</span> "everyone: check yourselves"`);
-  // O(delta): only devices the LAST exhaust implicated (or all, on the first scan) do work
-  const implicated = lastExhaust === null ? nodes.map((_,i)=>i)
-    : nodes.map((n,i)=> n.findings !== lastExhaust[i] || n.findings>0 ? i : -1).filter(i=>i>=0);
-  let work = 0;
-  for (const i of implicated){
-    const h = await sha(tileHash + "|" + i + "|" + nodes[i].findings);
-    work++;
-    logLine(`&nbsp;&nbsp;└ ${nodes[i].name} answers: ${nodes[i].findings} finding(s) <span style="color:var(--accent)">(holds ${tileHash.slice(0,8)}…, is ${h.slice(0,8)}…)</span>`);
+
+function renderLog() {
+  const log = byId("log");
+  if (!frames.length) {
+    log.innerHTML = "<p>No frames yet.</p>";
+    return;
   }
-  const total = nodes.reduce((s,n)=>s+n.findings,0);
-  const exhaust = nodes.map(n=>n.findings);
-  const same = lastExhaust !== null && exhaust.every((v,i)=>v===lastExhaust[i]);
-  stableTicks = same ? stableTicks+1 : 0;
-  lastExhaust = exhaust; ticks++;
-  logLine(`<span class="tick">TICK ${ticks}</span> merged report: ${total} finding(s) · work spent: ${work} of 5 devices ${same?"· nothing changed":""}`);
-  meters(work, total); paint(implicated);
-  document.getElementById("healBtn").disabled = total===0 || nodes.every(n=>n.healable===0);
-  if (stableTicks >= 1 && ticks >= 2){
-    document.getElementById("conv").textContent = "✓ CONVERGED — two stable ticks; the estate goes quiet (no human involved)";
-  } else document.getElementById("conv").textContent = "";
+  log.textContent = "";
+  frames.forEach((frame) => {
+    const line = document.createElement("div");
+    line.className = "log-line";
+    let summary = "";
+    if (frame.type === "scan.tile") {
+      summary = `scan ${frame.payload.scan}: targets ${frame.payload.targets.join(", ")}`;
+    } else if (frame.type === "scan.response") {
+      summary = `${frame.payload.device}: ${frame.payload.findings} finding(s), parent ${frame.payload.tile.slice(0, 10)}…`;
+    } else if (frame.type === "scan.report") {
+      summary = `report [${frame.payload.exhaust.join(", ")}]`;
+    } else if (frame.type === "repair.delta") {
+      summary = `repair touched devices ${frame.payload.targets.join(", ") || "none"}`;
+    } else {
+      summary = `mutation polled all devices instead of targets ${frame.payload.expectedTargets.join(", ")}`;
+    }
+    line.innerHTML = `<strong>#${frame.seq} ${frame.type}</strong> · ${summary} · ${frame.hash.slice(0, 12)}…`;
+    log.appendChild(line);
+  });
+  log.scrollTop = log.scrollHeight;
 }
-async function heal(){
-  const targets = nodes.map((n,i)=>n.findings>0 && n.healable>0 ? i:-1).filter(i=>i>=0);
-  let work=0;
-  for (const i of targets){
-    const fix = Math.min(nodes[i].healable, nodes[i].findings);
-    nodes[i].findings -= fix; nodes[i].healable = 0; work++;
-    logLine(`&nbsp;&nbsp;🩹 heals ${nodes[i].name}: −${fix} (deterministic, on a branch — the owner merges)`);
+
+async function render() {
+  const version = ++renderVersion;
+  paintFleet();
+  renderLog();
+  byId("findingMetric").textContent = totalFindings();
+  byId("responseMetric").textContent = responseCount;
+  byId("repairMetric").textContent = `${repairWork} / ${nodes.length}`;
+  byId("stableMetric").textContent = `${Math.min(stableReports, 2)} / 2`;
+  byId("healBtn").disabled = busy || !reportFresh || currentTargets.length === 0;
+  byId("wasteBtn").disabled = busy || !reportFresh;
+
+  const valid = await verifyFrames();
+  if (version !== renderVersion) return;
+  if (!frames.length) {
+    setCheck(
+      byId("chainCheck"),
+      "pending",
+      "Frame evidence: waiting",
+      "Mint a scan to create hash-linked evidence."
+    );
+  } else if (valid) {
+    setCheck(
+      byId("chainCheck"),
+      "pass",
+      "PASS · frame chain recomputes",
+      `${frames.length} frame${frames.length === 1 ? "" : "s"} and all predecessor links verify.`
+    );
+  } else {
+    setCheck(
+      byId("chainCheck"),
+      "fail",
+      "FAIL · evidence chain is inconsistent",
+      "At least one frame no longer matches its content or predecessor."
+    );
   }
-  const remaining = nodes.reduce((s,n)=>s+n.findings,0);
-  logLine(`exhaust says only ${targets.length} device(s) needed touching — the rest cost nothing. ${remaining? remaining + " finding(s) need a human." : ""}`);
-  meters(work, remaining); paint(targets);
-  document.getElementById("healBtn").disabled = true;
+
+  if (scopeState === "pass") {
+    setCheck(
+      byId("scopeCheck"),
+      "pass",
+      "PASS · follow-up stayed inside the trigger set",
+      `${responseCount} of ${nodes.length} devices answered the latest scan; repair touched ${repairWork} of ${nodes.length}.`
+    );
+  } else if (scopeState === "fail") {
+    const mutation = frames
+      .filter((frame) => frame.type === "scan.full-sweep-mutation")
+      .at(-1);
+    setCheck(
+      byId("scopeCheck"),
+      "fail",
+      "EXPECTED FAIL · full-sweep mutation detected",
+      `The mutation polled ${nodes.length} devices instead of ${mutation.payload.expectedTargets.length} expected targets.`
+    );
+  } else {
+    setCheck(
+      byId("scopeCheck"),
+      "pending",
+      "Bounded follow-up: waiting",
+      "Complete the baseline, then run a narrower scan or repair."
+    );
+  }
+
+  if (stableReports >= 2) {
+    setCheck(
+      byId("convergenceCheck"),
+      "pass",
+      "PASS · stable floor reached",
+      `Two identical reports; ${totalFindings()} human-only finding${totalFindings() === 1 ? "" : "s"} remain visible.`
+    );
+  } else {
+    setCheck(
+      byId("convergenceCheck"),
+      "pending",
+      "Convergence: waiting",
+      "Two identical report vectors are required."
+    );
+  }
 }
-function mess(){
-  const i = Math.floor(Math.random()*nodes.length);
-  nodes[i].findings += 2; nodes[i].healable += 2; stableTicks = 0;
-  logLine(`😈 ${nodes[i].name} drifted (+2 findings) — the NEXT scan tile will notice, and only it will pay.`);
-  document.getElementById("conv").textContent = "";
-  paint([i]); meters(0, nodes.reduce((s,n)=>s+n.findings,0));
+
+function setBusy(next) {
+  busy = next;
+  for (const id of ["sampleBtn", "scanBtn", "driftBtn", "resetBtn"]) {
+    byId(id).disabled = next;
+  }
+  byId("healBtn").disabled = next || !reportFresh || currentTargets.length === 0;
+  byId("wasteBtn").disabled = next || !reportFresh;
 }
+
+async function runExclusive(action) {
+  if (busy) return;
+  setBusy(true);
+  try {
+    await action();
+    await render();
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function scan() {
+  const baseline = lastReport === null;
+  const targets = baseline
+    ? nodes.map((_, index) => index)
+    : nodes
+      .map((node, index) =>
+        node.findings !== lastReport[index] || node.findings > 0 ? index : -1
+      )
+      .filter((index) => index >= 0);
+  const tile = await appendFrame("scan.tile", {
+    scan: scanCount,
+    targets: targets.map((index) => nodes[index].name)
+  });
+  responseCount = targets.length;
+  for (const index of targets) {
+    await appendFrame("scan.response", {
+      scan: scanCount,
+      tile: tile.hash,
+      device: nodes[index].name,
+      findings: nodes[index].findings,
+      healable: nodes[index].healable
+    });
+  }
+  const report = nodes.map((node) => node.findings);
+  await appendFrame("scan.report", {
+    scan: scanCount,
+    tile: tile.hash,
+    exhaust: report,
+    carriedForward: nodes
+      .map((_, index) => targets.includes(index) ? null : index)
+      .filter((index) => index !== null)
+  });
+  const same = lastReport !== null
+    && report.every((value, index) => value === lastReport[index]);
+  stableReports = same ? stableReports + 1 : 1;
+  lastReport = report;
+  currentTargets = nodes
+    .map((node, index) => node.findings > 0 && node.healable > 0 ? index : -1)
+    .filter((index) => index >= 0);
+  if (!baseline) scopeState = "pass";
+  reportFresh = true;
+  highlighted = targets;
+  scanCount += 1;
+}
+
+async function heal() {
+  if (!reportFresh) return;
+  const targets = [...currentTargets];
+  const before = nodes.map((node) => node.findings);
+  for (const index of targets) {
+    const fixed = Math.min(nodes[index].findings, nodes[index].healable);
+    nodes[index].findings -= fixed;
+    nodes[index].healable -= fixed;
+  }
+  repairWork = targets.length;
+  if (scopeState !== "fail") scopeState = "pass";
+  highlighted = targets;
+  reportFresh = false;
+  await appendFrame("repair.delta", {
+    targets,
+    before,
+    after: nodes.map((node) => node.findings),
+    sourceReport: frames.filter((frame) => frame.type === "scan.report").at(-1).hash
+  });
+}
+
+async function wastefulSweep() {
+  if (!reportFresh) return;
+  const expectedTargets = nodes
+    .map((node, index) =>
+      node.findings !== lastReport[index] || node.findings > 0 ? index : -1
+    )
+    .filter((index) => index >= 0);
+  responseCount = nodes.length;
+  scopeState = "fail";
+  highlighted = nodes.map((_, index) => index);
+  reportFresh = false;
+  await appendFrame("scan.full-sweep-mutation", {
+    touched: highlighted,
+    expectedTargets
+  });
+}
+
+function injectDrift() {
+  const index = driftCursor % nodes.length;
+  driftCursor += 1;
+  nodes[index].findings += 1;
+  nodes[index].healable += 1;
+  stableReports = 0;
+  reportFresh = false;
+  currentTargets = [];
+  highlighted = [index];
+  responseCount = 0;
+  scopeState = "pending";
+  render();
+}
+
+function resetState() {
+  nodes = initialNodes.map((node) => ({ ...node }));
+  frames = [];
+  lastReport = null;
+  currentTargets = [];
+  stableReports = 0;
+  scanCount = 0;
+  responseCount = 0;
+  repairWork = 0;
+  scopeState = "pending";
+  highlighted = [];
+  reportFresh = false;
+  driftCursor = 0;
+}
+
+function reset() {
+  resetState();
+  render();
+}
+
+byId("scanBtn").addEventListener("click", () =>
+  runExclusive(async () => scan())
+);
+byId("healBtn").addEventListener("click", () =>
+  runExclusive(async () => heal())
+);
+byId("wasteBtn").addEventListener("click", () =>
+  runExclusive(async () => wastefulSweep())
+);
+byId("driftBtn").addEventListener("click", injectDrift);
+byId("sampleBtn").addEventListener("click", () =>
+  runExclusive(async () => {
+    resetState();
+    await scan();
+    await heal();
+    await scan();
+    await scan();
+  })
+);
+byId("resetBtn").addEventListener("click", reset);
+byId("copyBtn").addEventListener("click", async () => {
+  const status = byId("copyStatus");
+  try {
+    await navigator.clipboard.writeText(PROOF_PROMPT);
+    status.textContent = "Proof prompt copied.";
+  } catch (error) {
+    status.textContent = `Copy failed: ${error.message}`;
+  }
+});
+
+byId("promptText").textContent = PROOF_PROMPT;
 reset();
 </script>
 </body>

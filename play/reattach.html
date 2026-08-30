@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deterministic Re-attachment — Frame Chains</title>
+<meta name="description" content="A standalone proof of fixed-order contradiction-set re-attachment with provenance and dry-hole preservation.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    let inherited = "";
+    try {
+      inherited = window.parent !== window
+        ? window.parent.document.documentElement.getAttribute("data-theme") || ""
+        : "";
+    } catch {}
+    const theme =
+      param || inherited || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 15px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { border-color: var(--cp-accent); }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 2px; }
+button[disabled] { cursor: default; opacity: .55; }
+code, pre, .mono { font-family: Consolas, "Courier New", Courier, monospace; }
+.shell { max-width: 960px; margin: 0 auto; padding: 18px; }
+.topline { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 22px; font-size: 13px; }
+.topline a { color: var(--cp-link); font-weight: 650; text-underline-offset: .18em; }
+.eyebrow { margin: 0 0 4px; color: var(--cp-accent); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+h1 { margin: 0; font-size: clamp(24px, 5vw, 34px); line-height: 1.15; }
+.instruction { margin: 8px 0 16px; color: var(--cp-text-muted); }
+.lesson-map {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.lesson-map div {
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.lesson-map strong { display: block; margin-bottom: 4px; color: var(--cp-accent); font-size: 12px; text-transform: uppercase; }
+.lesson-map span { color: var(--cp-text-muted); font-size: 13px; }
+.scope-note { margin: -4px 0 18px; padding: 10px 12px; border-left: 4px solid var(--cp-warning); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 13px; }
+.stage {
+  padding: 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-surface);
+  box-shadow: 0 1px 2px var(--cp-border);
+}
+.stranded {
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+}
+.stranded h2, .section-title { margin: 0 0 8px; font-size: 16px; }
+.read-grid { display: grid; gap: 6px; margin: 0; }
+.read-grid div {
+  padding: 7px 8px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+}
+.read-grid dt { font-weight: 700; }
+.read-grid dd { margin: 2px 0 0; overflow-wrap: anywhere; color: var(--cp-text-muted); font: 11px/1.4 Consolas, "Courier New", Courier, monospace; }
+.candidate-wrap { overflow-x: auto; margin-top: 12px; }
+table { width: 100%; min-width: 720px; border-collapse: collapse; }
+th, td { padding: 9px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; }
+th { color: var(--cp-text-muted); font-size: 12px; text-transform: uppercase; }
+td code { display: block; overflow-wrap: anywhere; font-size: 10px; }
+tr.clean td:first-child { border-left: 4px solid var(--cp-success); }
+tr.conflict td:first-child { border-left: 4px solid var(--cp-danger); }
+.set { color: var(--cp-text-muted); font-size: 12px; }
+.set strong { color: var(--cp-text); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 700; }
+.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.result-card {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.result-card h2 { margin: 0 0 6px; font-size: 14px; }
+.result-card code { display: block; overflow-wrap: anywhere; color: var(--cp-text-muted); font-size: 11px; }
+.assertions { display: grid; gap: 6px; margin-top: 12px; }
+.assertion {
+  padding: 8px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.assertion.pass { border-color: var(--cp-success); }
+.assertion.fail { border-color: var(--cp-danger); }
+.feedback {
+  min-height: 52px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+  color: var(--cp-text-muted);
+}
+.feedback.good { border-color: var(--cp-success); color: var(--cp-text); }
+.feedback.try { border-color: var(--cp-warning); color: var(--cp-text); }
+.log {
+  max-height: 190px;
+  overflow: auto;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+  font: 12px/1.45 Consolas, "Courier New", Courier, monospace;
+}
+.log div + div { margin-top: 5px; }
+.prompt {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.prompt summary { cursor: pointer; color: var(--cp-link); font-weight: 700; }
+.prompt p { margin: 8px 0; color: var(--cp-text-muted); }
+.prompt pre {
+  max-height: 230px;
+  overflow: auto;
+  white-space: pre-wrap;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font: 12px/1.45 Consolas, "Courier New", Courier, monospace;
+}
+.copy { border-color: var(--cp-accent); color: var(--cp-accent); font-weight: 700; }
+.footer-controls { margin-top: 12px; }
+@media (max-width: 520px) {
+  .shell { padding: 14px; }
+  .lesson-map, .result-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="topline" aria-label="Publication navigation">
+    <a href="../guide.html">Guided evidence path</a>
+    <a href="../paper.html#reattach-proof">Paper section</a>
+    <a href="../index.html">Project home</a>
+  </nav>
+  <p class="eyebrow">Interactive evidence · §3.7</p>
+  <h1>Deterministic re-attachment</h1>
+  <p class="instruction">A stranded frame declares the content addresses it read. Each candidate base is compared by set intersection, in fixed order; no model chooses the winner.</p>
+
+  <section class="lesson-map" aria-label="How to use this exercise">
+    <div><strong>What you are looking at</strong><span>One stranded frame, its declared read addresses, and a fixed ladder of candidate bases with computed conflict sets.</span></div>
+    <div><strong>Do this</strong><span>Search the ladder, tamper with the selected base, then run the dry-hole scenario.</span></div>
+    <div><strong>Watch for</strong><span>The first empty contradiction set wins; tampering moves the choice to the next clean base.</span></div>
+    <div><strong>What this demonstrates</strong><span>Re-attachment is a deterministic read-set comparison, and no candidate means no mutation.</span></div>
+  </section>
+  <p class="scope-note"><strong>Scope:</strong> the result is only as complete as the declared read set and candidate ladder. The model does not authenticate either input or prove that an omitted dependency is safe.</p>
+
+  <section class="stage" aria-labelledby="stranded-title">
+    <section class="stranded">
+      <h2 id="stranded-title">Stranded frame · declared reads</h2>
+      <dl class="read-grid" id="stranded-reads"></dl>
+      <p class="set mono" id="stranded-hash"></p>
+    </section>
+
+    <div class="candidate-wrap">
+      <h2 class="section-title">Ordered candidate ladder</h2>
+      <table>
+        <thead>
+          <tr><th>Order</th><th>Candidate base</th><th>Declared upstream reads</th><th>Computed contradiction set</th></tr>
+        </thead>
+        <tbody id="candidate-body"></tbody>
+      </table>
+    </div>
+
+    <div class="controls" aria-label="Re-attachment controls">
+      <button class="primary" id="search-ladder" type="button">Search and graft first clean base</button>
+      <button id="tamper-base" type="button">Tamper candidate 3, then search</button>
+      <button id="dry-hole" type="button">Run dry-hole no-op</button>
+    </div>
+
+    <div class="result-grid">
+      <section class="result-card" aria-labelledby="selection-title">
+        <h2 id="selection-title">Deterministic result</h2>
+        <div id="selection">No search run yet.</div>
+      </section>
+      <section class="result-card" aria-labelledby="history-title">
+        <h2 id="history-title">Preserved histories</h2>
+        <div id="history-state"></div>
+      </section>
+    </div>
+
+    <div class="assertions" aria-label="Assertions">
+      <div class="assertion" id="integrity-assertion">Input hash assertion: not run</div>
+      <div class="assertion" id="choice-assertion">Choice assertion: not run</div>
+      <div class="assertion" id="provenance-assertion">Provenance assertion: not run</div>
+      <div class="assertion" id="dry-assertion">Dry-hole assertion: not run</div>
+    </div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite">Choose an action to begin.</div>
+    <div class="log" id="log" aria-label="Candidate search log">The search log is empty.</div>
+  </section>
+
+  <div class="footer-controls">
+    <button id="reset-exercise" type="button">Reset exercise</button>
+  </div>
+
+  <details class="prompt">
+    <summary>Prove this with any LLM</summary>
+    <p>Copy this prompt into any model. It requests a self-contained implementation that can be independently verified.</p>
+    <pre id="prompt-text">Create one self-contained HTML file with no dependencies that independently proves deterministic re-attachment without an LLM decision.
+
+Requirements:
+- Give one stranded frame a declared read set of name → SHA-256 content-address pairs.
+- Provide at least four candidate bases in a fixed ladder spanning a local head, another local dimension, and public federated histories.
+- Independently recompute the stranded-frame and candidate-base hashes before selecting a base; fail closed if any hash is invalid.
+- For each candidate, compute the exact contradiction set: intersect read names, then include every shared name whose content addresses differ.
+- Select the first candidate whose computed contradiction set is empty; do not hard-code a candidate index.
+- On success, append a content-addressed graft frame containing grafted_from and selected_base provenance while preserving the stranded original.
+- Include a tamper control that changes one candidate declaration, recomputes its hash and conflict set, and visibly changes the deterministic selection.
+- Include a dry-hole scenario in which every candidate conflicts; prove it is a no-op by comparing canonical history bytes before and after.
+- Display full read addresses, candidate hashes, conflict sets, exact provenance, assertions, and an operation log.
+- Provide reset, keyboard-accessible controls, aria-live feedback, reduced-motion handling, and light/dark theme support.
+
+Return the complete runnable HTML. Every verdict must be computed from current data so another reader can independently inspect and break the invariant.</pre>
+    <button class="copy" id="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</main>
+
+<script>
+"use strict";
+const encoder = new TextEncoder();
+let addresses;
+let stranded;
+let candidates;
+let originalHistory;
+let graftedHistory;
+let lastEvaluations;
+let operationLog;
+let tampered;
+
+const strandedReads = document.getElementById("stranded-reads");
+const strandedHash = document.getElementById("stranded-hash");
+const candidateBody = document.getElementById("candidate-body");
+const selection = document.getElementById("selection");
+const historyState = document.getElementById("history-state");
+const feedback = document.getElementById("feedback");
+const log = document.getElementById("log");
+const integrityAssertion = document.getElementById("integrity-assertion");
+const choiceAssertion = document.getElementById("choice-assertion");
+const provenanceAssertion = document.getElementById("provenance-assertion");
+const dryAssertion = document.getElementById("dry-assertion");
+
+function canonical(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
+  return "{" + Object.keys(value).sort()
+    .map(key => JSON.stringify(key) + ":" + canonical(value[key])).join(",") + "}";
+}
+
+async function digest(value) {
+  const bytes = encoder.encode(typeof value === "string" ? value : canonical(value));
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(hash)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function makeStranded(reads) {
+  const preimage = { kind: "stranded.frame", reads };
+  return { ...preimage, frame_hash: await digest(preimage) };
+}
+
+async function makeBase(order, tier, name, reads) {
+  const preimage = { kind: "candidate.base", order, tier, name, reads };
+  return { ...preimage, base_hash: await digest(preimage) };
+}
+
+async function makeGraft(frame, base) {
+  const preimage = {
+    kind: "graft.frame",
+    grafted_from: frame.frame_hash,
+    selected_base: base.base_hash,
+    reads: frame.reads,
+  };
+  return { ...preimage, frame_hash: await digest(preimage) };
+}
+
+async function verifyStranded(frame) {
+  const { frame_hash, ...preimage } = frame;
+  return await digest(preimage) === frame_hash;
+}
+
+async function verifyBase(base) {
+  const { base_hash, ...preimage } = base;
+  return await digest(preimage) === base_hash;
+}
+
+function contradictionSet(frameReads, baseReads) {
+  return Object.keys(frameReads)
+    .filter(name => Object.prototype.hasOwnProperty.call(baseReads, name))
+    .filter(name => frameReads[name] !== baseReads[name])
+    .sort()
+    .map(name => ({ name, stranded: frameReads[name], candidate: baseReads[name] }));
+}
+
+function evaluate(list) {
+  return list.map(base => ({ base, conflicts: contradictionSet(stranded.reads, base.reads) }));
+}
+
+function historyBytes() {
+  return canonical({
+    originals: [...originalHistory].sort(),
+    grafts: [...graftedHistory.keys()].sort(),
+  });
+}
+
+function appendLog(message) {
+  operationLog.push(message);
+  log.textContent = "";
+  for (const line of operationLog) {
+    const row = document.createElement("div");
+    row.textContent = line;
+    log.appendChild(row);
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+function setFeedback(message, state = "") {
+  feedback.className = "feedback" + (state ? " " + state : "");
+  feedback.textContent = message;
+}
+
+function setAssertion(element, label, passed, detail) {
+  element.className = "assertion " + (passed ? "pass" : "fail");
+  element.textContent = `${passed ? "PASS" : "FAIL"} · ${label}: ${detail}`;
+}
+
+function renderReads() {
+  strandedReads.textContent = "";
+  for (const name of Object.keys(stranded.reads).sort()) {
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    const value = document.createElement("dd");
+    term.textContent = name;
+    value.textContent = stranded.reads[name];
+    row.append(term, value);
+    strandedReads.appendChild(row);
+  }
+  strandedHash.textContent = `frame_hash → ${stranded.frame_hash}`;
+}
+
+function conflictText(conflicts) {
+  if (!conflicts.length) return "∅ (contradiction-free)";
+  return conflicts.map(conflict =>
+    `${conflict.name}: stranded=${conflict.stranded} candidate=${conflict.candidate}`
+  ).join("\n");
+}
+
+function renderCandidates(evaluations = evaluate(candidates)) {
+  candidateBody.textContent = "";
+  for (const { base, conflicts } of evaluations) {
+    const row = document.createElement("tr");
+    row.className = conflicts.length ? "conflict" : "clean";
+    const order = document.createElement("td");
+    const label = document.createElement("td");
+    const reads = document.createElement("td");
+    const conflict = document.createElement("td");
+    order.textContent = String(base.order + 1);
+    label.innerHTML = `<strong>${base.name}</strong><div class="set">${base.tier}</div><code>${base.base_hash}</code>`;
+    reads.innerHTML = Object.keys(base.reads).sort()
+      .map(name => `<div class="set"><strong>${name}</strong><code>${base.reads[name]}</code></div>`).join("");
+    conflict.className = "set mono";
+    conflict.textContent = conflictText(conflicts);
+    row.append(order, label, reads, conflict);
+    candidateBody.appendChild(row);
+  }
+}
+
+function renderHistory() {
+  historyState.textContent = "";
+  const original = document.createElement("p");
+  original.innerHTML = `<strong>Originals:</strong> ${originalHistory.size}<code>${[...originalHistory].join("\n")}</code>`;
+  const grafts = document.createElement("p");
+  grafts.innerHTML = `<strong>Grafts:</strong> ${graftedHistory.size}`;
+  historyState.append(original, grafts);
+  for (const graft of graftedHistory.values()) {
+    const item = document.createElement("div");
+    item.innerHTML = `<code>graft ${graft.frame_hash}</code><code>grafted_from ${graft.grafted_from}</code><code>selected_base ${graft.selected_base}</code>`;
+    historyState.appendChild(item);
+  }
+}
+
+async function search(list, commit) {
+  const evaluations = evaluate(list);
+  const integrityFailures = [];
+  if (!await verifyStranded(stranded)) integrityFailures.push("stranded frame");
+  for (const base of list) {
+    if (!await verifyBase(base)) integrityFailures.push(`candidate ${base.order + 1}`);
+  }
+  if (integrityFailures.length) {
+    return { evaluations, chosen: null, graft: null, integrityFailures };
+  }
+  const chosen = evaluations.find(item => item.conflicts.length === 0) || null;
+  if (!chosen) return { evaluations, chosen: null, graft: null, integrityFailures };
+  const graft = await makeGraft(stranded, chosen.base);
+  if (commit) graftedHistory.set(graft.frame_hash, graft);
+  return { evaluations, chosen, graft, integrityFailures };
+}
+
+async function runNormalSearch() {
+  const result = await search(candidates, true);
+  lastEvaluations = result.evaluations;
+  renderCandidates(lastEvaluations);
+  for (const { base, conflicts } of result.evaluations) {
+    appendLog(`candidate ${base.order + 1} ${base.name} · conflicts={${conflicts.map(item => item.name).join(", ")}}`);
+    if (!conflicts.length) break;
+  }
+  if (result.integrityFailures.length) {
+    selection.textContent = "BLOCKED · one or more input hashes failed verification; no graft appended.";
+    setAssertion(integrityAssertion, "all input hashes recompute", false, result.integrityFailures.join(", "));
+    setFeedback("Re-attachment refused because an input hash failed verification.", "try");
+    return;
+  }
+  setAssertion(integrityAssertion, "all input hashes recompute", true, `${candidates.length + 1} records verified`);
+  if (!result.chosen) {
+    selection.textContent = "DRY HOLE · no contradiction-free base; no graft appended.";
+    setFeedback("No candidate qualified. Histories were unchanged.", "try");
+    return;
+  }
+  const firstClean = result.evaluations.find(item => item.conflicts.length === 0);
+  const deterministic = firstClean.base.base_hash === result.chosen.base.base_hash;
+  const originalPreserved = originalHistory.has(stranded.frame_hash);
+  const provenanceCorrect =
+    result.graft.grafted_from === stranded.frame_hash &&
+    result.graft.selected_base === result.chosen.base.base_hash;
+  selection.innerHTML = `<strong>Selected candidate ${result.chosen.base.order + 1}: ${result.chosen.base.name}</strong><code>base ${result.chosen.base.base_hash}</code><code>graft ${result.graft.frame_hash}</code>`;
+  setAssertion(choiceAssertion, "first contradiction-free base selected", deterministic, `candidate ${result.chosen.base.order + 1}`);
+  setAssertion(provenanceAssertion, "original preserved and provenance exact", originalPreserved && provenanceCorrect, `originals=${originalHistory.size}, grafts=${graftedHistory.size}`);
+  appendLog(`GRAFT appended · ${result.graft.frame_hash} · from=${result.graft.grafted_from} · base=${result.graft.selected_base}`);
+  setFeedback(`Selected candidate ${result.chosen.base.order + 1}; appended one deterministic graft and preserved the original.`, "good");
+  renderHistory();
+}
+
+async function reset() {
+  addresses = {
+    modelV4: await digest({ model: "atlas", version: 4 }),
+    modelV3: await digest({ model: "atlas", version: 3 }),
+    policy30: await digest({ retention_days: 30 }),
+    policy14: await digest({ retention_days: 14 }),
+    policyTampered: await digest({ retention_days: 1 }),
+    schema9: await digest({ schema: 9 }),
+    schema8: await digest({ schema: 8 }),
+    notes2: await digest({ notes: 2 }),
+    blocker: await digest({ contradiction: true }),
+  };
+  stranded = await makeStranded({
+    "model.runtime": addresses.modelV4,
+    "policy.retention": addresses.policy30,
+    "schema.frame": addresses.schema9,
+  });
+  candidates = [
+    await makeBase(0, "local head", "Local current head", {
+      "model.runtime": addresses.modelV4,
+      "policy.retention": addresses.policy14,
+    }),
+    await makeBase(1, "other local dimension", "Local recovery dimension", {
+      "model.runtime": addresses.modelV3,
+      "policy.retention": addresses.policy30,
+      "schema.frame": addresses.schema9,
+    }),
+    await makeBase(2, "public federation", "Public stable history", {
+      "model.runtime": addresses.modelV4,
+      "policy.retention": addresses.policy30,
+      "schema.frame": addresses.schema9,
+      "notes.format": addresses.notes2,
+    }),
+    await makeBase(3, "public federation", "Public archive", {
+      "policy.retention": addresses.policy30,
+      "schema.frame": addresses.schema9,
+    }),
+  ];
+  originalHistory = new Set([stranded.frame_hash]);
+  graftedHistory = new Map();
+  lastEvaluations = evaluate(candidates);
+  operationLog = [];
+  tampered = false;
+  document.getElementById("tamper-base").disabled = false;
+  for (const assertion of [integrityAssertion, choiceAssertion, provenanceAssertion, dryAssertion]) {
+    assertion.className = "assertion";
+  }
+  integrityAssertion.textContent = "Input hash assertion: not run";
+  choiceAssertion.textContent = "Choice assertion: not run";
+  provenanceAssertion.textContent = "Provenance assertion: not run";
+  dryAssertion.textContent = "Dry-hole assertion: not run";
+  selection.textContent = "No search run yet.";
+  log.textContent = "The search log is empty.";
+  renderReads();
+  renderCandidates(lastEvaluations);
+  renderHistory();
+  setFeedback("Reset complete. Conflict sets shown in the ladder are computed from the current addresses.");
+}
+
+document.getElementById("search-ladder").addEventListener("click", () => {
+  runNormalSearch().catch(error => setFeedback("Exercise error: " + error.message, "try"));
+});
+
+document.getElementById("tamper-base").addEventListener("click", async () => {
+  if (tampered) return;
+  const target = candidates[2];
+  target.reads["policy.retention"] = addresses.policyTampered;
+  const replacement = await makeBase(target.order, target.tier, target.name, target.reads);
+  candidates[2] = replacement;
+  tampered = true;
+  document.getElementById("tamper-base").disabled = true;
+  appendLog(`TAMPER candidate 3 · policy.retention=${addresses.policyTampered} · new base=${replacement.base_hash}`);
+  await runNormalSearch();
+});
+
+document.getElementById("dry-hole").addEventListener("click", async () => {
+  const before = historyBytes();
+  const blocked = [];
+  for (const base of candidates) {
+    blocked.push(await makeBase(base.order, base.tier, `${base.name} · dry-hole`, {
+      ...base.reads,
+      "policy.retention": addresses.blocker,
+    }));
+  }
+  const result = await search(blocked, false);
+  const after = historyBytes();
+  const unchanged = before === after;
+  lastEvaluations = result.evaluations;
+  renderCandidates(lastEvaluations);
+  selection.innerHTML = `<strong>DRY HOLE</strong><div>No contradiction-free candidate exists. Graft count remains ${graftedHistory.size}.</div>`;
+  for (const { base, conflicts } of result.evaluations) {
+    appendLog(`dry candidate ${base.order + 1} · conflicts={${conflicts.map(item => item.name).join(", ")}}`);
+  }
+  setAssertion(dryAssertion, "dry hole is a no-op", !result.chosen && unchanged, `history bytes identical=${unchanged}`);
+  setFeedback("Dry hole: every candidate contradicted policy.retention, so no frame was appended.", "good");
+  renderHistory();
+});
+
+document.getElementById("reset-exercise").addEventListener("click", () => {
+  reset().catch(error => setFeedback("Exercise error: " + error.message, "try"));
+});
+
+const promptText = document.getElementById("prompt-text");
+const copyPrompt = document.getElementById("copy-prompt");
+copyPrompt.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(promptText.textContent);
+    copyPrompt.textContent = "Copied";
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(promptText);
+    const selectionRange = getSelection();
+    selectionRange.removeAllRanges();
+    selectionRange.addRange(range);
+    copyPrompt.textContent = "Selected — copy normally";
+  }
+  setTimeout(() => { copyPrompt.textContent = "Copy proof prompt"; }, 1600);
+});
+
+reset().catch(error => setFeedback("Exercise error: " + error.message, "try"));
+</script>
+</body>
+</html>

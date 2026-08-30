@@ -4,21 +4,86 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Frame Chains</title>
+<meta name="description" content="Frame Chains RAPP paper, newcomer guide, and six standalone interactive proofs.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
 <style>
-  :root{ --ink:#1c1c1e; --mut:#5f5f64; --line:#e3e3e6; --accent:#0b5cad; }
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+  :root{ --ink:var(--cp-text); --mut:var(--cp-text-muted); --line:var(--cp-border); --accent:var(--cp-accent); --page-link:#005a9e; --card-shadow:0 0 2px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.14); }
+  html[data-theme="dark"]{ --mut:#b8b8b8; --page-link:#6bb6ff; --card-shadow:0 0 2px rgba(0,0,0,.42),0 1px 2px rgba(0,0,0,.36); }
   *{ box-sizing:border-box; }
-  body{ margin:0; color:var(--ink); font:17px/1.6 Georgia, serif; }
+  body{ margin:0; color:var(--ink); background:var(--cp-bg); font:16.5px/1.6 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
   main{ max-width:46rem; margin:0 auto; padding:3rem 1.2rem 5rem; }
   h1{ font-size:1.9rem; margin:0 0 .3rem; }
   .meta{ color:var(--mut); margin-bottom:1.4rem; }
-  .big{ display:inline-block; background:var(--accent); color:#fff; text-decoration:none;
-    padding:.6rem 1.1rem; border-radius:8px; font:600 1rem system-ui; margin:.4rem .5rem .4rem 0; }
-  .card{ border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0; }
-  .card a{ color:var(--accent); font-weight:600; text-decoration:none; font-family:system-ui; }
+  .big{ display:inline-block; background:var(--accent); color:var(--cp-accent-fg); text-decoration:none;
+    min-height:44px; padding:.65rem 1.1rem; border-radius:.625rem; font:600 1rem "Segoe UI", Aptos, Calibri, sans-serif; margin:.4rem .5rem .4rem 0; }
+  .big.secondary{ background:var(--cp-surface); color:var(--accent); border:1px solid var(--accent); }
+  .card{ border:1px solid var(--line); border-radius:16px; padding:1rem 1.2rem; margin:1rem 0; background:var(--cp-surface); box-shadow:var(--card-shadow); }
+  .card a{ color:var(--page-link); font-weight:600; text-decoration:none; font-family:"Segoe UI", Aptos, Calibri, sans-serif; }
   .card p{ margin:.35rem 0 0; color:var(--mut); font-size:.95rem; }
   h2{ font-size:1.15rem; margin:2rem 0 .5rem; }
-  code{ font:.85em ui-monospace, Menlo, monospace; background:#f4f4f5; padding:.05em .3em; border-radius:3px; }
+  code{ font:.85em Consolas, "Courier New", Courier, monospace; background:var(--cp-surface-soft); padding:.05em .3em; border-radius:.625rem; }
   footer{ margin-top:3rem; color:var(--mut); font-size:.85rem; border-top:1px solid var(--line); padding-top:1rem; }
+  a{ color:var(--page-link); }
+  a:focus-visible{ outline:3px solid var(--accent); outline-offset:3px; border-radius:.625rem; }
 </style>
 </head>
 <body>
@@ -32,6 +97,13 @@ unwatched, drifting. Frame chains keep a whole fleet healthy as <b>verifiable st
 append-only chain</b>: no central server, no elections, no clock agreement. Proven on a
 real eight-device estate — including ordering that shrugged off a 17.6-second clock
 disagreement, because <i>the chain is the clock</i>.</p>
+
+<div class="card">
+  <b>New to the idea?</b>
+  <p>Start with the guided path. It explains the vocabulary, gives you one action at a
+  time, and tells you what each result demonstrates before the paper introduces the
+  distributed-systems machinery.</p>
+</div>
 
 <figure style="margin:1.2rem 0 1rem">
 <svg viewBox="0 0 720 118" role="img" aria-label="A frame chain: each frame holds the fingerprint of the previous one" font-family="system-ui" font-size="13" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#fcfcfd">
@@ -59,8 +131,9 @@ in one picture: every frame contains the fingerprint of the one before it — or
 structural, not claimed.</figcaption>
 </figure>
 
-<a class="big" href="paper.html">Read the paper</a>
-<a class="big" style="background:#3b3b40" href="https://github.com/kody-w/frame-chains">GitHub</a>
+<a class="big" href="guide.html">Start the eight-minute guide</a>
+<a class="big secondary" href="paper.html">Read the technical paper</a>
+<a class="big secondary" href="https://github.com/kody-w/frame-chains">GitHub</a>
 
 <h2>Play with the ideas (no coding required)</h2>
 <div class="card">
@@ -70,24 +143,36 @@ structural, not claimed.</figcaption>
 </div>
 <div class="card">
   <a href="play/scan-tile.html">🛰 Scan Tiles &amp; the Healing Loop</a>
-  <p>Ask one question of a whole fleet with a single frame, watch the answers link back,
-  then heal only what changed — and watch the estate go quiet on its own.</p>
+  <p>Establish a fleet-wide baseline, then use prior exhaust and local change signals to
+  narrow later scans and repairs before declaring a stable floor.</p>
 </div>
 <div class="card">
   <a href="play/succession.html">👑 Succession Without Elections</a>
-  <p>Knock out the leader. Nobody votes, nobody panics: ranks wait their turn by rule,
-  lag can't cause a coup, and history is never rewritten.</p>
+  <p>Knock out the leader. In the stated lease model, ranks wait their turn by rule,
+  delayed observation only adds waiting, and an unsafe early claim is rejected.</p>
+</div>
+<div class="card">
+  <a href="play/membrane.html">The One-Way Membrane</a>
+  <p>Bring verified public knowledge into a private estate while the modeled transfer gate proves private-frame export is refused.</p>
+</div>
+<div class="card">
+  <a href="play/reattach.html">Deterministic Re-Attachment</a>
+  <p>Compare declared reads and attach a stranded frame to the first contradiction-free base without model judgment.</p>
+</div>
+<div class="card">
+  <a href="play/merge-fidelity.html">Merge Fidelity</a>
+  <p>Merge aligned dimensions, preserve contradictions in parallel, and compute the exact fidelity score.</p>
 </div>
 
 <h2>Run a sample</h2>
-<p><code>python3 samples/frame_chain.py</code> — a ~120-line toy frame chain (real SHA-256,
+<p><code>python3 samples/frame_chain.py</code> — a ~90-line toy frame chain (real SHA-256,
 no dependencies): mint, append, verify, catch tampering, and merge two skewed-clock
 devices in chain order.</p>
 
 <footer>
-<p>First public disclosure 2026-08-27 · © 2026 RapterBox LLC · substrate:
+<p>RAPP paper · first public disclosure 2026-08-27 · © 2026 RapterBox LLC · substrate:
 <a href="https://kody-w.github.io/rapp-1/">rapp/1</a> (published separately) ·
-the interactive pages are teaching toys — the paper is the source of truth.</p>
+the interactive pages are explanatory models — the paper is the source of truth.</p>
 </footer>
 </main>
 </body>

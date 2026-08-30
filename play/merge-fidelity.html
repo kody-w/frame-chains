@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graded Merge Fidelity — Frame Chains</title>
+<meta name="description" content="A standalone proof of deterministic dimension-aware merge fidelity with preserved conflicting histories.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    let inherited = "";
+    try {
+      inherited = window.parent !== window
+        ? window.parent.document.documentElement.getAttribute("data-theme") || ""
+        : "";
+    } catch {}
+    const theme =
+      param || inherited || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 15px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { border-color: var(--cp-accent); }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 2px; }
+button[disabled] { cursor: default; opacity: .55; }
+code, pre, .mono { font-family: Consolas, "Courier New", Courier, monospace; }
+.shell { max-width: 980px; margin: 0 auto; padding: 18px; }
+.topline { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 22px; font-size: 13px; }
+.topline a { color: var(--cp-link); font-weight: 650; text-underline-offset: .18em; }
+.eyebrow { margin: 0 0 4px; color: var(--cp-accent); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+h1 { margin: 0; font-size: clamp(24px, 5vw, 34px); line-height: 1.15; }
+.instruction { margin: 8px 0 16px; color: var(--cp-text-muted); }
+.lesson-map {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.lesson-map div {
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.lesson-map strong { display: block; margin-bottom: 4px; color: var(--cp-accent); font-size: 12px; text-transform: uppercase; }
+.lesson-map span { color: var(--cp-text-muted); font-size: 13px; }
+.scope-note { margin: -4px 0 18px; padding: 10px 12px; border-left: 4px solid var(--cp-warning); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 13px; }
+.stage {
+  padding: 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-surface);
+  box-shadow: 0 1px 2px var(--cp-border);
+}
+.history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.history {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+}
+.history h2 { margin: 0 0 8px; font-size: 16px; }
+.declaration {
+  margin-top: 7px;
+  padding: 8px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+}
+.declaration strong { display: block; }
+.declaration code { display: block; overflow-wrap: anywhere; color: var(--cp-text-muted); font-size: 10px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 700; }
+.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+.score {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.score strong { display: block; color: var(--cp-accent); font-size: clamp(22px, 5vw, 32px); }
+.score span { color: var(--cp-text-muted); }
+.merge-output { display: grid; gap: 8px; margin-top: 12px; }
+.dimension {
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+}
+.dimension.aligned { border-left: 4px solid var(--cp-success); }
+.dimension.parallel { border-left: 4px solid var(--cp-warning); }
+.dimension.mutated { border-left: 4px solid var(--cp-danger); }
+.dimension h3 { margin: 0 0 5px; font-size: 14px; }
+.dimension p { margin: 4px 0; color: var(--cp-text-muted); }
+.dimension code { display: block; overflow-wrap: anywhere; font-size: 10px; }
+.parallel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.parallel-grid div { padding: 7px; border: 1px dashed var(--cp-border-strong); border-radius: 0.625rem; }
+.assertions { display: grid; gap: 6px; margin-top: 12px; }
+.assertion {
+  padding: 8px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.assertion.pass { border-color: var(--cp-success); }
+.assertion.fail { border-color: var(--cp-danger); }
+.feedback {
+  min-height: 52px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+  color: var(--cp-text-muted);
+}
+.feedback.good { border-color: var(--cp-success); color: var(--cp-text); }
+.feedback.try { border-color: var(--cp-warning); color: var(--cp-text); }
+.log {
+  max-height: 190px;
+  overflow: auto;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+  font: 12px/1.45 Consolas, "Courier New", Courier, monospace;
+}
+.log div + div { margin-top: 5px; }
+.prompt {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+}
+.prompt summary { cursor: pointer; color: var(--cp-link); font-weight: 700; }
+.prompt p { margin: 8px 0; color: var(--cp-text-muted); }
+.prompt pre {
+  max-height: 230px;
+  overflow: auto;
+  white-space: pre-wrap;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font: 12px/1.45 Consolas, "Courier New", Courier, monospace;
+}
+.copy { border-color: var(--cp-accent); color: var(--cp-accent); font-weight: 700; }
+.footer-controls { margin-top: 12px; }
+@media (max-width: 520px) {
+  .shell { padding: 14px; }
+  .lesson-map, .history-grid, .parallel-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="topline" aria-label="Publication navigation">
+    <a href="../guide.html">Guided evidence path</a>
+    <a href="../paper.html#merge-proof">Paper section</a>
+    <a href="../index.html">Project home</a>
+  </nav>
+  <p class="eyebrow">Interactive evidence · §3.9</p>
+  <h1>Graded merge fidelity</h1>
+  <p class="instruction">Two histories formed without contact. Join them by dimension and logical tick, merge only contradiction-free dimensions, and keep every conflict in parallel.</p>
+
+  <section class="lesson-map" aria-label="How to use this exercise">
+    <div><strong>What you are looking at</strong><span>Two independently formed histories, their content hashes, and a dimension-by-dimension compatibility calculation.</span></div>
+    <div><strong>Do this</strong><span>Compute the merge, inspect the exact score, then run the overwrite mutation.</span></div>
+    <div><strong>Watch for</strong><span>Aligned and one-sided data combine; configuration keeps both contradictory alternatives.</span></div>
+    <div><strong>What this demonstrates</strong><span>Merge quality is graded and deterministic—conflicts reduce fidelity but do not destroy either history.</span></div>
+  </section>
+  <p class="scope-note"><strong>Scope:</strong> fidelity here weights each shared dimension equally. That score is inspectable and deterministic, but it is not a universal measure of semantic importance or merge safety.</p>
+
+  <section class="stage" aria-labelledby="histories-title">
+    <h2 id="histories-title" class="eyebrow">Independent source histories</h2>
+    <div class="history-grid">
+      <section class="history" aria-labelledby="left-title">
+        <h2 id="left-title">Estate A</h2>
+        <div id="left-history"></div>
+      </section>
+      <section class="history" aria-labelledby="right-title">
+        <h2 id="right-title">Estate B</h2>
+        <div id="right-history"></div>
+      </section>
+    </div>
+
+    <div class="controls" aria-label="Merge controls">
+      <button class="primary" id="compute-merge" type="button">Compute fidelity and merge</button>
+      <button id="mutate-merge" type="button" disabled>Mutate: overwrite the conflict</button>
+    </div>
+
+    <section class="score" aria-labelledby="score-title">
+      <span id="score-title">Exact fidelity</span>
+      <strong id="score-value">Not computed</strong>
+      <span id="score-detail">mergeable shared dimensions / all shared dimensions</span>
+    </section>
+
+    <section class="merge-output" id="merge-output" aria-label="Merged dimensions">
+      <div class="dimension">No merged state yet.</div>
+    </section>
+
+    <div class="assertions" aria-label="Assertions">
+      <div class="assertion" id="integrity-assertion">Input hash assertion: not run</div>
+      <div class="assertion" id="merge-assertion">Merge-rule assertion: not run</div>
+      <div class="assertion" id="preservation-assertion">Conflict-preservation assertion: not run</div>
+    </div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite">Choose an action to begin.</div>
+    <div class="log" id="log" aria-label="Merge computation log">The merge log is empty.</div>
+  </section>
+
+  <div class="footer-controls">
+    <button id="reset-exercise" type="button">Reset exercise</button>
+  </div>
+
+  <details class="prompt">
+    <summary>Prove this with any LLM</summary>
+    <p>Copy this prompt into any model. It requests a self-contained implementation that can be independently verified.</p>
+    <pre id="prompt-text">Create one self-contained HTML file with no dependencies that independently proves deterministic graded merge fidelity.
+
+Requirements:
+- Represent two independently formed histories as dimensions keyed by name and logical tick.
+- Compute a SHA-256 content hash from canonical JSON for every declared value and independently verify all hashes before merging.
+- Fail closed: if any input hash fails, produce no merged result.
+- Join on dimension and tick. A shared dimension is mergeable only when every overlapping tick has the same content hash.
+- Include three shared dimensions: two contradiction-free and one contradictory, plus one-sided dimensions on both histories.
+- Compute and display the exact score as numerator / denominator and decimal: mergeable shared dimensions / all shared dimensions.
+- Merge aligned shared dimensions and all one-sided dimensions. Preserve each conflicted dimension as two named parallel alternatives without choosing a winner.
+- Show exact tick keys, full content hashes, conflict pairs, resulting dimensions, assertions, and a deterministic operation log.
+- Add a mutation that silently overwrites the conflicted dimension with one side and make an independently computed preservation assertion turn red.
+- Provide reset, keyboard-accessible controls, aria-live feedback, reduced-motion handling, and light/dark theme support.
+
+Do not hard-code the score or merge result. Derive them from the current histories. Return the complete runnable HTML and explain one way to deliberately break the invariant.</pre>
+    <button class="copy" id="copy-prompt" type="button">Copy proof prompt</button>
+  </details>
+</main>
+
+<script>
+"use strict";
+const encoder = new TextEncoder();
+let leftHistory;
+let rightHistory;
+let currentAnalysis;
+let currentResult;
+let operationLog;
+
+const leftView = document.getElementById("left-history");
+const rightView = document.getElementById("right-history");
+const scoreValue = document.getElementById("score-value");
+const scoreDetail = document.getElementById("score-detail");
+const mergeOutput = document.getElementById("merge-output");
+const feedback = document.getElementById("feedback");
+const log = document.getElementById("log");
+const integrityAssertion = document.getElementById("integrity-assertion");
+const mergeAssertion = document.getElementById("merge-assertion");
+const preservationAssertion = document.getElementById("preservation-assertion");
+const mutateButton = document.getElementById("mutate-merge");
+
+function canonical(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
+  return "{" + Object.keys(value).sort()
+    .map(key => JSON.stringify(key) + ":" + canonical(value[key])).join(",") + "}";
+}
+
+async function digest(value) {
+  const bytes = encoder.encode(typeof value === "string" ? value : canonical(value));
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(hash)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function declaration(value) {
+  return { value, content_hash: await digest(value) };
+}
+
+function emptyHistory() {
+  return new Map();
+}
+
+function put(history, dimension, tick, entry) {
+  if (!history.has(dimension)) history.set(dimension, new Map());
+  history.get(dimension).set(String(tick), entry);
+}
+
+function dimensionObject(ticks) {
+  return Object.fromEntries([...ticks.entries()].sort(([a], [b]) => a.localeCompare(b)));
+}
+
+function serializeHistory(history) {
+  return Object.fromEntries([...history.entries()].sort(([a], [b]) => a.localeCompare(b))
+    .map(([dimension, ticks]) => [dimension, dimensionObject(ticks)]));
+}
+
+async function verifyHistory(history) {
+  const failures = [];
+  for (const [dimension, ticks] of history) {
+    for (const [tick, entry] of ticks) {
+      if (await digest(entry.value) !== entry.content_hash) failures.push(`${dimension}@${tick}`);
+    }
+  }
+  return failures;
+}
+
+function analyze(left, right) {
+  const leftNames = new Set(left.keys());
+  const rightNames = new Set(right.keys());
+  const allNames = [...new Set([...leftNames, ...rightNames])].sort();
+  const sharedNames = allNames.filter(name => leftNames.has(name) && rightNames.has(name));
+  const dimensions = {};
+
+  for (const name of allNames) {
+    const leftTicks = left.get(name);
+    const rightTicks = right.get(name);
+    if (!leftTicks) {
+      dimensions[name] = { kind: "one-sided", side: "B", ticks: dimensionObject(rightTicks), conflicts: [] };
+      continue;
+    }
+    if (!rightTicks) {
+      dimensions[name] = { kind: "one-sided", side: "A", ticks: dimensionObject(leftTicks), conflicts: [] };
+      continue;
+    }
+
+    const overlappingTicks = [...leftTicks.keys()].filter(tick => rightTicks.has(tick)).sort();
+    const conflicts = overlappingTicks
+      .filter(tick => leftTicks.get(tick).content_hash !== rightTicks.get(tick).content_hash)
+      .map(tick => ({
+        tick,
+        leftHash: leftTicks.get(tick).content_hash,
+        rightHash: rightTicks.get(tick).content_hash,
+      }));
+    dimensions[name] = {
+      kind: conflicts.length ? "conflicted" : "mergeable",
+      conflicts,
+      left: dimensionObject(leftTicks),
+      right: dimensionObject(rightTicks),
+    };
+  }
+
+  const mergeableShared = sharedNames.filter(name => dimensions[name].kind === "mergeable");
+  return {
+    allNames,
+    sharedNames,
+    mergeableShared,
+    numerator: mergeableShared.length,
+    denominator: sharedNames.length,
+    dimensions,
+  };
+}
+
+function mergeFromAnalysis(analysis) {
+  const dimensions = {};
+  for (const name of analysis.allNames) {
+    const info = analysis.dimensions[name];
+    if (info.kind === "one-sided") {
+      dimensions[name] = { mode: "assimilated", from: info.side, ticks: info.ticks };
+    } else if (info.kind === "mergeable") {
+      dimensions[name] = { mode: "merged", ticks: { ...info.left, ...info.right } };
+    } else {
+      dimensions[name] = {
+        mode: "parallel",
+        alternatives: { estateA: info.left, estateB: info.right },
+        conflicts: info.conflicts,
+      };
+    }
+  }
+  return {
+    score: { numerator: analysis.numerator, denominator: analysis.denominator },
+    dimensions,
+  };
+}
+
+function conflictPreserved(result, analysis) {
+  for (const name of analysis.sharedNames) {
+    const info = analysis.dimensions[name];
+    if (info.kind !== "conflicted") continue;
+    const output = result.dimensions[name];
+    if (!output || output.mode !== "parallel" || !output.alternatives) return false;
+    if (canonical(output.alternatives.estateA) !== canonical(info.left)) return false;
+    if (canonical(output.alternatives.estateB) !== canonical(info.right)) return false;
+  }
+  return true;
+}
+
+function mergedCorrectly(result, analysis) {
+  return analysis.allNames.every(name => {
+    const info = analysis.dimensions[name];
+    const output = result.dimensions[name];
+    if (!output) return false;
+    if (info.kind === "conflicted") {
+      return output.mode === "parallel"
+        && canonical(output.alternatives?.estateA) === canonical(info.left)
+        && canonical(output.alternatives?.estateB) === canonical(info.right);
+    }
+    if (info.kind === "mergeable") {
+      return output.mode === "merged"
+        && canonical(output.ticks) === canonical({ ...info.left, ...info.right });
+    }
+    return output.mode === "assimilated"
+      && output.from === info.side
+      && canonical(output.ticks) === canonical(info.ticks);
+  });
+}
+
+function appendLog(message) {
+  operationLog.push(message);
+  log.textContent = "";
+  for (const line of operationLog) {
+    const row = document.createElement("div");
+    row.textContent = line;
+    log.appendChild(row);
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+function setFeedback(message, state = "") {
+  feedback.className = "feedback" + (state ? " " + state : "");
+  feedback.textContent = message;
+}
+
+function setAssertion(element, label, passed, detail) {
+  element.className = "assertion " + (passed ? "pass" : "fail");
+  element.textContent = `${passed ? "PASS" : "FAIL"} · ${label}: ${detail}`;
+}
+
+function renderHistory(history, container) {
+  container.textContent = "";
+  for (const [dimension, ticks] of [...history.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    for (const [tick, entry] of [...ticks.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+      const item = document.createElement("div");
+      item.className = "declaration";
+      item.innerHTML = `<strong>${dimension} @ tick ${tick}</strong><code>value ${canonical(entry.value)}</code><code>hash ${entry.content_hash}</code>`;
+      container.appendChild(item);
+    }
+  }
+}
+
+function tickLines(ticks) {
+  return Object.keys(ticks).sort().map(tick =>
+    `<code>tick ${tick} · ${ticks[tick].content_hash}</code>`
+  ).join("");
+}
+
+function renderResult(result, analysis, mutated = false) {
+  mergeOutput.textContent = "";
+  for (const name of analysis.allNames) {
+    const info = result.dimensions[name];
+    const card = document.createElement("section");
+    if (info.mode === "parallel") {
+      card.className = "dimension parallel";
+      card.innerHTML = `<h3>${name} · preserved in parallel</h3>
+        <p>${info.conflicts.length} conflicting shared tick(s); no winner chosen.</p>
+        <div class="parallel-grid">
+          <div><strong>Estate A</strong>${tickLines(info.alternatives.estateA)}</div>
+          <div><strong>Estate B</strong>${tickLines(info.alternatives.estateB)}</div>
+        </div>`;
+    } else {
+      card.className = "dimension " + (mutated && info.mode === "overwritten" ? "mutated" : "aligned");
+      const label = info.mode === "assimilated"
+        ? `one-sided · assimilated from Estate ${info.from}`
+        : info.mode === "overwritten"
+          ? "MUTATED · one side silently overwrote the conflict"
+          : "shared · contradiction-free merge";
+      card.innerHTML = `<h3>${name} · ${label}</h3>${tickLines(info.ticks)}`;
+    }
+    mergeOutput.appendChild(card);
+  }
+}
+
+async function computeAndMerge() {
+  const failures = [...await verifyHistory(leftHistory), ...await verifyHistory(rightHistory)];
+  if (failures.length) {
+    currentAnalysis = null;
+    currentResult = null;
+    scoreValue.textContent = "Blocked";
+    scoreDetail.textContent = "Input integrity failed; no merge was produced.";
+    mergeOutput.innerHTML = '<div class="dimension mutated">Merge blocked because an input declaration failed SHA-256 verification.</div>';
+    setAssertion(integrityAssertion, "all input content hashes recompute", false, failures.join(", "));
+    mergeAssertion.className = "assertion";
+    mergeAssertion.textContent = "Merge-rule assertion: not run because input integrity failed";
+    preservationAssertion.className = "assertion";
+    preservationAssertion.textContent = "Conflict-preservation assertion: not run because input integrity failed";
+    mutateButton.disabled = true;
+    setFeedback("Merge refused: at least one input content hash did not recompute.", "try");
+    return;
+  }
+  currentAnalysis = analyze(leftHistory, rightHistory);
+  currentResult = mergeFromAnalysis(currentAnalysis);
+  const decimal = currentAnalysis.denominator
+    ? (currentAnalysis.numerator / currentAnalysis.denominator).toFixed(3)
+    : "1.000";
+  scoreValue.textContent = `${currentAnalysis.numerator} / ${currentAnalysis.denominator} = ${decimal}`;
+  scoreDetail.textContent = `${currentAnalysis.mergeableShared.join(", ")} merge; ${currentAnalysis.sharedNames
+    .filter(name => !currentAnalysis.mergeableShared.includes(name)).join(", ")} remains parallel`;
+
+  for (const name of currentAnalysis.allNames) {
+    const info = currentAnalysis.dimensions[name];
+    if (info.kind === "conflicted") {
+      appendLog(`${name} · conflict ${info.conflicts.map(item => `tick ${item.tick}: ${item.leftHash} ≠ ${item.rightHash}`).join("; ")}`);
+    } else if (info.kind === "mergeable") {
+      appendLog(`${name} · mergeable across every overlapping tick`);
+    } else {
+      appendLog(`${name} · one-sided on Estate ${info.side}; assimilated freely`);
+    }
+  }
+  appendLog(`FIDELITY ${currentAnalysis.numerator}/${currentAnalysis.denominator}=${decimal}`);
+
+  const integrity = failures.length === 0;
+  const mergeRulesPass = mergedCorrectly(currentResult, currentAnalysis);
+  const preservationPass = conflictPreserved(currentResult, currentAnalysis);
+  setAssertion(integrityAssertion, "all input content hashes recompute", integrity, integrity ? "no failures" : failures.join(", "));
+  setAssertion(mergeAssertion, "aligned and one-sided dimensions merged by rule", mergeRulesPass, `${currentAnalysis.allNames.length} dimensions classified`);
+  setAssertion(preservationAssertion, "conflicted dimensions retain both alternatives", preservationPass, preservationPass ? "both configuration hashes remain" : "an alternative was lost");
+  renderResult(currentResult, currentAnalysis);
+  mutateButton.disabled = false;
+  setFeedback(`Merge complete. Exact fidelity is ${currentAnalysis.numerator}/${currentAnalysis.denominator}; conflicts were preserved, not forced.`, "good");
+}
+
+async function reset() {
+  leftHistory = emptyHistory();
+  rightHistory = emptyHistory();
+  put(leftHistory, "roster", 10, await declaration({ leader: "r1", lease_beats: 6 }));
+  put(leftHistory, "roster", 11, await declaration({ leader: "r1", lease_beats: 6 }));
+  put(rightHistory, "roster", 10, await declaration({ leader: "r1", lease_beats: 6 }));
+
+  put(leftHistory, "notes", 10, await declaration({ format: "markdown" }));
+  put(leftHistory, "notes", 11, await declaration({ note: "A-only continuation" }));
+  put(rightHistory, "notes", 10, await declaration({ format: "markdown" }));
+  put(rightHistory, "notes", 12, await declaration({ note: "B-only continuation" }));
+
+  put(leftHistory, "configuration", 10, await declaration({ mode: "safe", retries: 3 }));
+  put(rightHistory, "configuration", 10, await declaration({ mode: "fast", retries: 1 }));
+
+  put(leftHistory, "telemetry", 10, await declaration({ devices: 8 }));
+  put(rightHistory, "diagnostics", 10, await declaration({ checks: 12 }));
+
+  currentAnalysis = null;
+  currentResult = null;
+  operationLog = [];
+  renderHistory(leftHistory, leftView);
+  renderHistory(rightHistory, rightView);
+  scoreValue.textContent = "Not computed";
+  scoreDetail.textContent = "mergeable shared dimensions / all shared dimensions";
+  mergeOutput.innerHTML = '<div class="dimension">No merged state yet.</div>';
+  for (const assertion of [integrityAssertion, mergeAssertion, preservationAssertion]) assertion.className = "assertion";
+  integrityAssertion.textContent = "Input hash assertion: not run";
+  mergeAssertion.textContent = "Merge-rule assertion: not run";
+  preservationAssertion.textContent = "Conflict-preservation assertion: not run";
+  mutateButton.disabled = true;
+  log.textContent = "The merge log is empty.";
+  setFeedback("Reset complete. Both source histories and every content hash were regenerated.");
+}
+
+document.getElementById("compute-merge").addEventListener("click", () => {
+  computeAndMerge().catch(error => setFeedback("Exercise error: " + error.message, "try"));
+});
+
+mutateButton.addEventListener("click", () => {
+  if (!currentAnalysis || !currentResult) return;
+  const mutated = structuredClone(currentResult);
+  const conflictName = currentAnalysis.sharedNames.find(name => currentAnalysis.dimensions[name].kind === "conflicted");
+  const conflictInfo = currentAnalysis.dimensions[conflictName];
+  mutated.dimensions[conflictName] = {
+    mode: "overwritten",
+    ticks: { ...conflictInfo.left, ...conflictInfo.right },
+  };
+  const preserved = conflictPreserved(mutated, currentAnalysis);
+  currentResult = mutated;
+  renderResult(currentResult, currentAnalysis, true);
+  setAssertion(preservationAssertion, "conflicted dimensions retain both alternatives", preserved, "mutation collapsed configuration to one overwritten tick");
+  appendLog(`MUTATION ${conflictName} · Estate B overwrote Estate A at the shared tick · preservation=${preserved}`);
+  setFeedback("Mutation failure detected: the score did not authorize overwriting the conflicted dimension, and one alternative was lost.", "try");
+  mutateButton.disabled = true;
+});
+
+document.getElementById("reset-exercise").addEventListener("click", () => {
+  reset().catch(error => setFeedback("Exercise error: " + error.message, "try"));
+});
+
+const promptText = document.getElementById("prompt-text");
+const copyPrompt = document.getElementById("copy-prompt");
+copyPrompt.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(promptText.textContent);
+    copyPrompt.textContent = "Copied";
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(promptText);
+    const selection = getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    copyPrompt.textContent = "Selected — copy normally";
+  }
+  setTimeout(() => { copyPrompt.textContent = "Copy proof prompt"; }, 1600);
+});
+
+reset().catch(error => setFeedback("Exercise error: " + error.message, "try"));
+</script>
+</body>
+</html>
