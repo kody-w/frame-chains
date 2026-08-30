@@ -139,6 +139,8 @@ code, pre, .mono { font-family: Consolas, "Courier New", Courier, monospace; }
 }
 h1 { max-width: 850px; margin: 0; font-size: clamp(36px, 7vw, 76px); line-height: .96; letter-spacing: -.045em; }
 .dek { max-width: 760px; margin: 20px 0 0; color: var(--cp-text-muted); font-size: clamp(16px, 2.2vw, 20px); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.hero-actions button { min-width: 190px; }
 .hero-seal {
   position: relative;
   z-index: 1;
@@ -459,6 +461,9 @@ details pre { max-height: 280px; overflow: auto; white-space: pre-wrap; overflow
       <p class="eyebrow">Frame 01 · executable museum label</p>
       <h1>Many-Worlds<br>Mission Control</h1>
       <p class="dek">Choose one immutable moment in a synthetic spacecraft mission. Fork three deterministic futures from that exact state, verify their ancestry, then discover what can merge—and what must remain parallel.</p>
+      <div class="hero-actions">
+        <button class="primary" id="hero-guided-btn" type="button">Run guided proof</button>
+      </div>
     </div>
     <div class="hero-seal" aria-hidden="true">
       <div class="seal-copy"><strong>SHA-256</strong><span>canonical JSON · append only</span></div>
@@ -1230,6 +1235,7 @@ async function guidedRun() {
   if (guidedRunning) return;
   guidedRunning = true;
   $("#guided-btn").disabled = true;
+  $("#hero-guided-btn").disabled = true;
   try {
     await reset(2);
     setLive("Guided step 1 of 5: replaying the immutable canonical mission.");
@@ -1251,6 +1257,7 @@ async function guidedRun() {
   } finally {
     guidedRunning = false;
     $("#guided-btn").disabled = false;
+    $("#hero-guided-btn").disabled = false;
   }
 }
 
@@ -1290,6 +1297,7 @@ async function initialize() {
     setLive(`Fork point changed to ${BASE_STREAM}/${selectedSequence}. Existing counterfactuals were cleared, never rewritten.`);
   });
   $("#guided-btn").addEventListener("click", guidedRun);
+  $("#hero-guided-btn").addEventListener("click", guidedRun);
   $("#fork-all-btn").addEventListener("click", forkAll);
   $("#merge-btn").addEventListener("click", attemptMerge);
   $("#replay-btn").addEventListener("click", replayArrivals);
