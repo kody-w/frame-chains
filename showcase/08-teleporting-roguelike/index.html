@@ -54,7 +54,7 @@
       cursor: pointer;
       font-weight: 760;
     }
-    button:hover { border-color: var(--accent); transform: translateY(-1px); }
+    button:hover { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent); }
     button:focus-visible, select:focus-visible, input:focus-visible {
       outline: 3px solid color-mix(in srgb, var(--accent) 65%, transparent);
       outline-offset: 2px;
@@ -288,7 +288,6 @@
     }
     @media (prefers-reduced-motion: reduce) {
       *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; }
-      button:hover { transform:none; }
     }
   </style>
 </head>
