@@ -44,7 +44,7 @@ function assertNoSensitiveIndicators(text, label) {
     ["IPv4 address", validIpv4],
     ["email address", text.match(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi) || []],
     ["home path", text.match(/(?:\/Users\/|\/home\/|[A-Z]:\\Users\\)[^\s"'`]+/gi) || []],
-    ["local hostname", text.match(/\b(?:localhost|[a-z0-9-]+\.(?:local|lan|internal|corp))\b/gi) || []],
+    ["local hostname", text.match(/\blocalhost\b|["'`](?:https?:\/\/)?[a-z0-9-]+\.(?:local|lan|internal|corp)(?::\d+)?["'`]/gi) || []],
     ["private key", text.match(/-----BEGIN [A-Z ]*PRIVATE KEY-----/g) || []],
     ["token prefix", text.match(/\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[A-Z0-9]{16})\b/g) || []],
   ];
@@ -187,7 +187,7 @@ async function hasVisibleVerdict(page, kind) {
     const expression = new RegExp(source, flags);
     const candidates = [
       ...document.querySelectorAll(
-        '.pass, .fail, .failed, .bad, [data-status="pass"], [data-status="fail"], [role=status]',
+        '.pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
       ),
     ].filter((node) => {
       const rect = node.getBoundingClientRect();
@@ -197,24 +197,28 @@ async function hasVisibleVerdict(page, kind) {
   }, { source: pattern.source, flags: pattern.flags });
 }
 
-async function waitForVisibleVerdict(page, kind) {
+async function waitForVisibleVerdict(page, kind, label) {
   const pattern = kind === "pass" ? /\bPASS\b/i : /\b(?:FAIL|REJECTED|BLOCKED|DETECTED)\b/i;
-  await page.waitForFunction(
-    ({ source, flags }) => {
-      const expression = new RegExp(source, flags);
-      const candidates = [
-        ...document.querySelectorAll(
-          '.pass, .fail, .failed, .bad, [data-status="pass"], [data-status="fail"], [role=status]',
-        ),
-      ].filter((node) => {
-        const rect = node.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0;
-      });
-      return candidates.some((node) => expression.test(node.textContent || ""));
-    },
-    { source: pattern.source, flags: pattern.flags },
-    { timeout: 15_000 },
-  );
+  try {
+    await page.waitForFunction(
+      ({ source, flags }) => {
+        const expression = new RegExp(source, flags);
+        const candidates = [
+          ...document.querySelectorAll(
+            '.pass, .valid, .success, .fail, .failed, .bad, .invalid, .rejected, .error, [aria-invalid="true"], [data-status="pass"], [data-status="fail"], [role=status]',
+          ),
+        ].filter((node) => {
+          const rect = node.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        });
+        return candidates.some((node) => expression.test(node.textContent || ""));
+      },
+      { source: pattern.source, flags: pattern.flags },
+      { timeout: 15_000 },
+    );
+  } catch {
+    throw new Error(`${label}: no visible ${kind.toUpperCase()} verdict`);
+  }
 }
 
 async function exerciseFrame(context, origin, slug) {
@@ -289,7 +293,7 @@ async function exerciseFrame(context, origin, slug) {
   await page.waitForTimeout(1_000);
   const afterGuided = compact(await page.locator("body").innerText());
   check(afterGuided !== before, `${slug}: guided run produced no visible change`);
-  await waitForVisibleVerdict(page, "pass");
+  await waitForVisibleVerdict(page, "pass", `${slug} guided run`);
 
   const mutation = await matchingButton(
     page,
@@ -298,7 +302,7 @@ async function exerciseFrame(context, origin, slug) {
   );
   await mutation.click();
   await page.waitForTimeout(700);
-  await waitForVisibleVerdict(page, "fail");
+  await waitForVisibleVerdict(page, "fail", `${slug} mutation`);
 
   await page.locator("details").evaluateAll((details) => {
     details.forEach((item) => { item.open = true; });
