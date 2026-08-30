@@ -1,0 +1,28 @@
+{
+  "frame": 1,
+  "slug": "01-many-worlds",
+  "title": "Many-Worlds Mission Control",
+  "claim": "A historical frame can seed multiple deterministic, independently verifiable counterfactual mission histories whose compatible claims merge while genuine contradictions remain parallel with exact, inspectable merge fidelity.",
+  "entry": "index.html",
+  "synthetic_only": true,
+  "network_required": false,
+  "invariants": [
+    "Every frame hash is computed with Web Crypto SHA-256 over recursively canonicalized JSON excluding only the stored hash field.",
+    "Every non-genesis frame records the exact parent stream, sequence, and hash.",
+    "Every counterfactual branch begins from the selected canonical frame and records a digest of its replayed parent state.",
+    "All displayed telemetry is derived by replaying immutable frame events.",
+    "The three policies are deterministic for the same seed and parent frame.",
+    "Only unanimous dimension claims merge; contradictory claims remain named parallel alternatives.",
+    "Merge fidelity is the exact count of equal branch-pair claims divided by all comparable branch-pair claims.",
+    "A parent-hash mutation invalidates only the affected branch when other histories are unchanged."
+  ],
+  "positive_path": [
+    "Select any historical canonical mission frame.",
+    "Fork conserve fuel, rescue SABLE-2, and accelerate from that exact parent.",
+    "Verify every frame hash, sequence, parent link, and fork-state digest independently.",
+    "Replay all arrivals and inspect the visible ledger and branch timeline.",
+    "Attempt the deterministic merge and observe 9 agreements over 15 comparisons, reduced to 3/5 and displayed as 0.6.",
+    "Confirm compatible communications, propulsion, and life-support claims merge while objective and encounter contradictions remain parallel."
+  ],
+  "failure_path": "After all branches verify, mutate the rescue branch's recorded canonical parent hash without recomputing its frame or descendants. The independent verifier must mark rescue FAIL while conserve fuel, accelerate, and the canonical stream remain PASS; merge must then refuse the invalid input."
+}

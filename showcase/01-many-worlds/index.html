@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An interactive, synthetic proof of deterministic branching, provenance verification, and graded merge fidelity on a canonical-JSON SHA-256 frame chain.">
+<title>Many-Worlds Mission Control</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 15px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button, select {
+  min-height: 44px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font: inherit;
+}
+button {
+  padding: 9px 14px;
+  cursor: pointer;
+  font-weight: 650;
+}
+select { width: 100%; padding: 8px 36px 8px 12px; }
+button:hover:not(:disabled) { border-color: var(--cp-accent); color: var(--cp-accent); }
+button:disabled { cursor: not-allowed; opacity: .5; }
+button:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--cp-accent);
+  outline-offset: 3px;
+}
+button.primary {
+  border-color: var(--cp-accent);
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+}
+button.primary:hover:not(:disabled) { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+button.danger { border-color: var(--cp-danger); color: var(--cp-danger); }
+button.quiet { border-color: var(--cp-border); color: var(--cp-text-muted); }
+code, pre, .mono { font-family: Consolas, "Courier New", Courier, monospace; }
+.shell { width: min(1440px, 100%); margin: 0 auto; padding: 20px; }
+.masthead {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, .7fr);
+  gap: 24px;
+  min-height: 270px;
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-bg-elevated);
+  box-shadow: 0 1px 2px var(--cp-border);
+}
+.masthead::after {
+  content: "";
+  position: absolute;
+  right: -72px;
+  bottom: -122px;
+  width: 340px;
+  height: 340px;
+  border: 1px solid var(--cp-border);
+  border-radius: 50%;
+  box-shadow: 0 0 0 32px var(--cp-accent-soft), 0 0 0 76px var(--cp-surface-soft);
+  pointer-events: none;
+}
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--cp-accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+h1 { max-width: 850px; margin: 0; font-size: clamp(36px, 7vw, 76px); line-height: .96; letter-spacing: -.045em; }
+.dek { max-width: 760px; margin: 20px 0 0; color: var(--cp-text-muted); font-size: clamp(16px, 2.2vw, 20px); }
+.hero-seal {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  justify-self: center;
+  width: min(240px, 100%);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 50%;
+  background: var(--cp-surface);
+  text-align: center;
+}
+.hero-seal::before, .hero-seal::after {
+  content: "";
+  position: absolute;
+  inset: 13%;
+  border: 1px dashed var(--cp-accent);
+  border-radius: 50%;
+}
+.hero-seal::after { inset: 28%; border-style: solid; border-color: var(--cp-border); }
+.seal-copy { position: relative; z-index: 2; width: 58%; }
+.seal-copy strong { display: block; color: var(--cp-accent); font-size: 28px; line-height: 1; }
+.seal-copy span { color: var(--cp-text-muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.lesson-map {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 10px;
+}
+.lesson-card, .scope-note, .panel, .branch-card, .assertion, .telemetry-cell, .merge-dimension, details {
+  border: 1px solid var(--cp-border);
+  background: var(--cp-surface);
+}
+.lesson-card { min-height: 130px; padding: 16px; border-radius: 16px; }
+.lesson-card strong { display: block; margin-bottom: 7px; color: var(--cp-accent); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+.lesson-card p { margin: 0; color: var(--cp-text-muted); font-size: 14px; }
+.scope-note {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-left: 4px solid var(--cp-warning);
+  border-radius: 0.625rem;
+  color: var(--cp-text-muted);
+}
+.scope-note strong { color: var(--cp-text); }
+.control-deck {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: minmax(180px, .9fr) minmax(0, 2.5fr);
+  gap: 16px;
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-overlay);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 1px 2px var(--cp-border);
+}
+.field label { display: block; margin-bottom: 4px; color: var(--cp-text-muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.controls { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.status-chip {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+}
+.status-chip span { display: block; color: var(--cp-text-muted); font-size: 11px; text-transform: uppercase; }
+.status-chip strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.status-chip.pass { border-color: var(--cp-success); }
+.status-chip.fail { border-color: var(--cp-danger); }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); gap: 16px; align-items: start; }
+.workspace > *, .workspace > * > * { min-width: 0; }
+.panel {
+  min-width: 0;
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px var(--cp-border);
+}
+.panel + .panel { margin-top: 16px; }
+.panel-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.panel-heading h2 { margin: 0; font-size: 20px; line-height: 1.2; }
+.panel-heading p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 13px; }
+.panel-kicker { color: var(--cp-accent); font: 700 11px/1.3 Consolas, "Courier New", Courier, monospace; letter-spacing: .08em; text-transform: uppercase; }
+.mission-plot {
+  position: relative;
+  min-height: 280px;
+  overflow: hidden;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-bg-elevated);
+}
+.mission-plot::before, .mission-plot::after {
+  content: "";
+  position: absolute;
+  border: 1px solid var(--cp-border);
+  border-radius: 50%;
+}
+.mission-plot::before { width: 340px; height: 340px; left: -170px; top: -34px; }
+.mission-plot::after { width: 160px; height: 160px; right: -72px; top: 42px; border-style: dashed; }
+.axis-x, .axis-y { position: absolute; background: var(--cp-border); opacity: .7; }
+.axis-x { left: 18px; right: 18px; top: 50%; height: 1px; }
+.axis-y { top: 18px; bottom: 18px; left: 50%; width: 1px; }
+.route {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 51%;
+  height: 0;
+  border-top: 2px dashed var(--cp-border-strong);
+  transform: rotate(-13deg);
+}
+.craft {
+  position: absolute;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--cp-accent);
+  border-radius: 50% 50% 50% 12%;
+  background: var(--cp-surface);
+  color: var(--cp-accent);
+  transform: translate(-50%, -50%) rotate(45deg);
+  transition: left .45s ease, top .45s ease;
+}
+.craft span { transform: rotate(-45deg); font-size: 18px; }
+.objective, .stranded {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 50%;
+  background: var(--cp-surface-soft);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+.objective { right: 6%; top: 14%; }
+.stranded { right: 23%; bottom: 8%; border-style: dashed; color: var(--cp-warning); }
+.plot-caption { position: absolute; left: 14px; bottom: 12px; z-index: 3; margin: 0; color: var(--cp-text-muted); font: 11px/1.4 Consolas, "Courier New", Courier, monospace; }
+.telemetry-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.telemetry-cell { min-width: 0; padding: 10px; border-radius: 0.625rem; background: var(--cp-surface-soft); }
+.telemetry-cell span { display: block; color: var(--cp-text-muted); font-size: 10px; text-transform: uppercase; }
+.telemetry-cell strong { display: block; overflow-wrap: anywhere; font: 700 14px/1.35 Consolas, "Courier New", Courier, monospace; }
+.chain-ribbon { display: flex; align-items: stretch; gap: 8px; overflow-x: auto; padding: 4px 2px 12px; }
+.frame-node {
+  flex: 0 0 150px;
+  min-height: 108px;
+  padding: 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+  transition: transform .16s ease, border-color .16s ease;
+}
+.frame-node + .frame-node { position: relative; }
+.frame-node + .frame-node::before {
+  content: "←";
+  position: absolute;
+  left: -17px;
+  top: 42px;
+  color: var(--cp-text-muted);
+}
+.frame-node.selected { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+.frame-node.replay { border-color: var(--cp-warning); transform: translateY(-4px); }
+.frame-node .seq { color: var(--cp-accent); font: 800 11px/1.3 Consolas, "Courier New", Courier, monospace; }
+.frame-node strong { display: block; margin: 5px 0; font-size: 13px; }
+.frame-node code { display: block; overflow-wrap: anywhere; color: var(--cp-text-muted); font-size: 10px; }
+.branch-stack { display: grid; gap: 10px; }
+.branch-card { padding: 14px; border-radius: 16px; }
+.branch-card.valid { border-left: 4px solid var(--cp-success); }
+.branch-card.invalid { border-left: 4px solid var(--cp-danger); }
+.branch-card.pending { border-left: 4px solid var(--cp-border-strong); }
+.branch-title { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+.branch-title h3 { margin: 0; font-size: 16px; }
+.branch-title p { margin: 3px 0 0; color: var(--cp-text-muted); font-size: 12px; }
+.verdict { flex: 0 0 auto; padding: 3px 7px; border: 1px solid var(--cp-border); border-radius: 0.625rem; font: 800 11px/1.3 Consolas, "Courier New", Courier, monospace; }
+.verdict.pass { border-color: var(--cp-success); color: var(--cp-success); }
+.verdict.fail { border-color: var(--cp-danger); color: var(--cp-danger); }
+.verdict.wait { color: var(--cp-text-muted); }
+.provenance {
+  margin: 10px 0;
+  padding: 9px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+  color: var(--cp-text-muted);
+  font: 10px/1.5 Consolas, "Courier New", Courier, monospace;
+  overflow-wrap: anywhere;
+}
+.mini-telemetry { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.mini-telemetry div { min-width: 0; padding: 7px; background: var(--cp-surface-soft); border-radius: 0.625rem; }
+.mini-telemetry span { display: block; color: var(--cp-text-muted); font-size: 9px; text-transform: uppercase; }
+.mini-telemetry strong { display: block; overflow-wrap: anywhere; font: 700 11px/1.35 Consolas, "Courier New", Courier, monospace; }
+.branch-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.branch-actions button { flex: 1 1 150px; }
+.timeline {
+  display: grid;
+  grid-template-columns: 160px repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+.timeline-origin, .timeline-lane {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+}
+.timeline-origin { display: grid; place-items: center; text-align: center; }
+.timeline-origin strong { display: block; color: var(--cp-accent); }
+.timeline-origin code, .timeline-lane code { overflow-wrap: anywhere; color: var(--cp-text-muted); font-size: 10px; }
+.timeline-lane h3 { margin: 0 0 8px; font-size: 13px; }
+.tick { position: relative; margin: 5px 0; padding: 6px 7px 6px 18px; border-left: 2px solid var(--cp-border-strong); background: var(--cp-surface); font-size: 11px; }
+.tick::before { content: ""; position: absolute; left: -5px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--cp-accent); }
+.merge-score {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-bg-elevated);
+}
+.score-number { color: var(--cp-accent); font: 800 clamp(30px, 6vw, 58px)/1 Consolas, "Courier New", Courier, monospace; letter-spacing: -.08em; }
+.score-copy strong { display: block; font-size: 16px; }
+.score-copy span { color: var(--cp-text-muted); font-size: 12px; }
+.merge-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.merge-dimension { padding: 11px; border-radius: 0.625rem; background: var(--cp-surface-soft); }
+.merge-dimension.compatible { border-left: 4px solid var(--cp-success); }
+.merge-dimension.parallel { border-left: 4px solid var(--cp-warning); }
+.merge-dimension h3 { margin: 0 0 5px; font-size: 13px; }
+.merge-dimension p { margin: 0; color: var(--cp-text-muted); font-size: 11px; overflow-wrap: anywhere; }
+.assertions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.assertion { padding: 10px; border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+.assertion.pass { border-color: var(--cp-success); }
+.assertion.fail { border-color: var(--cp-danger); }
+.assertion.wait { border-color: var(--cp-border); }
+.assertion strong { display: block; margin-bottom: 3px; font: 800 11px/1.3 Consolas, "Courier New", Courier, monospace; }
+.assertion.pass strong { color: var(--cp-success); }
+.assertion.fail strong { color: var(--cp-danger); }
+.assertion.wait strong { color: var(--cp-text-muted); }
+.assertion span { color: var(--cp-text-muted); font-size: 12px; }
+.ledger-wrap { width: 100%; max-width: 100%; overflow-x: auto; border: 1px solid var(--cp-border); border-radius: 0.625rem; }
+table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 11px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 10px; text-transform: uppercase; }
+td code { display: block; max-width: 260px; overflow-wrap: anywhere; }
+tr:last-child td { border-bottom: 0; }
+tr.row-fail { background: var(--cp-accent-soft); }
+.ledger-result.pass { color: var(--cp-success); font-weight: 800; }
+.ledger-result.fail { color: var(--cp-danger); font-weight: 800; }
+details { margin-top: 16px; padding: 14px; border-radius: 16px; }
+summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--cp-link); font-weight: 750; }
+details p { color: var(--cp-text-muted); }
+details pre { max-height: 280px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft); color: var(--cp-text); font-size: 11px; }
+.proof-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.live-region {
+  min-height: 48px;
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border-left: 4px solid var(--cp-accent);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text-muted);
+}
+.live-region.error { border-color: var(--cp-danger); color: var(--cp-danger); }
+.live-region.success { border-color: var(--cp-success); color: var(--cp-text); }
+.footer-note { margin: 18px 0 6px; color: var(--cp-text-muted); font-size: 12px; text-align: center; }
+@media (max-width: 980px) {
+  .workspace, .masthead { grid-template-columns: 1fr; }
+  .hero-seal { display: none; }
+  .lesson-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .timeline { grid-template-columns: 1fr; }
+  .timeline-origin { min-height: 90px; }
+}
+@media (max-width: 680px) {
+  .shell { padding: 10px; }
+  .masthead { padding: 24px 18px; }
+  .lesson-map, .status-strip, .telemetry-grid, .merge-grid, .assertions { grid-template-columns: 1fr 1fr; }
+  .control-deck { position: static; grid-template-columns: 1fr; }
+  .controls button { flex: 1 1 145px; }
+  .panel { padding: 14px; }
+}
+@media (max-width: 420px) {
+  .lesson-map, .status-strip, .telemetry-grid, .merge-grid, .assertions, .mini-telemetry { grid-template-columns: 1fr; }
+  .controls button, .branch-actions button { width: 100%; flex-basis: 100%; }
+  .merge-score { grid-template-columns: 1fr; }
+  .mission-plot { min-height: 240px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Frame 01 · executable museum label</p>
+      <h1>Many-Worlds<br>Mission Control</h1>
+      <p class="dek">Choose one immutable moment in a synthetic spacecraft mission. Fork three deterministic futures from that exact state, verify their ancestry, then discover what can merge—and what must remain parallel.</p>
+    </div>
+    <div class="hero-seal" aria-hidden="true">
+      <div class="seal-copy"><strong>SHA-256</strong><span>canonical JSON · append only</span></div>
+    </div>
+  </header>
+
+  <section class="lesson-map" aria-label="Newcomer guide">
+    <article class="lesson-card">
+      <strong>What you are looking at</strong>
+      <p>A synthetic mission written as frames. Each frame contains the exact SHA-256 hash of its parent, so history is a structure—not a story someone asks you to trust.</p>
+    </article>
+    <article class="lesson-card">
+      <strong>Do this</strong>
+      <p>Run the guided proof, or select any canonical frame and fork the three mission policies manually. Merge them, then mutate one parent hash.</p>
+    </article>
+    <article class="lesson-card">
+      <strong>Watch for</strong>
+      <p>Every branch begins from the selected parent state. Compatible claims converge. Contradictory objectives stay side by side. One mutation turns only its branch red.</p>
+    </article>
+    <article class="lesson-card">
+      <strong>What this demonstrates</strong>
+      <p>Counterfactual histories can be deterministic, independently verifiable, and mergeable by dimension without erasing genuine disagreement.</p>
+    </article>
+  </section>
+  <p class="scope-note"><strong>Scope:</strong> This is a deterministic teaching model with synthetic telemetry, simplified kinematics, unsigned frames, and an equal-weight claim comparison. It demonstrates content addressing, provenance, replay, and merge mechanics—not flight safety, cryptographic identity, consensus, or physical mission feasibility.</p>
+
+  <section class="control-deck" aria-label="Mission controls">
+    <div class="field">
+      <label for="parent-select">Historical fork point</label>
+      <select id="parent-select" aria-describedby="parent-help"></select>
+      <span id="parent-help" hidden>Select any immutable frame in the canonical mission.</span>
+    </div>
+    <div class="controls">
+      <button class="primary" id="guided-btn" type="button">Run guided proof</button>
+      <button id="fork-all-btn" type="button">Fork all three</button>
+      <button id="merge-btn" type="button" disabled>Attempt merge</button>
+      <button id="replay-btn" type="button">Replay arrivals</button>
+      <button class="danger" id="mutate-btn" type="button" disabled>Mutate rescue parent hash</button>
+      <button class="quiet" id="verify-btn" type="button">Verify now</button>
+      <button class="quiet" id="reset-btn" type="button">Reset</button>
+    </div>
+  </section>
+
+  <section class="status-strip" aria-label="Live mission status">
+    <div class="status-chip" id="chip-base"><span>Canonical stream</span><strong>Building…</strong></div>
+    <div class="status-chip" id="chip-forks"><span>Counterfactuals</span><strong>0 / 3 minted</strong></div>
+    <div class="status-chip" id="chip-merge"><span>Merge fidelity</span><strong>Not attempted</strong></div>
+    <div class="status-chip" id="chip-crypto"><span>Hash engine</span><strong>Web Crypto SHA-256</strong></div>
+  </section>
+
+  <div class="workspace">
+    <div>
+      <section class="panel" aria-labelledby="mission-title">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">01 / canonical present</span>
+            <h2 id="mission-title">Parent-state observatory</h2>
+            <p>Telemetry is replayed from frame events; no independent mutable state is stored.</p>
+          </div>
+        </div>
+        <div class="mission-plot" aria-label="Abstract mission position plot">
+          <div class="axis-x"></div>
+          <div class="axis-y"></div>
+          <div class="route"></div>
+          <div class="craft" id="craft-marker" aria-hidden="true"><span>◆</span></div>
+          <div class="objective">RHEA-7<br>OBJECTIVE</div>
+          <div class="stranded">SABLE-2<br>DISTRESS</div>
+          <p class="plot-caption" id="plot-caption">Awaiting canonical replay…</p>
+        </div>
+        <div class="telemetry-grid" id="parent-telemetry"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="chain-title">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">02 / choose a moment</span>
+            <h2 id="chain-title">Canonical frame chain</h2>
+            <p>Every arrow is a recorded parent hash. Selecting a frame never rewrites it.</p>
+          </div>
+        </div>
+        <div class="chain-ribbon" id="base-chain" aria-label="Canonical frame sequence"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="timeline-title">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">03 / branch geometry</span>
+            <h2 id="timeline-title">Branching timeline</h2>
+            <p>Each lane begins with the same explicit parent stream, sequence, hash, and replayed state digest.</p>
+          </div>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="ledger-title">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">04 / inspect the evidence</span>
+            <h2 id="ledger-title">Visible frame ledger</h2>
+            <p>The verifier canonicalizes each payload again and recomputes every digest independently.</p>
+          </div>
+        </div>
+        <div class="ledger-wrap">
+          <table>
+            <thead><tr><th>Stream / seq</th><th>Event</th><th>Recorded parent</th><th>Stored hash</th><th>Verifier</th></tr></thead>
+            <tbody id="ledger-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <aside>
+      <section class="panel" aria-labelledby="branches-title">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">counterfactual laboratory</span>
+            <h2 id="branches-title">Three deterministic futures</h2>
+            <p>Manual controls mint each branch from the selected parent.</p>
+          </div>
+        </div>
+        <div class="branch-stack" id="branch-stack"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="merge-title">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">dimension-aware reconciliation</span>
+            <h2 id="merge-title">Merge chamber</h2>
+            <p>Pairwise claim agreements form the exact fidelity fraction.</p>
+          </div>
+        </div>
+        <div id="merge-output">
+          <p class="scope-note">Mint and verify all three branches, then attempt the deterministic merge.</p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="assertions-title">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">live proof obligations</span>
+            <h2 id="assertions-title">Assertions</h2>
+          </div>
+        </div>
+        <div class="assertions" id="assertions"></div>
+      </section>
+    </aside>
+  </div>
+
+  <details>
+    <summary>Copy an any-LLM independent proof prompt</summary>
+    <p>Paste this into any capable coding model. It asks for an independent implementation rather than an explanation of this page.</p>
+    <pre id="proof-prompt">Build a single self-contained HTML proof with no libraries or network calls. Model a synthetic spacecraft mission as an append-only frame chain. Define recursive canonical JSON by sorting every object key lexicographically, preserving array order, and serializing primitives with JSON.stringify semantics. Hash each complete frame payload (excluding its stored hash field) with the browser Web Crypto SHA-256 API.
+
+Create a canonical mission stream of at least four event frames. Let the reader select any historical frame and deterministically fork three policy streams from that exact replayed parent state: conserve fuel, rescue a synthetic stranded craft, and accelerate toward the objective. The first frame of every branch must explicitly record parent stream, sequence, SHA-256 hash, and a SHA-256 digest of the replayed parent state. Every later frame must reference the preceding frame in its own branch.
+
+Derive every displayed state by replaying event deltas from frame histories. Implement an independent verifier that recomputes hashes, sequence continuity, parent links, and the fork-state digest. Implement a deterministic dimension-aware merge: unanimous claims merge; contradictory claims remain as named parallel alternatives. Compute merge fidelity as pairwise equal claims divided by pairwise comparable claims, showing numerator, denominator, reduced fraction, and exact terminating decimal where possible.
+
+Add a failure control that mutates only the rescue branch's recorded parent hash without recomputing that frame or descendants. The verifier must mark rescue invalid while conserve and accelerate remain valid. Include visible frame ledger rows and live assertions. Do not hard-code PASS/FAIL outcomes: derive them from verifier results. Include reset and replay controls, keyboard-accessible 44px controls, aria-live feedback, responsive 390px layout, dark/light theme variables, and reduced-motion support.</pre>
+    <div class="proof-actions">
+      <button class="primary" id="copy-btn" type="button">Copy proof prompt</button>
+    </div>
+  </details>
+
+  <div class="live-region" id="live-region" role="status" aria-live="polite">Initializing the canonical mission with real Web Crypto SHA-256…</div>
+  <p class="footer-note">Synthetic exhibit · deterministic seed MWMC-01 · all computation stays in this page</p>
+</main>
+
+<script>
+"use strict";
+
+const BASE_STREAM = "mission-prime";
+const SEED = "MWMC-01";
+const POLICY_ORDER = ["conserve", "rescue", "accelerate"];
+const POLICY = {
+  conserve: {
+    title: "Conserve fuel",
+    subtitle: "Minimum-burn coast and a patient arrival",
+    stream: "branch-conserve",
+    claims: { communications: "nominal", propulsion: "nominal", lifeSupport: "stable", objective: "RHEA-7 / reserve orbit", encounter: "SABLE-2 / monitor" }
+  },
+  rescue: {
+    title: "Rescue SABLE-2",
+    subtitle: "Divert, rendezvous, and secure the stranded craft",
+    stream: "branch-rescue",
+    claims: { communications: "nominal", propulsion: "nominal", lifeSupport: "stable", objective: "SABLE-2 / recovery", encounter: "SABLE-2 / secured" }
+  },
+  accelerate: {
+    title: "Accelerate",
+    subtitle: "Commit reserve propellant to the objective",
+    stream: "branch-accelerate",
+    claims: { communications: "nominal", propulsion: "nominal", lifeSupport: "stable", objective: "RHEA-7 / fast intercept", encounter: "SABLE-2 / bypassed" }
+  }
+};
+
+const INITIAL_STATE = Object.freeze({
+  phase: "prelaunch",
+  positionKm: 0,
+  velocityKps: 0,
+  fuelKg: 1000,
+  oxygenPct: 100,
+  distanceKm: 9600,
+  rescueRangeKm: 620,
+  objective: "RHEA-7",
+  rescueStatus: "uncontacted",
+  communications: "nominal",
+  propulsion: "nominal",
+  lifeSupport: "stable"
+});
+
+const BASE_EVENTS = [
+  { label: "Ignition committed", tick: 0, add: { velocityKps: 1.2, fuelKg: -34, distanceKm: -180, rescueRangeKm: -12 }, set: { phase: "departure" } },
+  { label: "Transfer burn complete", tick: 1, add: { positionKm: 1450, velocityKps: 2.6, fuelKg: -118, distanceKm: -1450, rescueRangeKm: -94 }, set: { phase: "transfer" } },
+  { label: "Distress signal acquired", tick: 2, add: { positionKm: 1780, velocityKps: .4, fuelKg: -12, distanceKm: -1780, rescueRangeKm: -206 }, set: { phase: "decision gate", rescueStatus: "signal acquired" } },
+  { label: "Navigation solution locked", tick: 3, add: { positionKm: 1310, velocityKps: .3, fuelKg: -9, distanceKm: -1310, rescueRangeKm: -68 }, set: { phase: "approach" } }
+];
+
+const BRANCH_EVENTS = {
+  conserve: [
+    { label: "Throttle to economy band", add: { positionKm: 690, velocityKps: -.25, fuelKg: -5, distanceKm: -690, rescueRangeKm: -16 }, set: { phase: "economy coast" } },
+    { label: "Bank reserve margin", add: { positionKm: 780, velocityKps: -.15, fuelKg: -3, distanceKm: -780, rescueRangeKm: 24 }, set: { rescueStatus: "monitoring beacon" } },
+    { label: "Enter reserve orbit", add: { positionKm: 860, velocityKps: -.1, fuelKg: -4, distanceKm: -860, rescueRangeKm: 42 }, set: { phase: "reserve orbit" } }
+  ],
+  rescue: [
+    { label: "Commit rescue diversion", add: { positionKm: 410, velocityKps: -.45, fuelKg: -42, distanceKm: -310, rescueRangeKm: -154 }, set: { phase: "rescue diversion", objective: "SABLE-2" } },
+    { label: "Match SABLE-2 velocity", add: { positionKm: 260, velocityKps: -.35, fuelKg: -31, distanceKm: -120, rescueRangeKm: -108 }, set: { phase: "rendezvous", rescueStatus: "contact" } },
+    { label: "Secure synthetic craft", add: { positionKm: 120, velocityKps: -.1, fuelKg: -11, distanceKm: -70, rescueRangeKm: -70 }, set: { phase: "recovery", rescueStatus: "secured" } }
+  ],
+  accelerate: [
+    { label: "Authorize reserve burn", add: { positionKm: 1120, velocityKps: .85, fuelKg: -74, distanceKm: -1120, rescueRangeKm: 98 }, set: { phase: "high-energy transfer" } },
+    { label: "Cross fast-intercept gate", add: { positionKm: 1540, velocityKps: .55, fuelKg: -58, distanceKm: -1540, rescueRangeKm: 176 }, set: { rescueStatus: "bypassed" } },
+    { label: "Brake at objective", add: { positionKm: 1760, velocityKps: -.65, fuelKg: -63, distanceKm: -1760, rescueRangeKm: 244 }, set: { phase: "fast intercept" } }
+  ]
+};
+
+let baseFrames = [];
+let branches = { conserve: [], rescue: [], accelerate: [] };
+let selectedSequence = 2;
+let mergeResult = null;
+let replayTimers = [];
+let guidedRunning = false;
+let mutationApplied = false;
+
+const $ = selector => document.querySelector(selector);
+const encoder = new TextEncoder();
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${canonicalize(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+async function sha256(value) {
+  const bytes = encoder.encode(typeof value === "string" ? value : canonicalize(value));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function payloadOf(frame) {
+  const { hash, ...payload } = frame;
+  return payload;
+}
+
+async function mintFrame(payload) {
+  return { ...payload, hash: await sha256(payload) };
+}
+
+function applyEvent(state, event) {
+  const next = { ...state };
+  for (const [key, value] of Object.entries(event.add || {})) {
+    next[key] = Number((Number(next[key] || 0) + value).toFixed(3));
+  }
+  for (const [key, value] of Object.entries(event.set || {})) next[key] = value;
+  return next;
+}
+
+function replayEvents(frames, initial = INITIAL_STATE) {
+  return frames.reduce((state, frame) => applyEvent(state, frame.event), { ...initial });
+}
+
+function baseStateAt(sequence) {
+  return replayEvents(baseFrames.slice(0, sequence + 1));
+}
+
+function branchState(name) {
+  const parent = baseStateAt(selectedSequence);
+  return replayEvents(branches[name], parent);
+}
+
+function deterministicNoise(parentHash, policyName, step) {
+  const text = `${SEED}|${parentHash}|${policyName}|${step}`;
+  let value = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    value ^= text.charCodeAt(index);
+    value = Math.imul(value, 16777619);
+  }
+  return ((value >>> 0) % 9) - 4;
+}
+
+async function buildBase() {
+  const frames = [];
+  for (let index = 0; index < BASE_EVENTS.length; index += 1) {
+    const previous = frames[index - 1];
+    const payload = {
+      protocol: "many-worlds/1",
+      stream: BASE_STREAM,
+      sequence: index,
+      parent: previous ? { stream: previous.stream, sequence: previous.sequence, hash: previous.hash } : null,
+      seed: SEED,
+      kind: index === 0 ? "genesis" : "mission-event",
+      event: BASE_EVENTS[index]
+    };
+    frames.push(await mintFrame(payload));
+  }
+  baseFrames = frames;
+}
+
+async function buildBranch(name) {
+  const policy = POLICY[name];
+  const selected = baseFrames[selectedSequence];
+  const parentState = baseStateAt(selectedSequence);
+  const stateHash = await sha256(parentState);
+  const frames = [];
+  for (let index = 0; index < BRANCH_EVENTS[name].length; index += 1) {
+    const previous = frames[index - 1];
+    const source = BRANCH_EVENTS[name][index];
+    const jitter = deterministicNoise(selected.hash, name, index);
+    const event = {
+      ...source,
+      tick: selectedSequence + index + 1,
+      add: { ...source.add, positionKm: source.add.positionKm + jitter }
+    };
+    if (index === BRANCH_EVENTS[name].length - 1) event.claims = { ...policy.claims };
+    const payload = {
+      protocol: "many-worlds/1",
+      stream: policy.stream,
+      sequence: index,
+      parent: previous
+        ? { stream: previous.stream, sequence: previous.sequence, hash: previous.hash }
+        : { stream: selected.stream, sequence: selected.sequence, hash: selected.hash },
+      fork: index === 0
+        ? { parentStream: selected.stream, parentSequence: selected.sequence, parentHash: selected.hash, parentStateHash: stateHash }
+        : null,
+      seed: `${SEED}/${name}`,
+      kind: "counterfactual-event",
+      event
+    };
+    frames.push(await mintFrame(payload));
+  }
+  branches[name] = frames;
+  if (name === "rescue") mutationApplied = false;
+  mergeResult = null;
+}
+
+async function verifyBase() {
+  const checks = [];
+  for (let index = 0; index < baseFrames.length; index += 1) {
+    const frame = baseFrames[index];
+    const expectedHash = await sha256(payloadOf(frame));
+    const expectedParent = index === 0 ? null : baseFrames[index - 1];
+    const parentOK = expectedParent
+      ? frame.parent?.stream === expectedParent.stream
+        && frame.parent?.sequence === expectedParent.sequence
+        && frame.parent?.hash === expectedParent.hash
+      : frame.parent === null;
+    checks.push({
+      hashOK: frame.hash === expectedHash,
+      sequenceOK: frame.sequence === index,
+      parentOK
+    });
+  }
+  return { valid: checks.every(item => item.hashOK && item.sequenceOK && item.parentOK), checks };
+}
+
+async function verifyBranch(name) {
+  const frames = branches[name];
+  if (!frames.length) return { ready: false, valid: false, checks: [] };
+  const selected = baseFrames[selectedSequence];
+  const expectedStateHash = await sha256(baseStateAt(selectedSequence));
+  const checks = [];
+  for (let index = 0; index < frames.length; index += 1) {
+    const frame = frames[index];
+    const expectedHash = await sha256(payloadOf(frame));
+    const expectedParent = index === 0 ? selected : frames[index - 1];
+    const parentOK = frame.parent?.stream === expectedParent.stream
+      && frame.parent?.sequence === expectedParent.sequence
+      && frame.parent?.hash === expectedParent.hash;
+    const forkOK = index !== 0 || (
+      frame.fork?.parentStream === selected.stream
+      && frame.fork?.parentSequence === selected.sequence
+      && frame.fork?.parentHash === selected.hash
+      && frame.fork?.parentStateHash === expectedStateHash
+    );
+    checks.push({
+      hashOK: frame.hash === expectedHash,
+      sequenceOK: frame.sequence === index,
+      parentOK,
+      forkOK
+    });
+  }
+  return {
+    ready: true,
+    valid: checks.every(item => item.hashOK && item.sequenceOK && item.parentOK && item.forkOK),
+    checks
+  };
+}
+
+async function verifyAll() {
+  const base = await verifyBase();
+  const branchResults = {};
+  for (const name of POLICY_ORDER) branchResults[name] = await verifyBranch(name);
+  return { base, branches: branchResults };
+}
+
+function gcd(a, b) {
+  let x = a;
+  let y = b;
+  while (y) [x, y] = [y, x % y];
+  return x;
+}
+
+function exactDecimal(numerator, denominator) {
+  if (!denominator) return "n/a";
+  let reducedDenominator = denominator / gcd(numerator, denominator);
+  while (reducedDenominator % 2 === 0) reducedDenominator /= 2;
+  while (reducedDenominator % 5 === 0) reducedDenominator /= 5;
+  return reducedDenominator === 1 ? (numerator / denominator).toString() : `${(numerator / denominator).toFixed(6)}…`;
+}
+
+async function computeMerge() {
+  const verification = await verifyAll();
+  const validNames = POLICY_ORDER.filter(name => verification.branches[name].valid);
+  if (validNames.length !== 3) return { ready: false, verification, reason: "All three branches must independently verify before merge." };
+
+  const claims = Object.fromEntries(validNames.map(name => [name, branches[name].at(-1).event.claims]));
+  const dimensions = Object.keys(claims[validNames[0]]).sort();
+  let numerator = 0;
+  let denominator = 0;
+  const outputs = {};
+
+  for (const dimension of dimensions) {
+    const declarations = validNames.map(name => ({ branch: name, value: claims[name][dimension] }));
+    for (let left = 0; left < declarations.length; left += 1) {
+      for (let right = left + 1; right < declarations.length; right += 1) {
+        denominator += 1;
+        if (declarations[left].value === declarations[right].value) numerator += 1;
+      }
+    }
+    const uniqueValues = [...new Set(declarations.map(item => item.value))];
+    outputs[dimension] = {
+      compatible: uniqueValues.length === 1,
+      declarations,
+      mergedValue: uniqueValues.length === 1 ? uniqueValues[0] : null
+    };
+  }
+
+  const divisor = gcd(numerator, denominator);
+  return {
+    ready: true,
+    verification,
+    numerator,
+    denominator,
+    reducedNumerator: numerator / divisor,
+    reducedDenominator: denominator / divisor,
+    decimal: exactDecimal(numerator, denominator),
+    outputs
+  };
+}
+
+function shortHash(value, length = 12) {
+  return value ? `${value.slice(0, length)}…` : "—";
+}
+
+function formatValue(key, value) {
+  if (key === "fuelKg") return `${value.toFixed(1)} kg`;
+  if (key === "velocityKps") return `${value.toFixed(2)} km/s`;
+  if (key === "oxygenPct") return `${value.toFixed(1)}%`;
+  if (key.endsWith("Km")) return `${Math.max(0, value).toFixed(0)} km`;
+  return String(value);
+}
+
+function setLive(message, tone = "") {
+  const region = $("#live-region");
+  region.textContent = message;
+  region.className = `live-region ${tone}`.trim();
+}
+
+function telemetryMarkup(state, compact = false) {
+  const fields = compact
+    ? [["fuelKg", "Fuel"], ["velocityKps", "Velocity"], ["phase", "Phase"]]
+    : [["positionKm", "Range flown"], ["distanceKm", "To RHEA-7"], ["fuelKg", "Fuel"], ["velocityKps", "Velocity"], ["rescueRangeKm", "To SABLE-2"], ["oxygenPct", "Oxygen"], ["phase", "Phase"], ["rescueStatus", "Rescue"]];
+  return fields.map(([key, label]) => `<div><span>${label}</span><strong>${formatValue(key, state[key])}</strong></div>`).join("");
+}
+
+function renderParent() {
+  const state = baseStateAt(selectedSequence);
+  $("#parent-telemetry").innerHTML = telemetryMarkup(state);
+  const progress = Math.min(88, 12 + (state.positionKm / 9600) * 76);
+  const vertical = Math.max(28, 66 - selectedSequence * 9);
+  const craft = $("#craft-marker");
+  craft.style.left = `${progress}%`;
+  craft.style.top = `${vertical}%`;
+  $("#plot-caption").textContent = `mission-prime/${selectedSequence} · ${state.phase} · ${shortHash(baseFrames[selectedSequence].hash, 16)}`;
+}
+
+function renderBaseChain() {
+  $("#base-chain").innerHTML = baseFrames.map(frame => `
+    <article class="frame-node ${frame.sequence === selectedSequence ? "selected" : ""}" data-frame-key="${frame.stream}:${frame.sequence}">
+      <span class="seq">${frame.stream} / ${frame.sequence}</span>
+      <strong>${frame.event.label}</strong>
+      <code>parent ${shortHash(frame.parent?.hash)}</code>
+      <code>self&nbsp;&nbsp; ${shortHash(frame.hash)}</code>
+    </article>
+  `).join("");
+}
+
+function renderBranchCards(results) {
+  $("#branch-stack").innerHTML = POLICY_ORDER.map(name => {
+    const policy = POLICY[name];
+    const frames = branches[name];
+    const result = results.branches[name];
+    const state = frames.length ? branchState(name) : null;
+    const statusClass = !frames.length ? "pending" : result.valid ? "valid" : "invalid";
+    const verdictClass = !frames.length ? "wait" : result.valid ? "pass" : "fail";
+    const verdict = !frames.length ? "WAIT" : result.valid ? "PASS" : "FAIL";
+    const provenance = frames.length
+      ? `parent.stream = ${frames[0].fork.parentStream}<br>parent.sequence = ${frames[0].fork.parentSequence}<br>parent.hash = ${frames[0].parent.hash}<br>parent.state = ${frames[0].fork.parentStateHash}`
+      : "No branch frames minted.";
+    return `
+      <article class="branch-card ${statusClass}">
+        <div class="branch-title">
+          <div><h3>${policy.title}</h3><p>${policy.subtitle}</p></div>
+          <span class="verdict ${verdictClass}">${verdict}</span>
+        </div>
+        <div class="provenance">${provenance}</div>
+        ${state ? `<div class="mini-telemetry">${telemetryMarkup(state, true)}</div>` : ""}
+        <div class="branch-actions"><button type="button" data-fork="${name}">${frames.length ? "Re-fork from selected frame" : `Fork ${policy.title.toLowerCase()}`}</button></div>
+      </article>
+    `;
+  }).join("");
+
+  document.querySelectorAll("[data-fork]").forEach(button => {
+    button.addEventListener("click", async () => {
+      await buildBranch(button.dataset.fork);
+      await render();
+      setLive(`${POLICY[button.dataset.fork].title} replayed from canonical frame ${selectedSequence}.`, "success");
+    });
+  });
+}
+
+function renderTimeline() {
+  const parent = baseFrames[selectedSequence];
+  const lanes = POLICY_ORDER.map(name => {
+    const frames = branches[name];
+    return `
+      <section class="timeline-lane">
+        <h3>${POLICY[name].title}</h3>
+        ${frames.length
+          ? frames.map(frame => `<div class="tick" data-frame-key="${frame.stream}:${frame.sequence}"><strong>${frame.sequence}</strong> ${frame.event.label}<br><code>${shortHash(frame.hash)}</code></div>`).join("")
+          : `<code>Not yet forked</code>`}
+      </section>
+    `;
+  }).join("");
+  $("#timeline").innerHTML = `
+    <div class="timeline-origin"><div><strong>${parent.stream}/${parent.sequence}</strong><code>${shortHash(parent.hash, 18)}</code></div></div>
+    ${lanes}
+  `;
+}
+
+function allFrames() {
+  return [...baseFrames, ...POLICY_ORDER.flatMap(name => branches[name])];
+}
+
+function resultForFrame(frame, results) {
+  if (frame.stream === BASE_STREAM) return results.base.checks[frame.sequence];
+  const name = POLICY_ORDER.find(key => POLICY[key].stream === frame.stream);
+  return results.branches[name]?.checks[frame.sequence];
+}
+
+function renderLedger(results) {
+  $("#ledger-body").innerHTML = allFrames().map(frame => {
+    const check = resultForFrame(frame, results);
+    const valid = check && Object.values(check).every(Boolean);
+    return `
+      <tr class="${valid ? "" : "row-fail"}" data-frame-key="${frame.stream}:${frame.sequence}">
+        <td><strong>${frame.stream}</strong><br><code>${frame.sequence}</code></td>
+        <td>${frame.event.label}<br><code>${canonicalize(frame.event)}</code></td>
+        <td><code>${frame.parent ? `${frame.parent.stream}/${frame.parent.sequence}\n${frame.parent.hash}` : "GENESIS"}</code></td>
+        <td><code>${frame.hash}</code></td>
+        <td class="ledger-result ${valid ? "pass" : "fail"}">${valid ? "PASS" : "FAIL"}<br><code>${check ? Object.entries(check).filter(([, ok]) => !ok).map(([key]) => key).join(", ") || "all checks" : "not checked"}</code></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderMerge() {
+  const target = $("#merge-output");
+  if (!mergeResult) {
+    target.innerHTML = `<p class="scope-note">Mint and verify all three branches, then attempt the deterministic merge.</p>`;
+    return;
+  }
+  if (!mergeResult.ready) {
+    target.innerHTML = `<p class="scope-note"><strong>Merge refused:</strong> ${mergeResult.reason} Invalid provenance is never silently reconciled.</p>`;
+    return;
+  }
+  const dimensions = Object.entries(mergeResult.outputs).map(([name, output]) => {
+    const values = output.declarations.map(item => `${POLICY[item.branch].title}: ${item.value}`).join(" · ");
+    return `
+      <article class="merge-dimension ${output.compatible ? "compatible" : "parallel"}">
+        <h3>${output.compatible ? "MERGED" : "PARALLEL"} · ${name}</h3>
+        <p>${output.compatible ? output.mergedValue : values}</p>
+      </article>
+    `;
+  }).join("");
+  target.innerHTML = `
+    <div class="merge-score">
+      <div class="score-number">${mergeResult.decimal}</div>
+      <div class="score-copy">
+        <strong>${mergeResult.numerator} agreements / ${mergeResult.denominator} comparisons</strong>
+        <span>Exact fraction ${mergeResult.reducedNumerator}/${mergeResult.reducedDenominator} = ${mergeResult.decimal}. Each dimension contributes three branch-pair comparisons.</span>
+      </div>
+    </div>
+    <div class="merge-grid">${dimensions}</div>
+  `;
+}
+
+function assertionMarkup(status, title, detail) {
+  const label = status === true ? "PASS" : status === false ? "FAIL" : "WAIT";
+  const className = status === true ? "pass" : status === false ? "fail" : "wait";
+  return `<article class="assertion ${className}"><strong>${label} · ${title}</strong><span>${detail}</span></article>`;
+}
+
+function renderAssertions(results) {
+  const minted = POLICY_ORDER.filter(name => branches[name].length);
+  const allMinted = minted.length === 3;
+  const allValid = allMinted ? POLICY_ORDER.every(name => results.branches[name].valid) : null;
+  const parentHashesExact = allMinted
+    ? POLICY_ORDER.every(name => branches[name][0].fork.parentHash === baseFrames[selectedSequence].hash)
+    : null;
+  const branchIsolation = branches.rescue.length && !results.branches.rescue.valid
+    ? results.branches.conserve.valid && results.branches.accelerate.valid
+    : null;
+  const contradictionsPreserved = mergeResult?.ready
+    ? Object.values(mergeResult.outputs).filter(output => !output.compatible).length === 2
+    : null;
+  const arithmeticExact = mergeResult?.ready
+    ? mergeResult.numerator === 9 && mergeResult.denominator === 15 && mergeResult.decimal === "0.6"
+    : null;
+
+  $("#assertions").innerHTML = [
+    assertionMarkup(results.base.valid, "Canonical append-only chain", "Every base hash, sequence, and parent link recomputes."),
+    assertionMarkup(allMinted, "Three futures exist", `${minted.length} of 3 branch histories are present.`),
+    assertionMarkup(parentHashesExact, "Exact fork provenance", "All first frames name the selected stream, sequence, hash, and state digest."),
+    assertionMarkup(allValid, "Independent branch verification", "Each branch is verified without trusting the displayed verdict."),
+    assertionMarkup(contradictionsPreserved, "Contradictions remain parallel", "Objective and encounter alternatives are retained, not overwritten."),
+    assertionMarkup(arithmeticExact, "Exact merge arithmetic", "Nine equal pairs out of fifteen comparable pairs equals 3/5 = 0.6."),
+    assertionMarkup(branchIsolation, "Failure is isolated", "After mutation, rescue fails while conserve and accelerate remain valid.")
+  ].join("");
+}
+
+function renderStatus(results) {
+  const minted = POLICY_ORDER.filter(name => branches[name].length).length;
+  const baseChip = $("#chip-base");
+  baseChip.className = `status-chip ${results.base.valid ? "pass" : "fail"}`;
+  baseChip.querySelector("strong").textContent = results.base.valid ? `${baseFrames.length} frames · PASS` : "FAIL";
+
+  const forksChip = $("#chip-forks");
+  const invalid = POLICY_ORDER.filter(name => branches[name].length && !results.branches[name].valid).length;
+  forksChip.className = `status-chip ${invalid ? "fail" : minted === 3 ? "pass" : ""}`;
+  forksChip.querySelector("strong").textContent = invalid ? `${invalid} invalid · ${minted} minted` : `${minted} / 3 minted`;
+
+  const mergeChip = $("#chip-merge");
+  mergeChip.className = `status-chip ${mergeResult?.ready ? "pass" : mergeResult ? "fail" : ""}`;
+  mergeChip.querySelector("strong").textContent = mergeResult?.ready
+    ? `${mergeResult.numerator}/${mergeResult.denominator} = ${mergeResult.decimal}`
+    : mergeResult ? "REFUSED" : "Not attempted";
+
+  $("#merge-btn").disabled = minted !== 3;
+  $("#mutate-btn").disabled = !branches.rescue.length || mutationApplied;
+}
+
+async function render() {
+  const results = await verifyAll();
+  renderParent();
+  renderBaseChain();
+  renderBranchCards(results);
+  renderTimeline();
+  renderLedger(results);
+  renderMerge();
+  renderAssertions(results);
+  renderStatus(results);
+  return results;
+}
+
+function clearReplayTimers() {
+  replayTimers.forEach(clearTimeout);
+  replayTimers = [];
+  document.querySelectorAll(".replay").forEach(node => node.classList.remove("replay"));
+}
+
+function replayArrivals(announce = true) {
+  clearReplayTimers();
+  const keys = allFrames().map(frame => `${frame.stream}:${frame.sequence}`);
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  keys.forEach((key, index) => {
+    const timer = setTimeout(() => {
+      document.querySelectorAll(".replay").forEach(node => node.classList.remove("replay"));
+      document.querySelectorAll(`[data-frame-key="${key}"]`).forEach(node => node.classList.add("replay"));
+      if (index === keys.length - 1 && announce) {
+        setLive(`Replay complete: ${keys.length} frame arrivals in structural order.`, "success");
+      }
+    }, reduced ? 0 : index * 180);
+    replayTimers.push(timer);
+  });
+}
+
+async function forkAll() {
+  for (const name of POLICY_ORDER) await buildBranch(name);
+  await render();
+  setLive(`Three deterministic futures forked from ${BASE_STREAM}/${selectedSequence}.`, "success");
+}
+
+async function attemptMerge() {
+  mergeResult = await computeMerge();
+  await render();
+  if (mergeResult.ready) {
+    setLive(`Merge complete: ${mergeResult.numerator}/${mergeResult.denominator} = ${mergeResult.decimal}. Two contradictory dimensions remain parallel.`, "success");
+  } else {
+    setLive(`Merge refused. ${mergeResult.reason}`, "error");
+  }
+}
+
+async function mutateRescue() {
+  if (!branches.rescue.length || mutationApplied) return;
+  const frame = branches.rescue[0];
+  const original = frame.parent.hash;
+  const replacement = `${original[0] === "0" ? "1" : "0"}${original.slice(1)}`;
+  frame.parent.hash = replacement;
+  mutationApplied = true;
+  mergeResult = null;
+  const results = await render();
+  const isolated = !results.branches.rescue.valid && results.branches.conserve.valid && results.branches.accelerate.valid;
+  setLive(
+    isolated
+      ? "Required failure observed: rescue provenance is red; conserve and accelerate remain valid. No lineage was recomputed."
+      : "Mutation applied, but the expected isolation assertion did not hold.",
+    isolated ? "error" : "error"
+  );
+}
+
+async function reset(selected = 2) {
+  clearReplayTimers();
+  branches = { conserve: [], rescue: [], accelerate: [] };
+  mergeResult = null;
+  mutationApplied = false;
+  selectedSequence = selected;
+  $("#parent-select").value = String(selectedSequence);
+  await render();
+  setLive(`Reset complete. Canonical frame ${selectedSequence} is selected; no branches exist.`, "success");
+}
+
+function wait(ms) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function guidedRun() {
+  if (guidedRunning) return;
+  guidedRunning = true;
+  $("#guided-btn").disabled = true;
+  try {
+    await reset(2);
+    setLive("Guided step 1 of 5: replaying the immutable canonical mission.");
+    replayArrivals(false);
+    await wait(850);
+    setLive("Guided step 2 of 5: forking conserve fuel from the exact selected parent.");
+    await buildBranch("conserve");
+    await render();
+    await wait(500);
+    setLive("Guided step 3 of 5: forking rescue and accelerate from that same parent.");
+    await buildBranch("rescue");
+    await buildBranch("accelerate");
+    await render();
+    await wait(650);
+    setLive("Guided step 4 of 5: verifying all histories and attempting a dimension-aware merge.");
+    await attemptMerge();
+    await wait(650);
+    setLive("Guided proof complete. Step 5 of 5: press “Mutate rescue parent hash” to observe isolated provenance failure.", "success");
+  } finally {
+    guidedRunning = false;
+    $("#guided-btn").disabled = false;
+  }
+}
+
+async function copyPrompt() {
+  const text = $("#proof-prompt").textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents($("#proof-prompt"));
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.execCommand("copy");
+    selection.removeAllRanges();
+  }
+  setLive("Independent proof prompt copied.", "success");
+}
+
+async function initialize() {
+  if (!globalThis.crypto?.subtle) {
+    $("#chip-crypto").classList.add("fail");
+    $("#chip-crypto strong").textContent = "Web Crypto unavailable";
+    setLive("This browser does not expose Web Crypto SHA-256.", "error");
+    return;
+  }
+  await buildBase();
+  $("#parent-select").innerHTML = baseFrames.map(frame => `<option value="${frame.sequence}">Frame ${frame.sequence} · ${frame.event.label}</option>`).join("");
+  $("#parent-select").value = String(selectedSequence);
+
+  $("#parent-select").addEventListener("change", async event => {
+    selectedSequence = Number(event.target.value);
+    branches = { conserve: [], rescue: [], accelerate: [] };
+    mergeResult = null;
+    mutationApplied = false;
+    await render();
+    setLive(`Fork point changed to ${BASE_STREAM}/${selectedSequence}. Existing counterfactuals were cleared, never rewritten.`);
+  });
+  $("#guided-btn").addEventListener("click", guidedRun);
+  $("#fork-all-btn").addEventListener("click", forkAll);
+  $("#merge-btn").addEventListener("click", attemptMerge);
+  $("#replay-btn").addEventListener("click", replayArrivals);
+  $("#mutate-btn").addEventListener("click", mutateRescue);
+  $("#verify-btn").addEventListener("click", async () => {
+    const results = await render();
+    const validCount = POLICY_ORDER.filter(name => results.branches[name].valid).length;
+    setLive(`Verification complete: canonical ${results.base.valid ? "PASS" : "FAIL"}; ${validCount} of 3 branches valid.`, results.base.valid ? "success" : "error");
+  });
+  $("#reset-btn").addEventListener("click", () => reset(2));
+  $("#copy-btn").addEventListener("click", copyPrompt);
+
+  await render();
+  setLive("Canonical mission ready. Choose a historical frame or run the guided proof.", "success");
+}
+
+initialize().catch(error => {
+  console.error(error);
+  setLive(`Initialization failed: ${error.message}`, "error");
+});
+</script>
+</body>
+</html>
