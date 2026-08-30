@@ -44,6 +44,18 @@ const resetSelectors = {
   "09-attack-timeline": "#resetBtn",
   "10-futures-museum": "#resetBtn",
 };
+const primarySelectors = {
+  "01-many-worlds": "#guided-btn",
+  "02-soul-passport": "#guided-button",
+  "03-mars-colony": "#nextButton",
+  "04-five-realities": "#guideBtn",
+  "05-causal-detective": "#guidedBtn",
+  "06-space-station": "#guided",
+  "07-constitution": "#guidedBtn",
+  "08-teleporting-roguelike": "#runDemo",
+  "09-attack-timeline": "#controlBtn",
+  "10-futures-museum": "#playBtn",
+};
 const runtimeFrames = process.env.SHOWCASE_FRAME
   ? frames.filter((slug) => slug === process.env.SHOWCASE_FRAME)
   : frames;
@@ -230,6 +242,97 @@ async function classesOf(page, selector) {
   return page.locator(selector).evaluateAll((nodes) =>
     nodes.map((node) => String(node.className)),
   );
+}
+
+async function findContrastFailures(page) {
+  return page.evaluate(() => {
+    function rgba(value) {
+      const match = value.match(/rgba?\(([^)]+)\)/);
+      if (!match) return null;
+      const parts = match[1].split(/[ ,/]+/).map(Number);
+      return [parts[0], parts[1], parts[2], parts.length > 3 ? parts[3] : 1];
+    }
+    function composite(foreground, background) {
+      const alpha = foreground[3];
+      return [
+        foreground[0] * alpha + background[0] * (1 - alpha),
+        foreground[1] * alpha + background[1] * (1 - alpha),
+        foreground[2] * alpha + background[2] * (1 - alpha),
+        1,
+      ];
+    }
+    function luminance(color) {
+      const channels = color.slice(0, 3).map((value) => {
+        const channel = value / 255;
+        return channel <= 0.04045
+          ? channel / 12.92
+          : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+    }
+    function contrast(left, right) {
+      const a = luminance(left);
+      const b = luminance(right);
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    }
+    function effectiveBackground(element) {
+      const layers = [];
+      for (let node = element; node; node = node.parentElement) {
+        const color = rgba(getComputedStyle(node).backgroundColor);
+        if (color && color[3] > 0) {
+          layers.push(color);
+          if (color[3] >= 0.999) break;
+        }
+      }
+      let result = [255, 255, 255, 1];
+      for (let index = layers.length - 1; index >= 0; index -= 1) {
+        result = composite(layers[index], result);
+      }
+      return result;
+    }
+
+    const failures = [];
+    for (const element of document.querySelectorAll("p, li, dd, label, small, span")) {
+      if (element.closest("button, a, input, select, option, svg, [aria-hidden=true], .sr-only")) {
+        continue;
+      }
+      const directText = [...element.childNodes]
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent)
+        .join(" ")
+        .trim();
+      if (!directText) continue;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      if (
+        rect.width <= 0
+        || rect.height <= 0
+        || style.display === "none"
+        || style.visibility === "hidden"
+      ) {
+        continue;
+      }
+      const background = effectiveBackground(element);
+      const rawColor = rgba(style.color);
+      if (!rawColor) continue;
+      const foreground = composite(rawColor, background);
+      const fontSize = Number.parseFloat(style.fontSize);
+      const fontWeight = Number.parseInt(style.fontWeight, 10) || 400;
+      const minimum = fontSize >= 24 || (fontWeight >= 700 && fontSize >= 18.66)
+        ? 3
+        : 4.5;
+      const measured = contrast(foreground, background);
+      if (measured + 0.01 < minimum) {
+        failures.push({
+          element: `${element.tagName.toLowerCase()}.${String(element.className).trim()}`,
+          text: directText.slice(0, 70),
+          contrast: Number(measured.toFixed(2)),
+          required: minimum,
+        });
+      }
+    }
+    return failures.slice(0, 20);
+  });
 }
 
 async function runFrameContract(page, slug) {
@@ -557,6 +660,12 @@ async function exerciseFrame(context, origin, slug) {
   check(compact(mobile.body).length > 500, `${slug}: rendered too little content`);
   check(mobile.scrollWidth <= mobile.clientWidth + 1, `${slug}: mobile horizontal overflow`);
   check(mobile.theme === "dark", `${slug}: forced dark theme was not applied`);
+  const primaryRect = await page.locator(primarySelectors[slug]).boundingBox();
+  check(primaryRect, `${slug}: primary guided control is not visible`);
+  check(
+    primaryRect.y >= 0 && primaryRect.y + primaryRect.height <= 844,
+    `${slug}: primary guided control starts below the initial mobile viewport at y=${primaryRect.y}`,
+  );
 
   const controls = page.locator("button, [role=button]");
   check(await controls.count() >= 4, `${slug}: expected at least four controls`);
@@ -567,13 +676,57 @@ async function exerciseFrame(context, origin, slug) {
         const style = getComputedStyle(node);
         return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0;
       })
-      .filter((node) => node.getBoundingClientRect().height < 40)
+      .filter((node) => node.getBoundingClientRect().height < 43.5)
       .map((node) => ({
         text: (node.textContent || node.getAttribute("aria-label") || "").trim(),
         height: node.getBoundingClientRect().height,
       })),
   );
   check(undersized.length === 0, `${slug}: undersized controls ${JSON.stringify(undersized)}`);
+  const undersizedNavigation = await page.locator("nav a").evaluateAll((nodes) =>
+    nodes
+      .filter((node) => {
+        const rect = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0;
+      })
+      .filter((node) => node.getBoundingClientRect().height < 43.5)
+      .map((node) => ({
+        text: (node.textContent || "").trim(),
+        height: node.getBoundingClientRect().height,
+      })),
+  );
+  check(
+    undersizedNavigation.length === 0,
+    `${slug}: undersized navigation targets ${JSON.stringify(undersizedNavigation)}`,
+  );
+  const darkContrastFailures = await findContrastFailures(page);
+  check(
+    darkContrastFailures.length === 0,
+    `${slug}: dark-theme text contrast failures ${JSON.stringify(darkContrastFailures)}`,
+  );
+
+  const lightResponse = await page.goto(
+    `${origin}/showcase/${slug}/index.html?scoutTheme=light`,
+    { waitUntil: "load", timeout: 15_000 },
+  );
+  check(lightResponse?.ok(), `${slug}: light-theme HTTP ${lightResponse?.status()}`);
+  await page.waitForTimeout(100);
+  check(
+    await page.locator("html").getAttribute("data-theme") === "light",
+    `${slug}: forced light theme was not applied`,
+  );
+  const lightContrastFailures = await findContrastFailures(page);
+  check(
+    lightContrastFailures.length === 0,
+    `${slug}: light-theme text contrast failures ${JSON.stringify(lightContrastFailures)}`,
+  );
+
+  await page.goto(
+    `${origin}/showcase/${slug}/index.html?scoutTheme=dark`,
+    { waitUntil: "load", timeout: 15_000 },
+  );
+  await page.waitForTimeout(100);
 
   await page.setViewportSize({ width: 1100, height: 900 });
   await runFrameContract(page, slug);
@@ -620,6 +773,13 @@ try {
     scroll: document.documentElement.scrollWidth,
   }));
   check(catalogWidth.scroll <= catalogWidth.client + 1, "showcase catalog overflows at 390px");
+  const catalogNavHeights = await catalog.locator(".topline a").evaluateAll((nodes) =>
+    nodes.map((node) => node.getBoundingClientRect().height),
+  );
+  check(
+    catalogNavHeights.every((height) => height >= 43.5),
+    `showcase catalog has undersized navigation targets: ${catalogNavHeights.join(", ")}`,
+  );
   catalogClean();
   await catalog.close();
 
