@@ -1,0 +1,24 @@
+{
+  "frame": 4,
+  "slug": "04-five-realities",
+  "title": "One History, Five Realities",
+  "claim": "Exactly one verified synthetic event chain can independently project into five simultaneous interfaces whose separately authored oracles recover the same canonical reduced state at every shared prefix, while a one-event omission isolates exactly the faulty projector and leaves the other four in agreement.",
+  "entry": "index.html",
+  "synthetic_only": true,
+  "network_required": false,
+  "invariants": [
+    "The ledger is the only domain state; every visible projection is rebuilt from the selected immutable event-chain prefix.",
+    "Every event hash includes its index, exact previous hash, type, and data after recursive lexicographic canonicalization with browser Web Crypto SHA-256.",
+    "Kanban, city, graph, command, and comic use independently written projectors and projection-specific oracles.",
+    "All five oracles expose a full SHA-256 digest of one canonical reduced-state schema at the same selected prefix.",
+    "Mutation changes only the Command projector by making it ignore exactly the relationship event.",
+    "Deleting every projection DOM tree and rebuilding from history reproduces the same canonical oracle hashes."
+  ],
+  "positive_path": [
+    "Run the guided replay or manually scrub all nine events while all five realities move to exactly the same prefix.",
+    "Inspect the complete verified event ledger and the full canonical reduced-state hash exposed by each projection.",
+    "Confirm unanimous five-of-five hash agreement at every unmutated prefix.",
+    "Delete all five projections and rebuild them solely from history with identical hashes."
+  ],
+  "failure_path": "Enable the selective mutation at the completed history so only Command ignores the mentoring-link event; observe the detector identify exactly Command as divergent while Kanban, city, graph, and comic retain the same majority canonical hash, then repair the projector and restore unanimous five-of-five agreement without changing history."
+}
