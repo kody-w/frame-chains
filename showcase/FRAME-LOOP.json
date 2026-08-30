@@ -2,7 +2,7 @@
   "schema": "frame-chains.frame-loop/1",
   "loop": 1,
   "base_commit": "6a7c980837cf33ca8e40fd48feaafd5e63c786ee",
-  "integration_head_before_ledger": "426c3726627edd525b741a25c16b802d710d6d2e",
+  "integration_head_before_ledger": "0756b0ff6b921470280e6b8ff12074f6815327ad",
   "merge_strategy": "git merge --no-ff",
   "squash": false,
   "frame_count": 10,
@@ -34,10 +34,11 @@
       "slug": "03-mars-colony",
       "branch": "frame/03-mars-colony",
       "path": "showcase/03-mars-colony",
-      "commit": "b4a16bd4a30f4292a1267c034a1b33d71ac63b13",
+      "commit": "79b666f574feed25e2d80ef3d989b88e5a15c8d9",
       "commits": [
         "03b4bb2163cbb4f0184f574fdf40ceb8f173a726",
-        "b4a16bd4a30f4292a1267c034a1b33d71ac63b13"
+        "b4a16bd4a30f4292a1267c034a1b33d71ac63b13",
+        "79b666f574feed25e2d80ef3d989b88e5a15c8d9"
       ]
     },
     {
@@ -45,10 +46,11 @@
       "slug": "04-five-realities",
       "branch": "frame/04-five-realities",
       "path": "showcase/04-five-realities",
-      "commit": "fe78e1c56be6e6c3631807090e49be5938be9154",
+      "commit": "8ac1a75495fcb357b958b4b7fc822a0cf2eae19f",
       "commits": [
         "44c5edc253bae12383998e0d482aacc9971f27eb",
-        "fe78e1c56be6e6c3631807090e49be5938be9154"
+        "fe78e1c56be6e6c3631807090e49be5938be9154",
+        "8ac1a75495fcb357b958b4b7fc822a0cf2eae19f"
       ]
     },
     {
@@ -56,9 +58,10 @@
       "slug": "05-causal-detective",
       "branch": "frame/05-causal-detective",
       "path": "showcase/05-causal-detective",
-      "commit": "87eb041b0cf781dcbc5c2d0ab8ddea328e83487b",
+      "commit": "e5ed13b0cbb7171f9bd765a930b99dbbbd6f7cb3",
       "commits": [
-        "87eb041b0cf781dcbc5c2d0ab8ddea328e83487b"
+        "87eb041b0cf781dcbc5c2d0ab8ddea328e83487b",
+        "e5ed13b0cbb7171f9bd765a930b99dbbbd6f7cb3"
       ]
     },
     {
@@ -76,10 +79,11 @@
       "slug": "07-constitution",
       "branch": "frame/07-constitution",
       "path": "showcase/07-constitution",
-      "commit": "6bfa1d38c349f8d9daafc02a22489d7b90546ba5",
+      "commit": "f25f7ff92941f2440b06ce7a8297411b9e233c26",
       "commits": [
         "bfff76500e4896f1c788efc3f794f5676145ba27",
-        "6bfa1d38c349f8d9daafc02a22489d7b90546ba5"
+        "6bfa1d38c349f8d9daafc02a22489d7b90546ba5",
+        "f25f7ff92941f2440b06ce7a8297411b9e233c26"
       ]
     },
     {
@@ -87,10 +91,11 @@
       "slug": "08-teleporting-roguelike",
       "branch": "frame/08-teleporting-roguelike",
       "path": "showcase/08-teleporting-roguelike",
-      "commit": "aa05697910cec1a069a565bcc2cd1a991848ba12",
+      "commit": "d489c38fb36e84297200d85938ffae89dc1f20b1",
       "commits": [
         "431d46d5719c6bb49f2b5570efb91833e649d402",
-        "aa05697910cec1a069a565bcc2cd1a991848ba12"
+        "aa05697910cec1a069a565bcc2cd1a991848ba12",
+        "d489c38fb36e84297200d85938ffae89dc1f20b1"
       ]
     },
     {
@@ -98,10 +103,11 @@
       "slug": "09-attack-timeline",
       "branch": "frame/09-attack-timeline",
       "path": "showcase/09-attack-timeline",
-      "commit": "e646debc45aae6de8b7e045c41d4a54411c11eba",
+      "commit": "b477cc124f7289146ee65f332d14fb068448d458",
       "commits": [
         "f4cfcccfcf1da1fcabc86042788997aad60bbdbd",
-        "e646debc45aae6de8b7e045c41d4a54411c11eba"
+        "e646debc45aae6de8b7e045c41d4a54411c11eba",
+        "b477cc124f7289146ee65f332d14fb068448d458"
       ]
     },
     {
@@ -109,10 +115,11 @@
       "slug": "10-futures-museum",
       "branch": "frame/10-futures-museum",
       "path": "showcase/10-futures-museum",
-      "commit": "8778e61c9d87cd98280502462de38f52dde9c8bb",
+      "commit": "fef699ab581f82f5c7b80bcb1e5d0c0c5fd4266a",
       "commits": [
         "62ba08fb4d977259d9355fcc05e71ba189317525",
-        "8778e61c9d87cd98280502462de38f52dde9c8bb"
+        "8778e61c9d87cd98280502462de38f52dde9c8bb",
+        "fef699ab581f82f5c7b80bcb1e5d0c0c5fd4266a"
       ]
     }
   ]
