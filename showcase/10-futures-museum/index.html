@@ -154,6 +154,8 @@
       font-weight: 650;
     }
     .hero-copy { max-width: 650px; font-size: clamp(17px, 2vw, 21px); color: var(--cp-text-soft); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .hero-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 180px; }
     .hero-notes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
     .hero-visual {
       position: relative;
@@ -267,6 +269,17 @@
     .frame-readout span { color: var(--cp-text-muted); font-family: Consolas, "Courier New", Courier, monospace; font-size: 12px; }
     .actions { justify-content: flex-end; }
     .actions button { display: inline-flex; align-items: center; gap: 7px; }
+    .scroll-cue {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      margin: 14px 2px -10px;
+      color: var(--cp-text);
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .scroll-cue svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
     .timeline-wrap {
       overflow-x: auto;
       margin: 18px 0;
@@ -408,7 +421,7 @@
     th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--cp-border); vertical-align: top; }
     th { position: sticky; top: 0; background: var(--cp-surface); color: var(--cp-text-muted); z-index: 1; }
     td code { font-family: Consolas, "Courier New", Courier, monospace; font-size: 11px; }
-    .ledger-status { font-weight: 800; color: var(--cp-success); }
+    .ledger-status { font-weight: 800; color: var(--cp-text); }
     .ledger-status.bad { color: var(--cp-danger); }
     .assertions { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
     .assertion {
@@ -443,6 +456,13 @@
     }
     .toast.visible { transform: translateY(0); }
     .keyboard-help { color: var(--cp-text-muted); font-size: 12px; margin-top: 12px; }
+    html[data-theme="dark"] .brand-kicker,
+    html[data-theme="dark"] .section-heading p,
+    html[data-theme="dark"] .hero-caption,
+    html[data-theme="dark"] .timeline-node,
+    html[data-theme="dark"] .keyboard-help {
+      color: var(--cp-text-soft);
+    }
     .sr-only {
       position: absolute;
       width: 1px;
@@ -473,6 +493,8 @@
       .scope-card { grid-template-columns: 1fr; gap: 8px; }
       .control-deck { grid-template-columns: 1fr; position: static; }
       .transport, .actions { justify-content: center; }
+      .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .actions button { justify-content: center; width: 100%; }
       .frame-readout { order: -1; }
       .artifact-copy { grid-template-columns: 1fr; }
       .artifact-stamp { text-align: left; }
@@ -491,7 +513,7 @@
       .hero-caption span:last-child { display: none; }
       .teach-card { min-height: 0; }
       .control-deck button { min-width: 44px; }
-      .actions button span { display: none; }
+      .hero-actions button { width: 100%; }
       .artifact-stage { min-height: 330px; }
       .artifact-copy, .side-card, .branch-map-panel, .compare-panel, .ledger-panel, .assertions-panel { padding: 16px; }
     }
@@ -522,6 +544,12 @@
           <div class="eyebrow">One history · many faithful futures</div>
           <h1 id="pageTitle">The Museum of Possible Futures</h1>
           <p class="hero-copy">Every verified frame adds an artifact, a room, a story, a motif, and a place in time. Curators may fork the collection—but they can never quietly rewrite what came before.</p>
+          <div class="hero-actions">
+            <button id="playBtn" class="primary" type="button" aria-label="Start guided replay" title="Play or pause guided replay (Space)">
+              <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+              <span>Start guided replay</span>
+            </button>
+          </div>
           <div class="hero-notes" aria-label="Museum principles">
             <span class="chip">Immutable rooms</span>
             <span class="chip">Deterministic art</span>
@@ -590,8 +618,8 @@
             <button id="prevBtn" type="button" aria-label="Previous frame" title="Previous frame (Left arrow)">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
             </button>
-            <button id="playBtn" class="primary" type="button" aria-label="Start guided replay" title="Play or pause guided replay (Space)">
-              <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+            <button id="playDockBtn" class="primary" type="button" aria-label="Start guided replay" title="Play or pause guided replay (Space)">
+              <svg id="playDockIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
             </button>
             <button id="nextBtn" type="button" aria-label="Next frame" title="Next frame (Right arrow)">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
@@ -618,7 +646,11 @@
         </div>
         <div class="keyboard-help">Keyboard: ←/→ browse · Space replay · F fork · M merge · X mutate · R reset</div>
 
-        <div class="timeline-wrap" aria-label="Current branch timeline">
+        <div class="scroll-cue" id="timelineScrollCue">
+          <span>Horizontal timeline · swipe or scroll to inspect every room</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M8 9l-3 3 3 3m8-6 3 3-3 3"/></svg>
+        </div>
+        <div class="timeline-wrap" aria-label="Current branch timeline" aria-describedby="timelineScrollCue">
           <div class="timeline" id="timeline"></div>
         </div>
 
@@ -1013,6 +1045,12 @@
         button.addEventListener("click", () => selectFrame(item.id));
         timeline.append(button);
       });
+      const active = timeline.querySelector(".timeline-node.active");
+      const scroller = timeline.closest(".timeline-wrap");
+      requestAnimationFrame(() => {
+        if (!active || !scroller) return;
+        scroller.scrollLeft = Math.max(0, active.offsetLeft - (scroller.clientWidth - active.offsetWidth) / 2);
+      });
     }
 
     function renderLineage(frame) {
@@ -1242,8 +1280,7 @@
       if (replayTimer) { stopReplay(); return; }
       replayOrder = replaySequence();
       replayIndex = 0;
-      $("#playIcon").innerHTML = `<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>`;
-      $("#playBtn").setAttribute("aria-label", "Pause guided replay");
+      updateReplayControls(true);
       const step = () => {
         if (replayIndex >= replayOrder.length) {
           stopReplay();
@@ -1253,16 +1290,32 @@
         currentId = replayOrder[replayIndex++];
         render();
         announce(`Guided replay: ${byId(currentId).title}. ${byId(currentId).narrative}`);
-        replayTimer = window.setTimeout(step, reducedMotion ? 650 : 2100);
+        replayTimer = window.setTimeout(step, 2100);
       };
       step();
+    }
+
+    function updateReplayControls(playing) {
+      const label = playing ? "Pause guided replay" : "Start guided replay";
+      const icon = playing
+        ? `<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>`
+        : `<path d="m8 5 11 7-11 7Z"/>`;
+      ["#playBtn", "#playDockBtn"].forEach(selector => {
+        const button = $(selector);
+        if (button) button.setAttribute("aria-label", label);
+      });
+      ["#playIcon", "#playDockIcon"].forEach(selector => {
+        const node = $(selector);
+        if (node) node.innerHTML = icon;
+      });
+      const heroLabel = $("#playBtn span");
+      if (heroLabel) heroLabel.textContent = label;
     }
 
     function stopReplay() {
       if (replayTimer) window.clearTimeout(replayTimer);
       replayTimer = null;
-      if ($("#playIcon")) $("#playIcon").innerHTML = `<path d="m8 5 11 7-11 7Z"/>`;
-      if ($("#playBtn")) $("#playBtn").setAttribute("aria-label", "Start guided replay");
+      updateReplayControls(false);
     }
 
     async function forkCurrent() {
@@ -1363,6 +1416,7 @@
     $("#prevBtn").addEventListener("click", () => move(-1));
     $("#nextBtn").addEventListener("click", () => move(1));
     $("#playBtn").addEventListener("click", startReplay);
+    $("#playDockBtn").addEventListener("click", startReplay);
     $("#forkBtn").addEventListener("click", forkCurrent);
     $("#mergeBtn").addEventListener("click", mergeSelected);
     $("#mutateBtn").addEventListener("click", mutateOldArtifact);
