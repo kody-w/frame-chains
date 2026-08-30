@@ -376,6 +376,7 @@ async function runFrameContract(page, slug) {
     await clickControl(page, "#verify-button", 350);
     check(/REJECTED/i.test(await textOf(page, "#mutation-diff")), "Frame 02 counterfeit was not visibly rejected");
     check(/content_address/i.test(await textOf(page, "#mutation-diff")), "Frame 02 rejection omitted the changed identity address");
+    check(/9 RECORDS/i.test(await textOf(page, "#ledger-count")), "Frame 02 rejected counterfeit was not recorded separately");
     check(await page.locator("#assertion-list .assertion.pass").count() === 7, "Frame 02 counterfeit assertion did not pass");
     check(/Counterfeit rejected/i.test(await textOf(page, "#live-status")), "Frame 02 did not announce counterfeit rejection");
     return;
@@ -468,6 +469,7 @@ async function runFrameContract(page, slug) {
     );
     check(await page.locator("#ledger .ledger-item.bad").count() === 1, "Frame 05 did not isolate one forged clue");
     check(/F01/i.test(await textOf(page, "#ledger .ledger-item.bad")), "Frame 05 did not identify forged frame F01");
+    check(/Accusation accepted/i.test(await textOf(page, "#verdict")), "Frame 05 mutation removed the accepted conclusion");
     return;
   }
 
@@ -511,28 +513,59 @@ async function runFrameContract(page, slug) {
   }
 
   if (slug === "08-teleporting-roguelike") {
-    await clickControl(page, "#runDemo", 250);
-    await poll("Frame 08 guided proof", async () =>
-      /STEP 8 \/ 8/i.test(await textOf(page, "#demoCounter"))
-      && !await page.locator("#runDemo").isDisabled(),
-      30_000,
-    );
-    check(await page.locator("[data-assert].pass").count() === 6, "Frame 08 guided proof did not satisfy six assertions");
-    check(await page.locator("#ledgerBody tr").count() === 6, "Frame 08 accepted ledger changed unexpectedly");
-    check(/Inventory forgery refused/i.test(await textOf(page, "#status")), "Frame 08 guided failure did not execute");
+    for (let step = 1; step <= 7; step += 1) {
+      await clickControl(page, "#nextDemo", 250);
+      check(
+        new RegExp(`STEP ${step} / 8`).test(await textOf(page, "#demoCounter")),
+        `Frame 08 did not reach guided step ${step}`,
+      );
+    }
+    check(await page.locator("[data-assert].pass").count() === 5, "Frame 08 positive path did not satisfy five assertions");
+    check(!(await page.locator('[data-assert="mutation"]').getAttribute("class")).includes("pass"), "Frame 08 mutation assertion passed before a mutation");
+    check(/LIVE/i.test(await textOf(page, "#bState")), "Frame 08 did not transfer the live world to Device B");
+    const inventoryHead = await textOf(page, "#ledgerBody tr:last-child");
+    await clickControl(page, "#forgeItem", 350);
+    check(/Inventory forgery refused/i.test(await textOf(page, "#status")), "Frame 08 inventory forgery was not rejected");
+    check(await textOf(page, "#ledgerBody tr:last-child") === inventoryHead, "Frame 08 inventory forgery changed the verified head");
+    check((await page.locator('[data-assert="mutation"]').getAttribute("class")).includes("pass"), "Frame 08 inventory mutation assertion did not pass");
 
+    await clickControl(page, "#reset", 400);
+    for (let step = 1; step <= 7; step += 1) {
+      await clickControl(page, "#nextDemo", 250);
+    }
+    const parentHead = await textOf(page, "#ledgerBody tr:last-child");
     await clickControl(page, "#forgeParent", 350);
     check(/Parent forgery refused/i.test(await textOf(page, "#status")), "Frame 08 parent forgery was not rejected");
+    check(await textOf(page, "#ledgerBody tr:last-child") === parentHead, "Frame 08 parent forgery changed the verified head");
     check(/Last good head preserved/i.test(await textOf(page, "#status")), "Frame 08 did not preserve the verified game");
-    check((await page.locator('[data-assert="mutation"]').getAttribute("class")).includes("pass"), "Frame 08 mutation assertion did not pass");
+
+    await clickControl(page, "#reset", 400);
+    for (let step = 1; step <= 6; step += 1) {
+      await clickControl(page, "#nextDemo", 250);
+    }
+    const reattachHead = await textOf(page, "#ledgerBody tr:last-child");
+    await clickControl(page, "#conflictC", 300);
+    await clickControl(page, "#reattachC", 350);
+    check(
+      /Reattach refused: an offline declared read is not present on the destination chain/i.test(
+        await textOf(page, "#status"),
+      ),
+      "Frame 08 unavailable-read reattachment was not refused",
+    );
+    check(await textOf(page, "#ledgerBody tr:last-child") === reattachHead, "Frame 08 refused reattachment changed the destination head");
     return;
   }
 
   if (slug === "09-attack-timeline") {
     await clickControl(page, "#controlBtn", 500);
+    check(/^ACCEPT$/i.test(await textOf(page, "#resultCode")), "Frame 09 control did not produce ACCEPT");
     check(await page.locator("#labStatus").getAttribute("data-state") === "verified", "Frame 09 control did not verify");
     check(await page.locator("#quarantine .quarantine-item").count() === 0, "Frame 09 control quarantined healthy data");
     check(await page.locator("#assertions .assertion[data-state=unmeasured]").count() === 9, "Frame 09 control did not leave nine detectors ready");
+    const controlHead = await textOf(page, "#worldHead");
+    const controlHighWater = await textOf(page, "#worldHighWater");
+    check(/#4/.test(controlHighWater), "Frame 09 control high-water is wrong");
+    check(await page.locator("#timeline .frame-row").count() === 5, "Frame 09 control timeline is incomplete");
 
     await clickControl(page, "#attackAllBtn", 4_500);
     check(await page.locator("#labStatus").getAttribute("data-state") === "rejected", "Frame 09 attacks were not rejected");
@@ -540,6 +573,8 @@ async function runFrameContract(page, slug) {
     check(await page.locator("#assertions .assertion[data-state=pass]").count() === 9, "Frame 09 detector mutations did not all turn red");
     const attackAssertions = await page.locator("#assertions .assertion").allInnerTexts();
     check(attackAssertions.every((value) => /red observed/i.test(value)), "Frame 09 reported a detector without observing red");
+    check(await textOf(page, "#worldHead") === controlHead, "Frame 09 attacks replaced the verified world head");
+    check(await textOf(page, "#worldHighWater") === controlHighWater, "Frame 09 attacks changed the high-water mark");
     return;
   }
 
@@ -550,7 +585,14 @@ async function runFrameContract(page, slug) {
       && /7 \/ 7/.test(await textOf(page, "#assertionScore")),
       35_000,
     );
-    check(await page.locator("#ledgerBody tr").count() === 9, "Frame 10 replay lost museum frames");
+    check(/D03/i.test(await textOf(page, "#readoutMeta")), "Frame 10 replay did not end at D03");
+    await clickControl(page, "#forkBtn", 350);
+    check(/V01/i.test(await textOf(page, "#readoutMeta")), "Frame 10 did not create visitor frame V01");
+    await page.locator("#compareSelect").selectOption("D02");
+    await clickControl(page, "#mergeBtn", 450);
+    check(/U01/i.test(await textOf(page, "#readoutMeta")), "Frame 10 did not create merge frame U01");
+    check(/^D02 \+ V01$/i.test(await textOf(page, "#detailParents")), "Frame 10 merge recorded the wrong parents");
+    check(await page.locator("#ledgerBody tr").count() === 11, "Frame 10 fork and merge did not preserve all frames");
     check(!(await page.locator("#integrityBanner").getAttribute("class")).includes("visible"), "Frame 10 began corrupt");
 
     await clickControl(page, "#mutateBtn", 500);
@@ -612,18 +654,25 @@ async function assertResetContract(page, slug) {
     check(/STEP 0 \/ 8/i.test(await textOf(page, "#demoCounter")), "Frame 08 reset kept guided progress");
     check(await page.locator("#ledgerBody tr").count() === 1, "Frame 08 reset did not return to genesis");
     check(/Genesis verified/i.test(await textOf(page, "#status")), "Frame 08 reset status is wrong");
+    await page.waitForTimeout(2_000);
+    check(/STEP 0 \/ 8/i.test(await textOf(page, "#demoCounter")), "Frame 08 reset was overwritten by pending work");
+    check(await page.locator("#ledgerBody tr").count() === 1, "Frame 08 reset ledger was overwritten by pending work");
     return;
   }
   if (slug === "09-attack-timeline") {
     check(await page.locator("#quarantine .quarantine-item").count() === 0, "Frame 09 reset kept quarantined attacks");
     check(await page.locator("#assertions .assertion[data-state=unmeasured]").count() === 9, "Frame 09 reset did not clear detector evidence");
     check(await page.locator("#labStatus").getAttribute("data-state") === "verified", "Frame 09 reset did not restore verified projection");
+    check(/^ACCEPT$/i.test(await textOf(page, "#resultCode")), "Frame 09 reset control did not accept");
     return;
   }
   if (slug === "10-futures-museum") {
     check(!(await page.locator("#integrityBanner").getAttribute("class")).includes("visible"), "Frame 10 reset kept corruption banner");
     check(/9 verified frames/i.test(await textOf(page, "#headerStatus")), "Frame 10 reset did not restore all frames");
     check(/7 \/ 7/.test(await textOf(page, "#assertionScore")), "Frame 10 reset assertions did not recover");
+    check(await page.locator("#ledgerBody tr").count() === 9, "Frame 10 reset kept visitor frames");
+    const resetLedger = await page.locator("#ledgerBody").innerText();
+    check(!/\b(?:V01|U01)\b/.test(resetLedger), "Frame 10 reset kept generated fork or merge frames");
     return;
   }
 }
@@ -760,7 +809,7 @@ try {
     headless: true,
     args: ["--disable-gpu-sandbox", "--enable-unsafe-swiftshader", "--use-gl=swiftshader"],
   });
-  const context = await browser.newContext();
+  const context = await browser.newContext({ reducedMotion: "reduce" });
 
   const catalog = await context.newPage();
   await catalog.setViewportSize({ width: 390, height: 844 });
