@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One History, Five Realities</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+    }
+    button, input, textarea { font: inherit; }
+    button, input[type="range"] { min-height: 44px; }
+    button {
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      padding: 10px 14px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      font-weight: 650;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--cp-accent);
+      outline-offset: 3px;
+    }
+    button.primary {
+      background: var(--cp-accent);
+      border-color: var(--cp-accent);
+      color: var(--cp-accent-fg);
+    }
+    button.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+    button.danger { border-color: var(--cp-danger); color: var(--cp-danger); }
+    button[aria-pressed="true"] { background: var(--cp-accent-soft); border-color: var(--cp-accent); color: var(--cp-accent); }
+    code, pre, .mono {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-variant-ligatures: none;
+    }
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 8px;
+      left: 8px;
+      transform: translateY(-150%);
+      padding: 10px 14px;
+      border-radius: 0.625rem;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    .shell { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 56px; }
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, .6fr);
+      gap: 24px;
+      align-items: end;
+      padding: 40px 0 28px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--cp-accent);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 900px;
+      margin-bottom: 12px;
+      font-size: clamp(2.5rem, 7vw, 6.5rem);
+      line-height: .92;
+      letter-spacing: -.065em;
+      font-weight: 820;
+    }
+    h2 { margin-bottom: 8px; font-size: clamp(1.35rem, 2.6vw, 2.1rem); letter-spacing: -.025em; }
+    h3 { margin-bottom: 8px; font-size: 1rem; }
+    .lede { max-width: 780px; margin-bottom: 0; color: var(--cp-text-muted); font-size: clamp(1rem, 2vw, 1.25rem); }
+    .mast-stat {
+      border-left: 3px solid var(--cp-accent);
+      padding-left: 20px;
+    }
+    .mast-stat strong { display: block; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; letter-spacing: -.05em; }
+    .mast-stat span { color: var(--cp-text-muted); }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .intro-card, .scope-card, .control-deck, .reality, .ledger-card, .assertions-card, .prompt-card {
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      box-shadow: 0 1px 2px var(--cp-border);
+    }
+    .intro-card { min-height: 150px; padding: 18px; border-radius: 16px; }
+    .intro-card .number {
+      display: inline-grid;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 14px;
+      place-items: center;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 50%;
+      color: var(--cp-accent);
+      font-size: .8rem;
+      font-weight: 800;
+    }
+    .intro-card p, .scope-card p { margin-bottom: 0; color: var(--cp-text-muted); font-size: .92rem; }
+    .scope-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 24px;
+      padding: 18px 20px;
+      border-radius: 16px;
+      border-left: 4px solid var(--cp-warning);
+    }
+    .scope-card strong { color: var(--cp-warning); text-transform: uppercase; letter-spacing: .1em; font-size: .76rem; }
+    .control-deck {
+      position: sticky;
+      z-index: 20;
+      top: 8px;
+      margin: 24px 0;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--cp-panel-strong);
+      box-shadow: var(--cp-shadow);
+    }
+    .control-top, .transport, .status-row, .scrub-label {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .control-top { justify-content: space-between; gap: 16px; }
+    .transport { flex: 1; }
+    .scrubber-wrap { flex: 2 1 360px; }
+    .scrub-label { justify-content: space-between; margin-bottom: 4px; color: var(--cp-text-muted); font-size: .82rem; }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--cp-accent);
+      cursor: pointer;
+    }
+    .status-row {
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--cp-border);
+      font-size: .85rem;
+      color: var(--cp-text-muted);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 4px 9px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-muted);
+      font-size: .75rem;
+      font-weight: 750;
+    }
+    .badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--cp-text-muted); }
+    .badge.good::before { background: var(--cp-success); }
+    .badge.bad::before { background: var(--cp-danger); }
+    .badge.warn::before { background: var(--cp-warning); }
+    .event-callout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+      min-height: 64px;
+      margin: 0 0 16px;
+      padding: 12px 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-bg-elevated);
+    }
+    .event-index {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 0.625rem;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-weight: 800;
+    }
+    .event-callout p { margin: 0; }
+    .event-callout small { color: var(--cp-text-muted); }
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 30px 0 12px;
+    }
+    .section-head p { max-width: 660px; margin-bottom: 0; color: var(--cp-text-muted); }
+    .reality-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .reality {
+      grid-column: span 2;
+      min-width: 0;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+    .reality:nth-child(1), .reality:nth-child(2) { grid-column: span 3; }
+    .reality.divergent { border: 2px solid var(--cp-danger); }
+    .reality-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      padding: 15px 16px 10px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .reality-kicker { color: var(--cp-text-muted); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .reality h3 { margin: 2px 0 0; font-size: 1.15rem; }
+    .oracle-label { color: var(--cp-success); font-size: .7rem; font-weight: 800; white-space: nowrap; }
+    .reality-body { min-height: 250px; padding: 14px; background: var(--cp-bg-elevated); }
+    .hash-box {
+      padding: 11px 14px 14px;
+      border-top: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+    }
+    .hash-box span { display: block; color: var(--cp-text-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; }
+    .hash-box code { display: block; margin-top: 5px; color: var(--cp-text); font-size: .68rem; overflow-wrap: anywhere; }
+    .kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .lane { min-width: 0; padding: 8px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); }
+    .lane h4 { margin: 0 0 8px; color: var(--cp-text-muted); font-size: .67rem; letter-spacing: .08em; text-transform: uppercase; }
+    .task-card { padding: 9px; border-left: 3px solid var(--cp-accent); border-radius: 6px; background: var(--cp-surface-soft); font-size: .76rem; overflow-wrap: anywhere; }
+    .task-card small { display: block; margin-top: 5px; color: var(--cp-text-muted); }
+    .roster-line { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .person-chip { padding: 3px 7px; border: 1px solid var(--cp-border); border-radius: 999px; color: var(--cp-text-muted); font-size: .68rem; }
+    .city-scene {
+      position: relative;
+      min-height: 218px;
+      overflow: hidden;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background:
+        linear-gradient(30deg, var(--cp-border) 1px, transparent 1px),
+        linear-gradient(150deg, var(--cp-border) 1px, transparent 1px),
+        var(--cp-surface);
+      background-size: 30px 52px;
+    }
+    .building {
+      position: absolute;
+      width: 48px;
+      padding: 7px 4px;
+      transform: skewY(-12deg);
+      border: 1px solid var(--cp-border-strong);
+      border-bottom: 7px solid var(--cp-accent);
+      border-radius: 5px 5px 2px 2px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      text-align: center;
+      font-size: .65rem;
+      box-shadow: 7px 7px 0 var(--cp-accent-soft);
+    }
+    .citizen {
+      position: absolute;
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border: 2px solid var(--cp-accent);
+      border-radius: 50%;
+      background: var(--cp-surface);
+      color: var(--cp-accent);
+      font-size: .62rem;
+      font-weight: 800;
+    }
+    .city-plaque { position: absolute; left: 8px; bottom: 7px; padding: 4px 7px; background: var(--cp-panel-strong); color: var(--cp-text-muted); font-size: .65rem; }
+    .graph-svg { width: 100%; height: 218px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); }
+    .graph-svg line { stroke: var(--cp-border-strong); stroke-width: 2; }
+    .graph-svg .relation { stroke: var(--cp-accent); stroke-dasharray: 5 4; }
+    .graph-svg circle { fill: var(--cp-surface); stroke: var(--cp-accent); stroke-width: 3; }
+    .graph-svg rect { fill: var(--cp-accent-soft); stroke: var(--cp-border-strong); stroke-width: 2; }
+    .graph-svg text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; font-size: 10px; text-anchor: middle; }
+    .terminal { min-height: 218px; padding: 12px; border-radius: 0.625rem; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); }
+    .term-top { display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: .68rem; }
+    .term-row { display: grid; grid-template-columns: 65px 1fr auto; gap: 7px; padding: 7px 0; border-bottom: 1px solid var(--cp-border); font-size: .7rem; }
+    .term-row span:first-child { color: var(--cp-accent); }
+    .term-row span:last-child { color: var(--cp-success); }
+    .comic { display: flex; gap: 8px; min-height: 218px; overflow-x: auto; scroll-snap-type: x mandatory; }
+    .comic-panel {
+      flex: 0 0 124px;
+      min-height: 190px;
+      padding: 9px;
+      scroll-snap-align: start;
+      border: 2px solid var(--cp-text);
+      border-radius: 4px;
+      background: var(--cp-surface);
+      box-shadow: 4px 4px 0 var(--cp-border);
+    }
+    .comic-panel .beat { color: var(--cp-accent); font-size: .62rem; font-weight: 900; text-transform: uppercase; }
+    .comic-panel .picture { display: grid; height: 64px; margin: 7px 0; place-items: center; border: 1px solid var(--cp-border); background: var(--cp-accent-soft); font-size: 1.8rem; }
+    .comic-panel p { margin: 0; font-size: .7rem; font-weight: 700; line-height: 1.3; }
+    .empty-state { display: grid; min-height: 218px; place-items: center; color: var(--cp-text-muted); text-align: center; }
+    .evidence-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 12px; margin-top: 12px; }
+    .ledger-card, .assertions-card, .prompt-card { padding: 18px; border-radius: 16px; min-width: 0; }
+    .ledger-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--cp-border); border-radius: 0.625rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; }
+    th { position: sticky; top: 0; background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: .68rem; letter-spacing: .07em; text-transform: uppercase; }
+    td code { font-size: .67rem; overflow-wrap: anywhere; }
+    tr.active { background: var(--cp-accent-soft); }
+    .assertion-list { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+    .assertion {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 8px;
+      align-items: start;
+      padding: 9px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      font-size: .78rem;
+    }
+    .assertion .mark { color: var(--cp-success); font-weight: 900; }
+    .assertion.fail .mark { color: var(--cp-danger); }
+    .assertion small { display: block; color: var(--cp-text-muted); }
+    .detector {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--cp-border);
+      border-left: 4px solid var(--cp-success);
+      border-radius: 0.625rem;
+      background: var(--cp-surface-soft);
+    }
+    .detector.bad { border-left-color: var(--cp-danger); }
+    .detector strong { display: block; }
+    .detector code { font-size: .7rem; overflow-wrap: anywhere; }
+    .prompt-card { margin-top: 12px; }
+    .prompt-layout { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      padding: 12px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: .78rem;
+    }
+    .footnote { margin: 30px 0 0; color: var(--cp-text-muted); font-size: .8rem; text-align: center; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 1050px) {
+      .intro-grid { grid-template-columns: repeat(2, 1fr); }
+      .reality { grid-column: span 3; }
+      .reality:last-child { grid-column: 2 / span 4; }
+    }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 20px, 1500px); padding-top: 8px; }
+      .masthead { grid-template-columns: 1fr; padding-top: 24px; }
+      .mast-stat { display: none; }
+      .intro-grid, .evidence-grid { grid-template-columns: 1fr; }
+      .reality, .reality:nth-child(1), .reality:nth-child(2), .reality:last-child { grid-column: 1 / -1; }
+      .scope-card, .prompt-layout { grid-template-columns: 1fr; }
+      .control-deck { top: 4px; }
+      .transport button { flex: 1 1 90px; }
+      .reality-body { min-height: 220px; }
+      .status-row .keys { display: none; }
+    }
+    @media (max-width: 430px) {
+      .intro-grid { grid-template-columns: 1fr; }
+      .kanban { grid-template-columns: 1fr; }
+      .lane { min-height: 60px; }
+      h1 { font-size: 2.75rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#simulator">Skip to synchronized simulator</a>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Frame 04 · Projection laboratory</p>
+        <h1>One History,<br>Five Realities</h1>
+        <p class="lede">A single signed event chain becomes five interfaces. Move one frame and every reality advances to the exact same prefix—then break one projector and watch consensus isolate it.</p>
+      </div>
+      <div class="mast-stat" aria-label="Five projections, one event history">
+        <strong>5 : 1</strong>
+        <span>views to verified history</span>
+      </div>
+    </header>
+
+    <section class="intro-grid" aria-label="Newcomer guide">
+      <article class="intro-card">
+        <span class="number">1</span>
+        <h3>Start with one source</h3>
+        <p>The ledger is the only domain state. Every card, building, node, command row, and comic panel is rebuilt from its prefix.</p>
+      </article>
+      <article class="intro-card">
+        <span class="number">2</span>
+        <h3>Scrub five realities</h3>
+        <p>Drag the frame control. Five independently shaped projectors receive the same immutable event slice.</p>
+      </article>
+      <article class="intro-card">
+        <span class="number">3</span>
+        <h3>Compare the oracles</h3>
+        <p>Each view has bespoke reduction code that recovers canonical state and hashes recursive canonical JSON with Web Crypto.</p>
+      </article>
+      <article class="intro-card">
+        <span class="number">4</span>
+        <h3>Inject one omission</h3>
+        <p>Mutation makes only Command ignore the relationship event. The detector names that view while the other four still agree.</p>
+      </article>
+    </section>
+
+    <aside class="scope-card" aria-label="Scope and limitations">
+      <strong>Scope</strong>
+      <p>This is a deterministic synthetic proof of projection, rebuild, and divergence detection—not a claim that matching hashes make arbitrary renderers correct. Agreement is meaningful because the five oracles are separately authored and their reduced-state schema is visible in the live hashes.</p>
+    </aside>
+
+    <section id="simulator" aria-labelledby="simulator-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Synchronized instrument</p>
+          <h2 id="simulator-title">Move the history, not the views</h2>
+        </div>
+        <p>Guided Run narrates every frame. Manual controls, keyboard shortcuts, replay, reset, mutation, and complete projection deletion all operate on the same chain.</p>
+      </div>
+
+      <div class="control-deck">
+        <div class="control-top">
+          <div class="transport" role="group" aria-label="Playback controls">
+            <button class="primary" id="guideBtn" type="button">▶ Guided run</button>
+            <button id="backBtn" type="button" aria-label="Previous frame">← Back</button>
+            <button id="nextBtn" type="button" aria-label="Next frame">Next →</button>
+            <button id="replayBtn" type="button">↻ Replay</button>
+            <button id="resetBtn" type="button">Reset</button>
+          </div>
+          <div class="scrubber-wrap">
+            <label class="scrub-label" for="scrubber">
+              <span>Frame prefix</span>
+              <strong id="prefixLabel">0 / 9</strong>
+            </label>
+            <input id="scrubber" type="range" min="0" max="9" value="0" step="1" aria-describedby="eventDescription">
+          </div>
+        </div>
+        <div class="status-row">
+          <div>
+            <span class="badge good" id="chainBadge">Minting chain…</span>
+            <span class="badge" id="consensusBadge">Awaiting oracles</span>
+          </div>
+          <span class="keys">Keys: <span class="mono">← → Space M D R</span></span>
+        </div>
+      </div>
+
+      <div class="event-callout" id="eventDescription" aria-live="polite">
+        <span class="event-index" id="eventIndex">Ø</span>
+        <p><strong id="eventTitle">Before the first event</strong><br><small id="eventNarration">All five projections are empty. The verified chain is ready to be read.</small></p>
+      </div>
+
+      <div class="transport" role="group" aria-label="Integrity controls">
+        <button class="danger" id="mutationBtn" type="button" aria-pressed="false">Mutate Command projector</button>
+        <button id="rebuildBtn" type="button">Delete + rebuild all projections</button>
+      </div>
+
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Five simultaneous views</p>
+          <h2>Independent projectors, common meaning</h2>
+        </div>
+        <p id="projectionSummary">All projectors currently read prefix 0.</p>
+      </div>
+      <div id="projectionHost" class="reality-grid" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="evidence-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Evidence surface</p>
+          <h2 id="evidence-title">Ledger and live assertions</h2>
+        </div>
+        <p>Event hashes verify the chain itself. Projection hashes verify the meaning each view independently recovers from the selected prefix.</p>
+      </div>
+      <div class="evidence-grid">
+        <article class="ledger-card">
+          <h3>Verified synthetic event chain</h3>
+          <div class="ledger-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Event</th><th>Previous</th><th>SHA-256</th></tr></thead>
+              <tbody id="ledgerBody"></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="assertions-card">
+          <h3>Live contract</h3>
+          <ul class="assertion-list" id="assertionList"></ul>
+          <div class="detector" id="detector">
+            <strong>Divergence detector</strong>
+            <span id="detectorText">Waiting for projection oracles.</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="prompt-card" aria-labelledby="prompt-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Reproduce independently</p>
+          <h2 id="prompt-title">Copyable any-LLM prompt</h2>
+        </div>
+        <p>Ask another model to build the claim without copying this implementation, then compare its failure behavior.</p>
+      </div>
+      <div class="prompt-layout">
+        <textarea id="llmPrompt" readonly aria-label="Prompt for any language model">Build a self-contained browser proof with exactly one immutable synthetic event chain and five independently implemented projections: a Kanban board, isometric city, social graph, command dashboard, and comic narrative. Every view must derive only from a selected chain prefix. Write a separate projection-specific oracle for each view that recovers the same canonical reduced state. Implement recursive canonical JSON (sorting object keys at every depth), hash each oracle result with Web Crypto SHA-256, and show the full hashes. Add a scrubber and guided replay that move all views to one prefix. Add a failure toggle that makes exactly one projector ignore exactly one event; automatically identify that view and prove the other four still agree. Add a control that deletes every projection DOM node and rebuilds all five solely from history. Include visible event-chain verification, live assertions, accessible keyboard controls, reduced-motion support, and no network requests or libraries. Explain scope and limitations. Do not share reducer code between the five oracles.</textarea>
+        <button id="copyBtn" class="primary" type="button">Copy prompt</button>
+      </div>
+    </section>
+    <p class="footnote">Synthetic seed <span class="mono">FRAME-04 / SIGNAL-GARDEN</span> · No network · No retained projection state</p>
+  </main>
+  <div id="announcer" class="sr-only" aria-live="assertive"></div>
+
+  <script>
+    "use strict";
+
+    const RAW_EVENTS = Object.freeze([
+      { id: "e01", type: "mission.define", data: { title: "Restore the signal garden" }, label: "The mission is named", narration: "One purpose appears in every reality: restore the signal garden." },
+      { id: "e02", type: "actor.join", data: { id: "ava", name: "Ava", role: "field engineer" }, label: "Ava joins", narration: "A field engineer enters the roster, city, graph, command surface, and story." },
+      { id: "e03", type: "actor.join", data: { id: "ren", name: "Ren", role: "signal cartographer" }, label: "Ren joins", narration: "A second actor creates the possibility of a social relationship." },
+      { id: "e04", type: "work.create", data: { id: "beacon", title: "Calibrate beacon" }, label: "Work is created", narration: "The beacon task begins in the queued district of each projection." },
+      { id: "e05", type: "work.assign", data: { workId: "beacon", actorId: "ava" }, label: "Ava takes the beacon", narration: "Ownership becomes visible without changing the source history." },
+      { id: "e06", type: "work.start", data: { workId: "beacon" }, label: "Calibration starts", narration: "The same transition becomes a Kanban move, taller building, graph fact, command status, and comic beat." },
+      { id: "e07", type: "link.form", data: { from: "ava", to: "ren", kind: "mentors" }, label: "A mentoring link forms", narration: "This is the event the mutation will selectively hide from the Command projector." },
+      { id: "e08", type: "pulse.record", data: { value: 72, unit: "hz" }, label: "A 72 Hz pulse arrives", narration: "Telemetry enters all five representations while remaining one canonical fact." },
+      { id: "e09", type: "work.complete", data: { workId: "beacon" }, label: "The beacon is calibrated", narration: "The final frame closes the task. Every honest oracle now reports the same reduced state." }
+    ]);
+
+    const VIEW_META = Object.freeze({
+      kanban: { number: "01", title: "Kanban Board", oracle: "oracleKanban()" },
+      city: { number: "02", title: "Isometric City", oracle: "oracleCity()" },
+      graph: { number: "03", title: "Social Graph", oracle: "oracleGraph()" },
+      command: { number: "04", title: "Command Dashboard", oracle: "oracleCommand()" },
+      comic: { number: "05", title: "Comic Narrative", oracle: "oracleComic()" }
+    });
+
+    let history = Object.freeze([]);
+    let cursor = 0;
+    let playing = false;
+    let mutationEnabled = false;
+    let playTimer = null;
+    let renderVersion = 0;
+    let rebuildVerified = false;
+
+    const $ = (selector) => document.querySelector(selector);
+    const escapeHTML = (value) => String(value).replace(/[&<>"']/g, character => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    })[character]);
+
+    function canonicalize(value) {
+      if (value === null || typeof value !== "object") return value;
+      if (Array.isArray(value)) return value.map(canonicalize);
+      const output = {};
+      for (const key of Object.keys(value).sort()) output[key] = canonicalize(value[key]);
+      return output;
+    }
+
+    function canonicalJSON(value) {
+      return JSON.stringify(canonicalize(value));
+    }
+
+    async function sha256(value) {
+      const bytes = new TextEncoder().encode(typeof value === "string" ? value : canonicalJSON(value));
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function mintHistory() {
+      const events = [];
+      let previous = "GENESIS";
+      for (let index = 0; index < RAW_EVENTS.length; index += 1) {
+        const raw = RAW_EVENTS[index];
+        const material = { index: index + 1, previous, id: raw.id, type: raw.type, data: raw.data };
+        const hash = await sha256(material);
+        events.push(Object.freeze({ ...raw, index: index + 1, previous, hash }));
+        previous = hash;
+      }
+      return Object.freeze(events);
+    }
+
+    async function verifyHistory(chain) {
+      let previous = "GENESIS";
+      for (let index = 0; index < chain.length; index += 1) {
+        const event = chain[index];
+        if (event.previous !== previous) return false;
+        const expected = await sha256({ index: index + 1, previous, id: event.id, type: event.type, data: event.data });
+        if (expected !== event.hash) return false;
+        previous = event.hash;
+      }
+      return true;
+    }
+
+    function projectKanban(events) {
+      const board = { banner: null, members: [], lanes: { queued: [], active: [], complete: [] }, connections: [], telemetry: null };
+      for (const event of events) {
+        const d = event.data;
+        if (event.type === "mission.define") board.banner = d.title;
+        if (event.type === "actor.join") board.members.push({ key: d.id, display: d.name, specialty: d.role });
+        if (event.type === "work.create") board.lanes.queued.push({ key: d.id, caption: d.title, assigned: null });
+        if (event.type === "work.assign") {
+          for (const cards of Object.values(board.lanes)) {
+            const card = cards.find(item => item.key === d.workId);
+            if (card) card.assigned = d.actorId;
+          }
+        }
+        if (event.type === "work.start" || event.type === "work.complete") {
+          const destination = event.type === "work.start" ? "active" : "complete";
+          for (const laneName of Object.keys(board.lanes)) {
+            const cardIndex = board.lanes[laneName].findIndex(item => item.key === d.workId);
+            if (cardIndex >= 0) board.lanes[destination].push(board.lanes[laneName].splice(cardIndex, 1)[0]);
+          }
+        }
+        if (event.type === "link.form") board.connections.push({ source: d.from, target: d.to, label: d.kind });
+        if (event.type === "pulse.record") board.telemetry = { reading: d.value, suffix: d.unit };
+      }
+      return board;
+    }
+
+    function oracleKanban(board) {
+      const statuses = { queued: "queued", active: "active", complete: "complete" };
+      const recoveredWork = [];
+      for (const lane of ["queued", "active", "complete"]) {
+        for (const card of board.lanes[lane]) recoveredWork.push({ id: card.key, title: card.caption, status: statuses[lane], owner: card.assigned });
+      }
+      return {
+        mission: board.banner || null,
+        actors: board.members.map(member => ({ id: member.key, name: member.display, role: member.specialty })).sort((a, b) => a.id.localeCompare(b.id)),
+        work: recoveredWork.sort((a, b) => a.id.localeCompare(b.id)).map(item => ({ ...item, owner: item.owner || null })),
+        links: board.connections.map(connection => ({ from: connection.source, to: connection.target, kind: connection.label })).sort((a, b) => `${a.from}:${a.to}:${a.kind}`.localeCompare(`${b.from}:${b.to}:${b.kind}`)),
+        pulse: board.telemetry ? { value: board.telemetry.reading, unit: board.telemetry.suffix } : null
+      };
+    }
+
+    function projectCity(events) {
+      const city = { monument: null, citizens: [], parcels: [], roads: [], towerSignal: null };
+      for (const event of events) {
+        const d = event.data;
+        switch (event.type) {
+          case "mission.define": city.monument = { inscription: d.title }; break;
+          case "actor.join": city.citizens.push({ badge: d.id, callSign: d.name, guild: d.role }); break;
+          case "work.create": city.parcels.push({ lot: d.id, sign: d.title, district: "queued", resident: null }); break;
+          case "work.assign": {
+            const parcel = city.parcels.find(item => item.lot === d.workId);
+            if (parcel) parcel.resident = d.actorId;
+            break;
+          }
+          case "work.start": {
+            const parcel = city.parcels.find(item => item.lot === d.workId);
+            if (parcel) parcel.district = "active";
+            break;
+          }
+          case "work.complete": {
+            const parcel = city.parcels.find(item => item.lot === d.workId);
+            if (parcel) parcel.district = "complete";
+            break;
+          }
+          case "link.form": city.roads.push({ origin: d.from, destination: d.to, roadType: d.kind }); break;
+          case "pulse.record": city.towerSignal = { frequency: d.value, measure: d.unit }; break;
+        }
+      }
+      return city;
+    }
+
+    function oracleCity(city) {
+      return {
+        mission: city.monument ? city.monument.inscription : null,
+        actors: city.citizens.map(citizen => ({ id: citizen.badge, name: citizen.callSign, role: citizen.guild })).sort((a, b) => a.id.localeCompare(b.id)),
+        work: city.parcels.map(parcel => ({ id: parcel.lot, title: parcel.sign, status: parcel.district, owner: parcel.resident || null })).sort((a, b) => a.id.localeCompare(b.id)),
+        links: city.roads.map(road => ({ from: road.origin, to: road.destination, kind: road.roadType })).sort((a, b) => `${a.from}:${a.to}:${a.kind}`.localeCompare(`${b.from}:${b.to}:${b.kind}`)),
+        pulse: city.towerSignal ? { value: city.towerSignal.frequency, unit: city.towerSignal.measure } : null
+      };
+    }
+
+    function projectGraph(events) {
+      const graph = { headline: null, vertices: [], edges: [], meter: null };
+      for (const event of events) {
+        const d = event.data;
+        if (event.type === "mission.define") graph.headline = d.title;
+        if (event.type === "actor.join") graph.vertices.push({ nodeId: `person:${d.id}`, payload: { id: d.id, name: d.name, role: d.role, class: "person" } });
+        if (event.type === "work.create") graph.vertices.push({ nodeId: `work:${d.id}`, payload: { id: d.id, title: d.title, state: "queued", owner: null, class: "work" } });
+        if (event.type === "work.assign") {
+          const node = graph.vertices.find(vertex => vertex.nodeId === `work:${d.workId}`);
+          if (node) node.payload.owner = d.actorId;
+          graph.edges.push({ a: `person:${d.actorId}`, b: `work:${d.workId}`, predicate: "owns", structural: true });
+        }
+        if (event.type === "work.start" || event.type === "work.complete") {
+          const node = graph.vertices.find(vertex => vertex.nodeId === `work:${d.workId}`);
+          if (node) node.payload.state = event.type === "work.start" ? "active" : "complete";
+        }
+        if (event.type === "link.form") graph.edges.push({ a: `person:${d.from}`, b: `person:${d.to}`, predicate: d.kind, structural: false });
+        if (event.type === "pulse.record") graph.meter = { magnitude: d.value, dimension: d.unit };
+      }
+      return graph;
+    }
+
+    function oracleGraph(graph) {
+      const actors = graph.vertices.filter(vertex => vertex.payload.class === "person").map(vertex => ({
+        id: vertex.payload.id, name: vertex.payload.name, role: vertex.payload.role
+      }));
+      const work = graph.vertices.filter(vertex => vertex.payload.class === "work").map(vertex => ({
+        id: vertex.payload.id, title: vertex.payload.title, status: vertex.payload.state, owner: vertex.payload.owner
+      }));
+      const links = graph.edges.filter(edge => !edge.structural).map(edge => ({
+        from: edge.a.replace("person:", ""), to: edge.b.replace("person:", ""), kind: edge.predicate
+      }));
+      return {
+        mission: graph.headline || null,
+        actors: actors.sort((a, b) => a.id.localeCompare(b.id)),
+        work: work.sort((a, b) => a.id.localeCompare(b.id)).map(item => ({ ...item, owner: item.owner || null })),
+        links: links.sort((a, b) => `${a.from}:${a.to}:${a.kind}`.localeCompare(`${b.from}:${b.to}:${b.kind}`)),
+        pulse: graph.meter ? { value: graph.meter.magnitude, unit: graph.meter.dimension } : null
+      };
+    }
+
+    function projectCommand(events, mutate) {
+      const dashboard = { objective: null, roster: {}, jobs: {}, relations: [], gauges: {} };
+      for (const event of events) {
+        if (mutate && event.id === "e07") continue;
+        const d = event.data;
+        if (event.type === "mission.define") dashboard.objective = d.title;
+        if (event.type === "actor.join") dashboard.roster[d.id] = { displayName: d.name, duty: d.role };
+        if (event.type === "work.create") dashboard.jobs[d.id] = { summary: d.title, phase: "queued", operator: null };
+        if (event.type === "work.assign" && dashboard.jobs[d.workId]) dashboard.jobs[d.workId].operator = d.actorId;
+        if (event.type === "work.start" && dashboard.jobs[d.workId]) dashboard.jobs[d.workId].phase = "active";
+        if (event.type === "work.complete" && dashboard.jobs[d.workId]) dashboard.jobs[d.workId].phase = "complete";
+        if (event.type === "link.form") dashboard.relations.push(`${d.from}|${d.kind}|${d.to}`);
+        if (event.type === "pulse.record") dashboard.gauges.signal = `${d.value} ${d.unit}`;
+      }
+      return dashboard;
+    }
+
+    function oracleCommand(dashboard) {
+      const actors = Object.entries(dashboard.roster).map(([id, record]) => ({ id, name: record.displayName, role: record.duty }));
+      const work = Object.entries(dashboard.jobs).map(([id, record]) => ({ id, title: record.summary, status: record.phase, owner: record.operator }));
+      const links = dashboard.relations.map(serialized => {
+        const [from, kind, to] = serialized.split("|");
+        return { from, to, kind };
+      });
+      let pulse = null;
+      if (dashboard.gauges.signal) {
+        const [value, unit] = dashboard.gauges.signal.split(" ");
+        pulse = { value: Number(value), unit };
+      }
+      return {
+        mission: dashboard.objective || null,
+        actors: actors.sort((a, b) => a.id.localeCompare(b.id)),
+        work: work.sort((a, b) => a.id.localeCompare(b.id)).map(item => ({ ...item, owner: item.owner || null })),
+        links: links.sort((a, b) => `${a.from}:${a.to}:${a.kind}`.localeCompare(`${b.from}:${b.to}:${b.kind}`)),
+        pulse
+      };
+    }
+
+    function projectComic(events) {
+      const comic = { strips: [] };
+      for (const event of events) {
+        const d = event.data;
+        const panel = { frame: event.id, action: event.type, props: [] };
+        if (event.type === "mission.define") panel.props.push(["caption", d.title]);
+        if (event.type === "actor.join") panel.props.push(["hero", d.id], ["name", d.name], ["role", d.role]);
+        if (event.type === "work.create") panel.props.push(["quest", d.id], ["title", d.title], ["status", "queued"]);
+        if (event.type === "work.assign") panel.props.push(["quest", d.workId], ["owner", d.actorId]);
+        if (event.type === "work.start") panel.props.push(["quest", d.workId], ["status", "active"]);
+        if (event.type === "work.complete") panel.props.push(["quest", d.workId], ["status", "complete"]);
+        if (event.type === "link.form") panel.props.push(["from", d.from], ["to", d.to], ["bond", d.kind]);
+        if (event.type === "pulse.record") panel.props.push(["pulse", d.value], ["unit", d.unit]);
+        comic.strips.push(panel);
+      }
+      return comic;
+    }
+
+    function oracleComic(comic) {
+      let mission = null;
+      const cast = new Map();
+      const quests = new Map();
+      const bonds = [];
+      let pulse = null;
+      for (const panel of comic.strips) {
+        const props = Object.fromEntries(panel.props);
+        if (panel.action === "mission.define") mission = props.caption;
+        if (panel.action === "actor.join") cast.set(props.hero, { id: props.hero, name: props.name, role: props.role });
+        if (panel.action === "work.create") quests.set(props.quest, { id: props.quest, title: props.title, status: props.status, owner: null });
+        if (panel.action === "work.assign" && quests.has(props.quest)) quests.get(props.quest).owner = props.owner;
+        if ((panel.action === "work.start" || panel.action === "work.complete") && quests.has(props.quest)) quests.get(props.quest).status = props.status;
+        if (panel.action === "link.form") bonds.push({ from: props.from, to: props.to, kind: props.bond });
+        if (panel.action === "pulse.record") pulse = { value: Number(props.pulse), unit: props.unit };
+      }
+      return {
+        mission: mission || null,
+        actors: [...cast.values()].sort((a, b) => a.id.localeCompare(b.id)),
+        work: [...quests.values()].sort((a, b) => a.id.localeCompare(b.id)).map(item => ({ ...item, owner: item.owner || null })),
+        links: bonds.sort((a, b) => `${a.from}:${a.to}:${a.kind}`.localeCompare(`${b.from}:${b.to}:${b.kind}`)),
+        pulse
+      };
+    }
+
+    function seedNumber(text) {
+      let seed = 2166136261;
+      for (const character of text) {
+        seed ^= character.charCodeAt(0);
+        seed = Math.imul(seed, 16777619);
+      }
+      return seed >>> 0;
+    }
+
+    function seededPoint(key, index, width, height) {
+      let seed = seedNumber(`FRAME-04:${key}:${index}`);
+      const next = () => {
+        seed += 0x6D2B79F5;
+        let value = seed;
+        value = Math.imul(value ^ value >>> 15, value | 1);
+        value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+        return ((value ^ value >>> 14) >>> 0) / 4294967296;
+      };
+      return { x: 28 + next() * (width - 56), y: 28 + next() * (height - 56) };
+    }
+
+    function renderKanban(board) {
+      const lanes = ["queued", "active", "complete"].map(lane => `
+        <section class="lane"><h4>${lane}</h4>
+          ${board.lanes[lane].length ? board.lanes[lane].map(card => `<div class="task-card">${escapeHTML(card.caption)}<small>${card.assigned ? `owner · ${escapeHTML(card.assigned)}` : "unassigned"}</small></div>`).join("") : `<div class="empty-state">—</div>`}
+        </section>`).join("");
+      const members = board.members.map(member => `<span class="person-chip">${escapeHTML(member.display)} · ${escapeHTML(member.specialty)}</span>`).join("");
+      return `<div class="kanban">${lanes}</div><div class="roster-line">${members || `<span class="person-chip">No roster yet</span>`}${board.telemetry ? `<span class="person-chip">${board.telemetry.reading} ${escapeHTML(board.telemetry.suffix)}</span>` : ""}</div>`;
+    }
+
+    function renderCity(city) {
+      const buildings = city.parcels.map((parcel, index) => {
+        const point = seededPoint(parcel.lot, index, 245, 150);
+        const height = parcel.district === "complete" ? 92 : parcel.district === "active" ? 70 : 48;
+        return `<div class="building" style="left:${point.x}px;top:${point.y}px;height:${height}px" title="${escapeHTML(parcel.sign)}">${escapeHTML(parcel.lot)}<br>${escapeHTML(parcel.district)}</div>`;
+      }).join("");
+      const citizens = city.citizens.map((citizen, index) => {
+        const point = seededPoint(citizen.badge, index + 8, 260, 175);
+        return `<div class="citizen" style="left:${point.x}px;top:${point.y}px" title="${escapeHTML(citizen.callSign)}">${escapeHTML(citizen.callSign.slice(0, 1))}</div>`;
+      }).join("");
+      const label = city.monument ? city.monument.inscription : "Unbuilt city";
+      return `<div class="city-scene">${buildings}${citizens}<span class="city-plaque">${escapeHTML(label)}${city.towerSignal ? ` · ${city.towerSignal.frequency} ${escapeHTML(city.towerSignal.measure)}` : ""}</span></div>`;
+    }
+
+    function renderGraph(graph) {
+      const nodes = graph.vertices.map((vertex, index) => ({ ...vertex, point: seededPoint(vertex.nodeId, index, 320, 190) }));
+      const lookup = Object.fromEntries(nodes.map(node => [node.nodeId, node.point]));
+      const edges = graph.edges.map(edge => {
+        const a = lookup[edge.a], b = lookup[edge.b];
+        if (!a || !b) return "";
+        return `<line class="${edge.structural ? "" : "relation"}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"><title>${escapeHTML(edge.predicate)}</title></line>`;
+      }).join("");
+      const shapes = nodes.map(node => node.payload.class === "person"
+        ? `<g><circle cx="${node.point.x}" cy="${node.point.y}" r="18"></circle><text x="${node.point.x}" y="${node.point.y + 4}">${escapeHTML(node.payload.name)}</text></g>`
+        : `<g><rect x="${node.point.x - 28}" y="${node.point.y - 16}" width="56" height="32" rx="5"></rect><text x="${node.point.x}" y="${node.point.y + 4}">${escapeHTML(node.payload.id)}</text></g>`
+      ).join("");
+      return `<svg class="graph-svg" viewBox="0 0 320 218" role="img" aria-label="Social graph at current prefix">${edges}${shapes}${graph.meter ? `<text x="160" y="207">pulse ${graph.meter.magnitude} ${escapeHTML(graph.meter.dimension)}</text>` : ""}</svg>`;
+    }
+
+    function renderCommand(dashboard) {
+      const actorRows = Object.entries(dashboard.roster).map(([id, actor]) => `<div class="term-row"><span>ACTOR</span><b>${escapeHTML(id)} · ${escapeHTML(actor.displayName)}</b><span>ONLINE</span></div>`).join("");
+      const jobRows = Object.entries(dashboard.jobs).map(([id, job]) => `<div class="term-row"><span>WORK</span><b>${escapeHTML(id)} · ${escapeHTML(job.phase)} · ${escapeHTML(job.operator || "none")}</b><span>SYNC</span></div>`).join("");
+      const relationRows = dashboard.relations.map(relation => `<div class="term-row"><span>LINK</span><b>${escapeHTML(relation)}</b><span>SYNC</span></div>`).join("");
+      return `<div class="terminal mono"><div class="term-top"><span>${escapeHTML(dashboard.objective || "NO OBJECTIVE")}</span><span>${escapeHTML(dashboard.gauges.signal || "NO SIGNAL")}</span></div>${actorRows}${jobRows}${relationRows || `<div class="term-row"><span>LINK</span><b>none</b><span>—</span></div>`}</div>`;
+    }
+
+    const comicIcon = type => ({
+      "mission.define": "◎", "actor.join": "●", "work.create": "□", "work.assign": "→",
+      "work.start": "↗", "link.form": "∞", "pulse.record": "⌁", "work.complete": "✓"
+    })[type] || "•";
+
+    function renderComic(comic) {
+      if (!comic.strips.length) return `<div class="empty-state">The first panel has not been drawn.</div>`;
+      return `<div class="comic">${comic.strips.map((panel, index) => {
+        const props = Object.fromEntries(panel.props);
+        const phrase = panel.action === "mission.define" ? props.caption
+          : panel.action === "actor.join" ? `${props.name} enters as ${props.role}.`
+          : panel.action === "work.create" ? `${props.title} appears.`
+          : panel.action === "work.assign" ? `${props.owner} takes ${props.quest}.`
+          : panel.action === "work.start" ? `${props.quest} moves to active.`
+          : panel.action === "work.complete" ? `${props.quest} is complete.`
+          : panel.action === "link.form" ? `${props.from} ${props.bond} ${props.to}.`
+          : `The garden pulses at ${props.pulse} ${props.unit}.`;
+        return `<article class="comic-panel"><span class="beat">Beat ${index + 1}</span><div class="picture" aria-hidden="true">${comicIcon(panel.action)}</div><p>${escapeHTML(phrase)}</p></article>`;
+      }).join("")}</div>`;
+    }
+
+    function projectionCard(key, body) {
+      const meta = VIEW_META[key];
+      return `<article class="reality" data-view="${key}">
+        <header class="reality-head"><div><span class="reality-kicker">Reality ${meta.number}</span><h3>${meta.title}</h3></div><span class="oracle-label">${meta.oracle}</span></header>
+        <div class="reality-body">${body}</div>
+        <footer class="hash-box"><span>Canonical reduced-state · SHA-256</span><code data-hash="${key}">calculating…</code></footer>
+      </article>`;
+    }
+
+    function buildProjectionModels(prefix) {
+      const selected = history.slice(0, prefix);
+      return {
+        kanban: projectKanban(selected),
+        city: projectCity(selected),
+        graph: projectGraph(selected),
+        command: projectCommand(selected, mutationEnabled),
+        comic: projectComic(selected)
+      };
+    }
+
+    function runOracles(models) {
+      return {
+        kanban: oracleKanban(models.kanban),
+        city: oracleCity(models.city),
+        graph: oracleGraph(models.graph),
+        command: oracleCommand(models.command),
+        comic: oracleComic(models.comic)
+      };
+    }
+
+    async function hashOracles(oracles) {
+      const entries = await Promise.all(Object.entries(oracles).map(async ([key, value]) => [key, await sha256(value)]));
+      return Object.fromEntries(entries);
+    }
+
+    function consensusOf(hashes) {
+      const groups = {};
+      for (const [view, hash] of Object.entries(hashes)) {
+        if (!groups[hash]) groups[hash] = [];
+        groups[hash].push(view);
+      }
+      const ranked = Object.entries(groups).sort((a, b) => b[1].length - a[1].length);
+      const [majorityHash, agreeing] = ranked[0];
+      const divergent = Object.keys(hashes).filter(view => hashes[view] !== majorityHash);
+      return { majorityHash, agreeing, divergent, unanimous: divergent.length === 0 };
+    }
+
+    function renderLedger() {
+      $("#ledgerBody").innerHTML = history.map(event => `
+        <tr class="${event.index === cursor ? "active" : ""}">
+          <td>${String(event.index).padStart(2, "0")}</td>
+          <td><strong>${escapeHTML(event.type)}</strong><br><small>${escapeHTML(event.label)}</small></td>
+          <td><code>${event.previous === "GENESIS" ? "GENESIS" : event.previous.slice(0, 12) + "…"}</code></td>
+          <td><code>${event.hash}</code></td>
+        </tr>`).join("");
+    }
+
+    function setAssertionList(chainValid, consensus, hashes) {
+      const mutationShouldDiverge = mutationEnabled && cursor >= 7;
+      const assertions = [
+        { pass: chainValid, title: "Chain verifies recursively", detail: "Every event hash includes its index, previous hash, type, and data." },
+        { pass: Object.keys(hashes).length === 5, title: "Five independent oracle hashes exposed", detail: "No projection shares its oracle implementation." },
+        { pass: mutationShouldDiverge ? consensus.agreeing.length === 4 : consensus.unanimous, title: mutationShouldDiverge ? "Four honest projections still agree" : "All projections agree", detail: mutationShouldDiverge ? "The majority canonical hash is unchanged by the faulty Command view." : "All five reduced states canonicalize to one digest." },
+        { pass: !mutationShouldDiverge || (consensus.divergent.length === 1 && consensus.divergent[0] === "command"), title: mutationShouldDiverge ? "Exactly Command is isolated" : "No false divergence reported", detail: mutationShouldDiverge ? "The selective omission is attributed to one and only one projector." : "The detector remains quiet while consensus is unanimous." },
+        { pass: rebuildVerified, title: rebuildVerified ? "Delete + rebuild reproduced consensus" : "Rebuild proof available", detail: rebuildVerified ? "All projection DOM was removed and regenerated solely from the selected history prefix." : "Use “Delete + rebuild all projections” to run this check." }
+      ];
+      $("#assertionList").innerHTML = assertions.map(item => `
+        <li class="assertion ${item.pass ? "" : "fail"}"><span class="mark">${item.pass ? "✓" : "○"}</span><span><strong>${item.title}</strong><small>${item.detail}</small></span></li>`).join("");
+    }
+
+    function updateDetector(consensus) {
+      const detector = $("#detector");
+      const text = $("#detectorText");
+      if (consensus.unanimous) {
+        detector.classList.remove("bad");
+        text.innerHTML = `Unanimous: five views resolve to <code>${consensus.majorityHash}</code>`;
+        $("#consensusBadge").className = "badge good";
+        $("#consensusBadge").textContent = "5 / 5 canonical agreement";
+      } else {
+        detector.classList.add("bad");
+        const names = consensus.divergent.map(view => VIEW_META[view].title).join(", ");
+        text.innerHTML = `Isolated: <strong>${escapeHTML(names)}</strong>. The other ${consensus.agreeing.length} views still resolve to <code>${consensus.majorityHash}</code>`;
+        $("#consensusBadge").className = "badge bad";
+        $("#consensusBadge").textContent = `${consensus.divergent.length} divergent view`;
+      }
+      document.querySelectorAll(".reality").forEach(card => card.classList.toggle("divergent", consensus.divergent.includes(card.dataset.view)));
+    }
+
+    function updateControls() {
+      $("#scrubber").value = cursor;
+      $("#prefixLabel").textContent = `${cursor} / ${history.length}`;
+      $("#backBtn").disabled = cursor === 0;
+      $("#nextBtn").disabled = cursor === history.length;
+      $("#guideBtn").textContent = playing ? "❚❚ Pause" : "▶ Guided run";
+      $("#guideBtn").setAttribute("aria-pressed", String(playing));
+      $("#mutationBtn").setAttribute("aria-pressed", String(mutationEnabled));
+      $("#mutationBtn").textContent = mutationEnabled ? "Repair Command projector" : "Mutate Command projector";
+      const event = history[cursor - 1];
+      $("#eventIndex").textContent = event ? String(event.index).padStart(2, "0") : "Ø";
+      $("#eventTitle").textContent = event ? event.label : "Before the first event";
+      $("#eventNarration").textContent = event ? event.narration : "All five projections are empty. The verified chain is ready to be read.";
+      $("#projectionSummary").textContent = `All projectors read prefix ${cursor}; ${history.length - cursor} event${history.length - cursor === 1 ? "" : "s"} remain outside the selected history.`;
+    }
+
+    async function render() {
+      const version = ++renderVersion;
+      updateControls();
+      renderLedger();
+      const models = buildProjectionModels(cursor);
+      const host = $("#projectionHost");
+      host.innerHTML = [
+        projectionCard("kanban", renderKanban(models.kanban)),
+        projectionCard("city", renderCity(models.city)),
+        projectionCard("graph", renderGraph(models.graph)),
+        projectionCard("command", renderCommand(models.command)),
+        projectionCard("comic", renderComic(models.comic))
+      ].join("");
+      const oracles = runOracles(models);
+      const [hashes, chainValid] = await Promise.all([hashOracles(oracles), verifyHistory(history)]);
+      if (version !== renderVersion) return;
+      for (const [view, hash] of Object.entries(hashes)) {
+        const target = document.querySelector(`[data-hash="${view}"]`);
+        if (target) target.textContent = hash;
+      }
+      const consensus = consensusOf(hashes);
+      updateDetector(consensus);
+      setAssertionList(chainValid, consensus, hashes);
+      $("#chainBadge").className = `badge ${chainValid ? "good" : "bad"}`;
+      $("#chainBadge").textContent = chainValid ? `Chain verified · ${history.length} events` : "Chain verification failed";
+    }
+
+    function announce(message) {
+      $("#announcer").textContent = "";
+      requestAnimationFrame(() => { $("#announcer").textContent = message; });
+    }
+
+    function stopPlayback() {
+      playing = false;
+      if (playTimer) clearTimeout(playTimer);
+      playTimer = null;
+      updateControls();
+    }
+
+    function scheduleStep() {
+      if (!playing) return;
+      if (cursor >= history.length) {
+        stopPlayback();
+        announce("Guided run complete. All selected events are projected.");
+        return;
+      }
+      playTimer = setTimeout(async () => {
+        cursor += 1;
+        await render();
+        announce(`Frame ${cursor}: ${history[cursor - 1].label}`);
+        scheduleStep();
+      }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 250 : 1050);
+    }
+
+    function togglePlayback() {
+      if (playing) {
+        stopPlayback();
+        announce("Guided run paused.");
+        return;
+      }
+      if (cursor >= history.length) cursor = 0;
+      playing = true;
+      render();
+      announce("Guided run started.");
+      scheduleStep();
+    }
+
+    async function deleteAndRebuild() {
+      stopPlayback();
+      const before = await hashOracles(runOracles(buildProjectionModels(cursor)));
+      $("#projectionHost").replaceChildren();
+      $("#projectionSummary").textContent = "All five projection DOM trees deleted. Rebuilding from history…";
+      announce("All projections deleted.");
+      await new Promise(resolve => setTimeout(resolve, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 20 : 420));
+      const after = await hashOracles(runOracles(buildProjectionModels(cursor)));
+      rebuildVerified = canonicalJSON(before) === canonicalJSON(after);
+      await render();
+      announce(rebuildVerified ? "All projections rebuilt from history with identical hashes." : "Rebuild comparison failed.");
+    }
+
+    function bindControls() {
+      $("#guideBtn").addEventListener("click", togglePlayback);
+      $("#backBtn").addEventListener("click", () => { stopPlayback(); cursor = Math.max(0, cursor - 1); rebuildVerified = false; render(); });
+      $("#nextBtn").addEventListener("click", () => { stopPlayback(); cursor = Math.min(history.length, cursor + 1); rebuildVerified = false; render(); });
+      $("#replayBtn").addEventListener("click", () => { stopPlayback(); cursor = 0; mutationEnabled = false; rebuildVerified = false; render().then(togglePlayback); });
+      $("#resetBtn").addEventListener("click", () => { stopPlayback(); cursor = 0; mutationEnabled = false; rebuildVerified = false; render(); announce("Simulator reset to the empty prefix."); });
+      $("#scrubber").addEventListener("input", event => {
+        const selectedPrefix = Number(event.target.value);
+        stopPlayback();
+        cursor = selectedPrefix;
+        rebuildVerified = false;
+        render();
+      });
+      $("#mutationBtn").addEventListener("click", () => {
+        stopPlayback();
+        mutationEnabled = !mutationEnabled;
+        cursor = history.length;
+        rebuildVerified = false;
+        render();
+        announce(mutationEnabled ? "Command projector now ignores event seven." : "Command projector repaired.");
+      });
+      $("#rebuildBtn").addEventListener("click", deleteAndRebuild);
+      $("#copyBtn").addEventListener("click", async () => {
+        const prompt = $("#llmPrompt").value;
+        try {
+          await navigator.clipboard.writeText(prompt);
+        } catch {
+          $("#llmPrompt").select();
+          document.execCommand("copy");
+        }
+        $("#copyBtn").textContent = "Copied";
+        announce("Independent proof prompt copied.");
+        setTimeout(() => { $("#copyBtn").textContent = "Copy prompt"; }, 1400);
+      });
+      document.addEventListener("keydown", event => {
+        if (event.target.matches("textarea, input")) return;
+        if (event.target.matches("button") && (event.key === " " || event.key === "Enter")) return;
+        if (event.key === " " ) { event.preventDefault(); togglePlayback(); }
+        if (event.key === "ArrowLeft") { event.preventDefault(); stopPlayback(); cursor = Math.max(0, cursor - 1); rebuildVerified = false; render(); }
+        if (event.key === "ArrowRight") { event.preventDefault(); stopPlayback(); cursor = Math.min(history.length, cursor + 1); rebuildVerified = false; render(); }
+        if (event.key.toLowerCase() === "m") $("#mutationBtn").click();
+        if (event.key.toLowerCase() === "d") $("#rebuildBtn").click();
+        if (event.key.toLowerCase() === "r") $("#resetBtn").click();
+      });
+    }
+
+    async function initialize() {
+      if (!window.crypto || !window.crypto.subtle) {
+        $("#chainBadge").className = "badge bad";
+        $("#chainBadge").textContent = "Web Crypto unavailable";
+        return;
+      }
+      history = await mintHistory();
+      $("#scrubber").max = history.length;
+      bindControls();
+      await render();
+      announce("One verified history is ready in five realities.");
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
