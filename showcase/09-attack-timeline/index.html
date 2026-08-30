@@ -1,0 +1,1526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Attack the Timeline: an offline adversarial verification laboratory for a synthetic content-addressed frame chain.">
+<title>Attack the Timeline · Frame 09</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font: 16px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button, textarea { font: inherit; }
+button, [href], textarea { touch-action: manipulation; }
+button:focus-visible, a:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--cp-accent);
+  outline-offset: 3px;
+}
+button {
+  min-height: 44px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  padding: 10px 14px;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  cursor: pointer;
+  font-weight: 700;
+}
+button:hover:not(:disabled) {
+  border-color: var(--cp-accent);
+  color: var(--cp-accent);
+}
+button:disabled { cursor: wait; opacity: .58; }
+.primary {
+  border-color: var(--cp-accent);
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+}
+.primary:hover:not(:disabled) {
+  background: var(--cp-accent-hover);
+  color: var(--cp-accent-fg);
+}
+.danger {
+  border-color: var(--cp-danger);
+  color: var(--cp-danger);
+}
+.app {
+  width: min(1520px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 72px;
+}
+.masthead {
+  position: relative;
+  overflow: hidden;
+  min-height: 238px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  padding: clamp(24px, 5vw, 56px);
+  background: var(--cp-bg-elevated);
+  box-shadow: var(--cp-shadow);
+}
+.masthead::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--cp-border) 1px, var(--cp-bg-elevated) 1px);
+  background-size: 48px 100%;
+  opacity: .22;
+}
+.masthead::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 68%;
+  width: 1px;
+  background: var(--cp-accent);
+  box-shadow: 0 0 24px var(--cp-accent);
+  opacity: .62;
+  animation: scan 5s ease-in-out infinite alternate;
+}
+@keyframes scan {
+  from { transform: translateX(-18vw); }
+  to { transform: translateX(18vw); }
+}
+.mast-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: end;
+}
+.eyebrow, .panel-kicker {
+  margin: 0 0 8px;
+  color: var(--cp-accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  max-width: 860px;
+  margin-bottom: 12px;
+  font-size: clamp(42px, 7vw, 86px);
+  line-height: .94;
+  letter-spacing: -.055em;
+}
+.lede {
+  max-width: 740px;
+  margin: 0;
+  color: var(--cp-text-muted);
+  font-size: clamp(17px, 2vw, 22px);
+}
+.seal {
+  display: grid;
+  place-items: center;
+  width: 132px;
+  aspect-ratio: 1;
+  border: 1px solid var(--cp-accent);
+  border-radius: 50%;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.seal strong {
+  display: block;
+  font: 800 29px/1 Consolas, "Courier New", Courier, monospace;
+  letter-spacing: -.06em;
+}
+.command-bar {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-panel-strong);
+  box-shadow: var(--cp-shadow);
+}
+.command-bar .spacer { flex: 1 1 12px; }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 8px;
+  border: 1px solid var(--cp-border);
+  border-radius: 999px;
+  padding: 8px 13px;
+  color: var(--cp-text-muted);
+  font: 700 12px/1 Consolas, "Courier New", Courier, monospace;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.status-pill::before, .dot {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cp-border-strong);
+}
+.status-pill[data-state="verified"]::before, .dot.pass { background: var(--cp-success); }
+.status-pill[data-state="rejected"]::before, .dot.fail { background: var(--cp-danger); }
+.status-pill[data-state="running"]::before { background: var(--cp-warning); }
+.lab-grid {
+  display: grid;
+  grid-template-columns: minmax(310px, .84fr) minmax(460px, 1.4fr);
+  gap: 16px;
+  align-items: start;
+}
+.stack { display: grid; gap: 16px; }
+.panel {
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-surface);
+  box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+}
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--cp-border);
+}
+.panel-head h2 { margin: 0; font-size: 21px; line-height: 1.15; }
+.panel-head p {
+  max-width: 540px;
+  margin: 5px 0 0;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+}
+.panel-body { padding: 20px; }
+.projection {
+  position: relative;
+  overflow: hidden;
+  background: var(--cp-bg-elevated);
+}
+.projection::after {
+  content: "LAST VERIFIED";
+  position: absolute;
+  top: 20px;
+  right: -35px;
+  width: 150px;
+  border-block: 1px solid var(--cp-success);
+  padding: 3px 0;
+  color: var(--cp-success);
+  transform: rotate(36deg);
+  text-align: center;
+  font: 800 9px/1 Consolas, "Courier New", Courier, monospace;
+  letter-spacing: .08em;
+}
+.world-mark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.world-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--cp-success);
+  border-radius: 50%;
+  background: var(--cp-surface);
+  color: var(--cp-success);
+  font-size: 26px;
+}
+.world-title { margin: 0; font-size: 20px; }
+.world-sub {
+  margin: 2px 0 0;
+  color: var(--cp-text-muted);
+  font: 13px/1.4 Consolas, "Courier New", Courier, monospace;
+}
+.world-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.datum {
+  min-width: 0;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  padding: 12px;
+  background: var(--cp-surface);
+}
+.datum span {
+  display: block;
+  color: var(--cp-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.datum strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 700 13px/1.3 Consolas, "Courier New", Courier, monospace;
+}
+.timeline {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.frame-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+.rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.rail::after {
+  content: "";
+  position: absolute;
+  top: 22px;
+  bottom: -22px;
+  width: 1px;
+  background: var(--cp-border-strong);
+}
+.frame-row:last-child .rail::after { display: none; }
+.node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--cp-success);
+  border-radius: 50%;
+  background: var(--cp-surface);
+  color: var(--cp-success);
+  font: 800 10px/1 Consolas, "Courier New", Courier, monospace;
+}
+.frame-card {
+  min-width: 0;
+  margin-bottom: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  padding: 12px;
+  background: var(--cp-surface-soft);
+}
+.frame-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.hash {
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--cp-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 11px/1.35 Consolas, "Courier New", Courier, monospace;
+}
+.attack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.attack {
+  min-height: 112px;
+  padding: 12px;
+  text-align: left;
+}
+.attack strong, .attack span { display: block; }
+.attack strong { margin-bottom: 5px; font-size: 13px; line-height: 1.25; }
+.attack span {
+  color: var(--cp-text-muted);
+  font: 11px/1.35 Consolas, "Courier New", Courier, monospace;
+}
+.attack:hover:not(:disabled) span { color: var(--cp-text); }
+.matrix-wrap { overflow-x: auto; }
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.matrix th, .matrix td {
+  border-bottom: 1px solid var(--cp-border);
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+.matrix th {
+  color: var(--cp-text-muted);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.matrix tbody tr:last-child td { border-bottom: 0; }
+.detector {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 750;
+}
+.signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 90px;
+  border: 1px solid var(--cp-border);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: var(--cp-text-muted);
+  font: 700 10px/1 Consolas, "Courier New", Courier, monospace;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.signal::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cp-border-strong);
+}
+.signal.pass {
+  border-color: var(--cp-success);
+  color: var(--cp-success);
+}
+.signal.pass::before { background: var(--cp-success); }
+.signal.fail {
+  border-color: var(--cp-danger);
+  color: var(--cp-danger);
+}
+.signal.fail::before { background: var(--cp-danger); }
+.signal.warn {
+  border-color: var(--cp-warning);
+  color: var(--cp-warning);
+}
+.signal.warn::before { background: var(--cp-warning); }
+.detail {
+  max-width: 310px;
+  color: var(--cp-text-muted);
+  font-size: 12px;
+}
+.result-banner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  border: 1px solid var(--cp-border);
+  border-left: 5px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  padding: 12px;
+  background: var(--cp-surface-soft);
+}
+.result-banner[data-state="verified"] { border-left-color: var(--cp-success); }
+.result-banner[data-state="rejected"] { border-left-color: var(--cp-danger); }
+.result-banner strong { display: block; }
+.result-banner p { margin: 2px 0 0; color: var(--cp-text-muted); font-size: 13px; }
+.result-code {
+  min-width: 74px;
+  color: var(--cp-text-muted);
+  font: 800 11px/1 Consolas, "Courier New", Courier, monospace;
+  text-align: center;
+}
+.lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+.lab-grid > *, .lower-grid > *, .stack > *, .log li > *, .quarantine-item strong > * {
+  min-width: 0;
+}
+.log {
+  max-height: 360px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.log li {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 10px;
+  border-bottom: 1px solid var(--cp-border);
+  padding: 11px 0;
+}
+.log li:last-child { border-bottom: 0; }
+.log time {
+  color: var(--cp-text-muted);
+  font: 11px/1.4 Consolas, "Courier New", Courier, monospace;
+}
+.log strong { display: block; font-size: 13px; }
+.log p { margin: 2px 0 0; color: var(--cp-text-muted); font-size: 12px; }
+.log strong, .log p, .quarantine-item strong span { overflow-wrap: anywhere; }
+.empty {
+  border: 1px dashed var(--cp-border-strong);
+  border-radius: 0.625rem;
+  padding: 20px;
+  color: var(--cp-text-muted);
+  text-align: center;
+  font-size: 13px;
+}
+.quarantine-item {
+  margin-bottom: 10px;
+  border: 1px solid var(--cp-danger);
+  border-radius: 0.625rem;
+  padding: 11px;
+  background: var(--cp-surface-soft);
+}
+.quarantine-item:last-child { margin-bottom: 0; }
+.quarantine-item strong {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--cp-danger);
+  font-size: 12px;
+}
+.quarantine-item code {
+  display: block;
+  overflow: hidden;
+  margin-top: 6px;
+  color: var(--cp-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 10px/1.4 Consolas, "Courier New", Courier, monospace;
+}
+.assertions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.assertion {
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  padding: 11px;
+  background: var(--cp-surface-soft);
+}
+.assertion strong { display: block; font-size: 12px; }
+.assertion p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 11px; }
+.assertion[data-state="pass"] { border-color: var(--cp-success); }
+.assertion[data-state="fail"] { border-color: var(--cp-danger); }
+.assertion[data-state="unmeasured"] { border-style: dashed; }
+.scope {
+  margin-top: 16px;
+  padding: clamp(22px, 4vw, 38px);
+}
+.scope-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr);
+  gap: 28px;
+}
+.scope h2 { font-size: clamp(26px, 4vw, 42px); line-height: 1.05; }
+.scope ul { margin: 0; padding-left: 20px; }
+.scope li { margin-bottom: 8px; color: var(--cp-text-muted); }
+.prompt-wrap { margin-top: 24px; }
+.prompt-wrap textarea {
+  width: 100%;
+  min-height: 168px;
+  resize: vertical;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  padding: 14px;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+  font: 12px/1.55 Consolas, "Courier New", Courier, monospace;
+}
+.prompt-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.prompt-actions small { color: var(--cp-text-muted); }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 1040px) {
+  .lab-grid { grid-template-columns: 1fr; }
+  .stack:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .app { width: min(100% - 20px, 720px); padding-top: 10px; }
+  .mast-content, .scope-grid { grid-template-columns: 1fr; }
+  .seal { width: 96px; }
+  .stack:first-child, .lower-grid { grid-template-columns: 1fr; }
+  .attack-grid, .assertions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .command-bar { position: static; }
+  .command-bar button { flex: 1 1 calc(50% - 8px); }
+  .command-bar .spacer { display: none; }
+  .status-pill { flex: 1 1 100%; justify-content: center; }
+}
+@media (max-width: 430px) {
+  .app { width: calc(100% - 16px); }
+  .masthead { min-height: 0; padding: 24px 18px; }
+  h1 { font-size: 46px; }
+  .panel-head, .panel-body { padding-inline: 14px; }
+  .attack-grid, .assertions { grid-template-columns: 1fr; }
+  .attack { min-height: 88px; }
+  .world-grid { grid-template-columns: 1fr; }
+  .matrix th:nth-child(3), .matrix td:nth-child(3) { display: none; }
+  .command-bar button { flex-basis: 100%; }
+  .projection::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="masthead">
+    <div class="mast-content">
+      <div>
+        <p class="eyebrow">Frame 09 · Adversarial verification laboratory</p>
+        <h1>Attack the Timeline</h1>
+        <p class="lede">A healthy synthetic world is running. Change its history, break its order, or lie about its ancestry. The verifier computes every boundary, quarantines rejected bytes, and keeps the last trusted world on screen.</p>
+      </div>
+      <div class="seal" aria-label="Offline canonical SHA-256">
+        <div><strong>256</strong>canonical<br>offline</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="command-bar" aria-label="Laboratory controls">
+    <button class="primary" id="controlBtn" type="button">Run control</button>
+    <button class="danger" id="attackAllBtn" type="button">Attack all</button>
+    <button id="guidedBtn" type="button">Guided: next attack</button>
+    <button id="replayBtn" type="button">Replay last</button>
+    <button id="resetBtn" type="button">Reset lab</button>
+    <span class="spacer" aria-hidden="true"></span>
+    <button id="themeBtn" type="button" aria-label="Toggle light and dark theme">Switch theme</button>
+    <span class="status-pill" id="labStatus" data-state="running">Booting verifier</span>
+  </nav>
+
+  <div class="lab-grid">
+    <div class="stack">
+      <section class="panel projection" aria-labelledby="projectionTitle">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker">Panel 01 · Observe</p>
+            <h2 id="projectionTitle">Verified projection</h2>
+            <p>Rejected candidates never repaint this world.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="world-mark">
+            <div class="world-icon" aria-hidden="true">✓</div>
+            <div>
+              <h3 class="world-title" id="worldTitle">Initializing…</h3>
+              <p class="world-sub" id="worldHead">head pending</p>
+            </div>
+          </div>
+          <div class="world-grid">
+            <div class="datum"><span>Policy</span><strong id="worldPolicy">—</strong></div>
+            <div class="datum"><span>Credits</span><strong id="worldCredits">—</strong></div>
+            <div class="datum"><span>Consumed</span><strong id="worldConsumed">—</strong></div>
+            <div class="datum"><span>High-water</span><strong id="worldHighWater">—</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="timelineTitle">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker">Trusted chain</p>
+            <h2 id="timelineTitle">Healthy frames</h2>
+            <p>Every hand-off names the exact predecessor.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <ol class="timeline" id="timeline"></ol>
+        </div>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="panel" aria-labelledby="attackTitle">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker">Panel 02 · Attack</p>
+            <h2 id="attackTitle">Adversary console</h2>
+            <p>Each mutation is computed against the current healthy chain. The expected boundary is named before launch.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="attack-grid" id="attackGrid"></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="detectorTitle">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker">Panel 03 · Detect</p>
+            <h2 id="detectorTitle">Verification stack</h2>
+            <p>Green means measured and valid. Red means measured and rejected. Gray is unmeasured—never a pass.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="result-banner" id="resultBanner" data-state="pending">
+            <div class="result-code" id="resultCode">WAIT</div>
+            <div>
+              <strong id="resultTitle">Verifier is starting</strong>
+              <p id="resultDetail">Building a canonical synthetic chain with Web Crypto.</p>
+            </div>
+          </div>
+          <div class="matrix-wrap">
+            <table class="matrix">
+              <thead>
+                <tr><th>Layer</th><th>Current signal</th><th>What is computed</th></tr>
+              </thead>
+              <tbody id="detectorRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="lower-grid">
+    <section class="panel" aria-labelledby="ledgerTitle">
+      <div class="panel-head">
+        <div>
+          <p class="panel-kicker">Panel 04 · Preserve</p>
+          <h2 id="ledgerTitle">Verification ledger</h2>
+          <p>Accepted and rejected attempts share one audit trail.</p>
+        </div>
+      </div>
+      <div class="panel-body"><ol class="log" id="ledger"></ol></div>
+    </section>
+
+    <section class="panel" aria-labelledby="quarantineTitle">
+      <div class="panel-head">
+        <div>
+          <p class="panel-kicker">Rejected input</p>
+          <h2 id="quarantineTitle">Byte quarantine</h2>
+          <p>The candidate is retained for inspection; it is never projected.</p>
+        </div>
+      </div>
+      <div class="panel-body" id="quarantine"></div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:16px" aria-labelledby="assertionsTitle">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">Executable claims</p>
+        <h2 id="assertionsTitle">Assertions</h2>
+        <p>Every layer must be measured green in the control and observed red under a challenge. Unmeasured is explicitly incomplete.</p>
+      </div>
+    </div>
+    <div class="panel-body"><div class="assertions" id="assertions"></div></div>
+  </section>
+
+  <section class="panel scope" aria-labelledby="scopeTitle">
+    <div class="scope-grid">
+      <div>
+        <p class="panel-kicker">Scope</p>
+        <h2 id="scopeTitle">A proof of rejection boundaries, not a production trust system.</h2>
+      </div>
+      <div>
+        <ul>
+          <li>This page uses canonical JSON and the browser’s real Web Crypto SHA-256. It does not use substitute hashes.</li>
+          <li>Signatures, identities, distributed transport, persistence, consensus, and key custody are intentionally modeled—not claimed.</li>
+          <li>The synthetic high-water mark represents trusted durable state. A production system must protect that anchor independently.</li>
+          <li>Structural validity is not semantic truth. That is why semantics, causality, concurrency, and provenance are separate detectors.</li>
+          <li>A rejection preserves the last verified projection and retains the submitted bytes for audit. Nothing here silently “repairs” hostile input.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="prompt-wrap">
+      <label for="prompt"><strong>Copyable build prompt</strong></label>
+      <textarea id="prompt" readonly>Create one offline, dependency-free HTML laboratory named “Attack the Timeline.” Build a healthy synthetic append-only frame chain using canonical JSON and Web Crypto SHA-256. Add computed attacks for edited past payload, one-frame rehash, frame reorder, consumable-action replay, stale write, rollback, corrupt serialized bytes, older-valid-chain replacement, and forged branch provenance. Verify bytes, payload hash, frame hash, sequence, predecessor, semantics, causality, concurrency/high-water, and provenance separately. Quarantine rejected bytes, preserve the last verified projection, expose control/attack-all/guided/manual/replay/reset controls, and show assertions where unmeasured is never pass. Make it keyboard accessible, responsive at 390px, reduced-motion aware, and light/dark theme compatible.</textarea>
+      <div class="prompt-actions">
+        <small id="copyStatus">No network, libraries, fonts, or assets.</small>
+        <button id="copyBtn" type="button">Copy prompt</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sr-only" id="live" aria-live="polite" aria-atomic="true"></div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder("utf-8", { fatal: true });
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const detectorOrder = [
+    "bytes",
+    "payload",
+    "frame",
+    "sequence",
+    "predecessor",
+    "semantics",
+    "causality",
+    "concurrency",
+    "provenance"
+  ];
+
+  const detectorMeta = {
+    bytes: { label: "Bytes", detail: "UTF-8 decode + JSON parse" },
+    payload: { label: "Payload hash", detail: "SHA-256(canonical payload)" },
+    frame: { label: "Frame hash", detail: "SHA-256(canonical envelope)" },
+    sequence: { label: "Sequence", detail: "position equals declared seq" },
+    predecessor: { label: "Predecessor", detail: "prevHash names prior frame" },
+    semantics: { label: "Semantics", detail: "consumable token used once" },
+    causality: { label: "Causality", detail: "worldVersion advances by one" },
+    concurrency: { label: "Concurrency / high-water", detail: "fresh base + trusted floor" },
+    provenance: { label: "Provenance", detail: "branch parent + proof agree" }
+  };
+
+  const attackDefinitions = [
+    {
+      id: "edit-payload",
+      title: "Edit past payload",
+      layer: "payload",
+      note: "Stored digest no longer names the payload."
+    },
+    {
+      id: "rehash-one",
+      title: "Recompute only one frame hash",
+      layer: "predecessor",
+      note: "The next frame still names the old predecessor."
+    },
+    {
+      id: "reorder",
+      title: "Reorder frames",
+      layer: "sequence",
+      note: "Array position contradicts declared sequence."
+    },
+    {
+      id: "replay-action",
+      title: "Replay consumable action",
+      layer: "semantics",
+      note: "A valid new frame spends an already-used token."
+    },
+    {
+      id: "stale-write",
+      title: "Submit stale write",
+      layer: "concurrency",
+      note: "A valid append was authored against an old world."
+    },
+    {
+      id: "rollback",
+      title: "Rollback world version",
+      layer: "causality",
+      note: "A valid append moves state backward."
+    },
+    {
+      id: "corrupt-bytes",
+      title: "Corrupt serialized bytes",
+      layer: "bytes",
+      note: "The candidate cannot be decoded as its claimed format."
+    },
+    {
+      id: "older-chain",
+      title: "Replace world with older valid chain",
+      layer: "concurrency",
+      note: "Every remaining frame is valid, but head is below high-water."
+    },
+    {
+      id: "forge-provenance",
+      title: "Forge branch provenance",
+      layer: "provenance",
+      note: "The branch claims a parent absent from this history."
+    }
+  ];
+
+  const state = {
+    healthy: [],
+    trustedHighWater: 0,
+    projection: null,
+    ledger: [],
+    quarantine: [],
+    currentSignals: Object.fromEntries(detectorOrder.map(key => [key, "unmeasured"])),
+    controlSignals: Object.fromEntries(detectorOrder.map(key => [key, "unmeasured"])),
+    redSeen: Object.fromEntries(detectorOrder.map(key => [key, false])),
+    lastAction: { type: "control" },
+    guidedIndex: 0,
+    busy: false,
+    clock: 0
+  };
+
+  const el = id => document.getElementById(id);
+  const clone = value => JSON.parse(JSON.stringify(value));
+
+  function canonical(value) {
+    if (value === null || typeof value !== "object") return JSON.stringify(value);
+    if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
+    return "{" + Object.keys(value).sort().map(key => JSON.stringify(key) + ":" + canonical(value[key])).join(",") + "}";
+  }
+
+  async function sha256(value) {
+    const bytes = typeof value === "string" ? encoder.encode(value) : value;
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function makeFrame(seq, prevHash, type, payload, provenance = null) {
+    const payloadHash = await sha256(canonical(payload));
+    const body = { seq, prevHash, type, payload, payloadHash, provenance };
+    return { ...body, hash: await sha256(canonical(body)) };
+  }
+
+  async function buildHealthyChain() {
+    const frames = [];
+    frames.push(await makeFrame(0, "GENESIS", "genesis", {
+      worldVersion: 1,
+      policy: "guarded",
+      credits: 12,
+      action: "initialize"
+    }));
+    frames.push(await makeFrame(1, frames[0].hash, "grant", {
+      worldVersion: 2,
+      policy: "guarded",
+      credits: 12,
+      capability: "repair"
+    }));
+    frames.push(await makeFrame(2, frames[1].hash, "consume", {
+      worldVersion: 3,
+      policy: "guarded",
+      credits: 7,
+      token: "repair-token-42",
+      amount: 5
+    }));
+    frames.push(await makeFrame(3, frames[2].hash, "write", {
+      worldVersion: 4,
+      baseVersion: 3,
+      policy: "locked",
+      credits: 7,
+      key: "recovery.mode",
+      value: "verified"
+    }));
+    const parentHash = frames[2].hash;
+    const actor = "lab-branch-alpha";
+    const branch = "repair/verified";
+    const proof = await sha256(parentHash + "|" + branch + "|" + actor);
+    frames.push(await makeFrame(4, frames[3].hash, "branch", {
+      worldVersion: 5,
+      policy: "locked",
+      credits: 7,
+      branch
+    }, { parentHash, branch, actor, proof }));
+    return frames;
+  }
+
+  function serializeFrames(frames) {
+    return encoder.encode(canonical({ format: "frame-chain/v1", frames }));
+  }
+
+  async function appendValid(frames, type, payload, provenance = null) {
+    const next = clone(frames);
+    next.push(await makeFrame(next.length, next[next.length - 1].hash, type, payload, provenance));
+    return next;
+  }
+
+  function measured(status, detail) {
+    return { status, detail };
+  }
+
+  async function verify(bytes) {
+    const result = Object.fromEntries(detectorOrder.map(key => [key, measured("unmeasured", "Dependency not available")]));
+    let documentValue;
+    let frames;
+
+    try {
+      const text = decoder.decode(bytes);
+      documentValue = JSON.parse(text);
+      if (!documentValue || documentValue.format !== "frame-chain/v1" || !Array.isArray(documentValue.frames)) {
+        throw new Error("Frame-chain envelope is missing");
+      }
+      frames = documentValue.frames;
+      result.bytes = measured("pass", bytes.byteLength + " bytes decode as frame-chain/v1");
+    } catch (error) {
+      result.bytes = measured("fail", error.message);
+      return finishVerification(result, null);
+    }
+
+    let payloadOK = true;
+    for (const frame of frames) {
+      const expected = await sha256(canonical(frame.payload));
+      if (expected !== frame.payloadHash) {
+        payloadOK = false;
+        result.payload = measured("fail", "Frame " + frame.seq + " payload digest mismatch");
+        break;
+      }
+    }
+    if (payloadOK) result.payload = measured("pass", frames.length + " payload digests match");
+
+    let frameOK = true;
+    for (const frame of frames) {
+      const body = {
+        seq: frame.seq,
+        prevHash: frame.prevHash,
+        type: frame.type,
+        payload: frame.payload,
+        payloadHash: frame.payloadHash,
+        provenance: frame.provenance
+      };
+      const expected = await sha256(canonical(body));
+      if (expected !== frame.hash) {
+        frameOK = false;
+        result.frame = measured("fail", "Frame " + frame.seq + " envelope digest mismatch");
+        break;
+      }
+    }
+    if (frameOK) result.frame = measured("pass", frames.length + " frame digests match");
+
+    const sequenceFailure = frames.findIndex((frame, index) => frame.seq !== index);
+    result.sequence = sequenceFailure === -1
+      ? measured("pass", "Declared sequence is contiguous")
+      : measured("fail", "Position " + sequenceFailure + " declares seq " + frames[sequenceFailure].seq);
+
+    let predecessorFailure = "";
+    for (let index = 0; index < frames.length; index += 1) {
+      const expected = index === 0 ? "GENESIS" : frames[index - 1].hash;
+      if (frames[index].prevHash !== expected) {
+        predecessorFailure = "Frame " + frames[index].seq + " does not name the prior hash";
+        break;
+      }
+    }
+    result.predecessor = predecessorFailure
+      ? measured("fail", predecessorFailure)
+      : measured("pass", "Every predecessor hand-off matches");
+
+    const spent = new Set();
+    let semanticsFailure = "";
+    for (const frame of frames) {
+      if (frame.type === "consume") {
+        if (spent.has(frame.payload.token)) {
+          semanticsFailure = "Token " + frame.payload.token + " is consumed twice";
+          break;
+        }
+        spent.add(frame.payload.token);
+      }
+    }
+    result.semantics = semanticsFailure
+      ? measured("fail", semanticsFailure)
+      : measured("pass", spent.size + " consumable token use is unique");
+
+    let causalityFailure = "";
+    frames.forEach((frame, index) => {
+      if (causalityFailure) return;
+      const expected = index + 1;
+      if (frame.payload.worldVersion !== expected) {
+        causalityFailure = "Frame " + frame.seq + " worldVersion " + frame.payload.worldVersion + " expected " + expected;
+      }
+    });
+    result.causality = causalityFailure
+      ? measured("fail", causalityFailure)
+      : measured("pass", "World versions advance monotonically");
+
+    let concurrencyFailure = "";
+    if (frames.length - 1 < state.trustedHighWater) {
+      concurrencyFailure = "Head " + (frames.length - 1) + " is below trusted high-water " + state.trustedHighWater;
+    } else {
+      for (let index = 0; index < frames.length; index += 1) {
+        const frame = frames[index];
+        if (frame.type === "write" && frame.payload.baseVersion !== index) {
+          concurrencyFailure = "Frame " + frame.seq + " baseVersion " + frame.payload.baseVersion + " expected " + index;
+          break;
+        }
+      }
+    }
+    result.concurrency = concurrencyFailure
+      ? measured("fail", concurrencyFailure)
+      : measured("pass", "Writes are fresh and head meets high-water");
+
+    let provenanceFailure = "";
+    for (let index = 0; index < frames.length; index += 1) {
+      const frame = frames[index];
+      if (frame.type !== "branch") continue;
+      const provenance = frame.provenance || {};
+      const parentExists = frames.slice(0, index).some(item => item.hash === provenance.parentHash);
+      const expectedProof = await sha256((provenance.parentHash || "") + "|" + (provenance.branch || "") + "|" + (provenance.actor || ""));
+      if (!parentExists || expectedProof !== provenance.proof || provenance.branch !== frame.payload.branch) {
+        provenanceFailure = "Frame " + frame.seq + " branch ancestry cannot be proven";
+        break;
+      }
+    }
+    result.provenance = provenanceFailure
+      ? measured("fail", provenanceFailure)
+      : measured("pass", "Branch parents and proofs resolve");
+
+    return finishVerification(result, frames);
+  }
+
+  function finishVerification(result, frames) {
+    const firstFailure = detectorOrder.find(key => result[key].status === "fail") || null;
+    const accepted = !firstFailure && detectorOrder.every(key => result[key].status === "pass");
+    return { result, frames, firstFailure, accepted };
+  }
+
+  async function makeAttack(id) {
+    let frames = clone(state.healthy);
+    let bytes;
+    if (id === "edit-payload") {
+      frames[2].payload.amount = 900;
+      bytes = serializeFrames(frames);
+    } else if (id === "rehash-one") {
+      frames[2].payload.amount = 6;
+      frames[2].payload.credits = 6;
+      frames[2].payloadHash = await sha256(canonical(frames[2].payload));
+      const body = {
+        seq: frames[2].seq,
+        prevHash: frames[2].prevHash,
+        type: frames[2].type,
+        payload: frames[2].payload,
+        payloadHash: frames[2].payloadHash,
+        provenance: frames[2].provenance
+      };
+      frames[2].hash = await sha256(canonical(body));
+      bytes = serializeFrames(frames);
+    } else if (id === "reorder") {
+      [frames[2], frames[3]] = [frames[3], frames[2]];
+      bytes = serializeFrames(frames);
+    } else if (id === "replay-action") {
+      frames = await appendValid(frames, "consume", {
+        worldVersion: 6,
+        policy: "locked",
+        credits: 2,
+        token: "repair-token-42",
+        amount: 5
+      });
+      bytes = serializeFrames(frames);
+    } else if (id === "stale-write") {
+      frames = await appendValid(frames, "write", {
+        worldVersion: 6,
+        baseVersion: 2,
+        policy: "locked",
+        credits: 7,
+        key: "recovery.mode",
+        value: "unsafe"
+      });
+      bytes = serializeFrames(frames);
+    } else if (id === "rollback") {
+      frames = await appendValid(frames, "checkpoint", {
+        worldVersion: 3,
+        policy: "guarded",
+        credits: 12,
+        action: "rollback"
+      });
+      bytes = serializeFrames(frames);
+    } else if (id === "corrupt-bytes") {
+      const healthyBytes = serializeFrames(frames);
+      const damaged = healthyBytes.slice();
+      damaged[Math.floor(damaged.length / 2)] = 255;
+      bytes = damaged;
+    } else if (id === "older-chain") {
+      frames = frames.slice(0, 3);
+      bytes = serializeFrames(frames);
+    } else if (id === "forge-provenance") {
+      const parentHash = "f".repeat(64);
+      const branch = "repair/forged";
+      const actor = "lab-branch-omega";
+      const proof = await sha256(parentHash + "|" + branch + "|" + actor);
+      frames = await appendValid(frames, "branch", {
+        worldVersion: 6,
+        policy: "locked",
+        credits: 7,
+        branch
+      }, { parentHash, branch, actor, proof });
+      bytes = serializeFrames(frames);
+    }
+    return { bytes, frames };
+  }
+
+  function deriveProjection(frames) {
+    const last = frames[frames.length - 1];
+    const consumed = frames.filter(frame => frame.type === "consume").map(frame => frame.payload.token);
+    return {
+      title: "World " + last.payload.worldVersion + " · stable",
+      head: last.hash,
+      policy: last.payload.policy,
+      credits: last.payload.credits,
+      consumed: consumed.join(", ") || "none",
+      highWater: frames.length - 1
+    };
+  }
+
+  function clockStamp() {
+    state.clock += 1;
+    return "T+" + String(state.clock).padStart(3, "0");
+  }
+
+  function announce(message) {
+    el("live").textContent = "";
+    requestAnimationFrame(() => { el("live").textContent = message; });
+  }
+
+  function setBusy(busy) {
+    state.busy = busy;
+    document.querySelectorAll("button").forEach(button => {
+      if (button.id !== "themeBtn") button.disabled = busy;
+    });
+    const rejected = detectorOrder.some(key => state.currentSignals[key] === "fail");
+    el("labStatus").dataset.state = busy ? "running" : (rejected ? "rejected" : "verified");
+    if (busy) el("labStatus").textContent = "Computing SHA-256";
+    else el("labStatus").textContent = rejected ? "Candidate quarantined" : "Projection verified";
+  }
+
+  async function executeControl({ quiet = false } = {}) {
+    if (state.busy) return;
+    setBusy(true);
+    const bytes = serializeFrames(state.healthy);
+    const verification = await verify(bytes);
+    state.currentSignals = Object.fromEntries(detectorOrder.map(key => [key, verification.result[key].status]));
+    state.controlSignals = { ...state.currentSignals };
+    if (verification.accepted) {
+      state.projection = deriveProjection(verification.frames);
+      state.lastAction = { type: "control" };
+      state.ledger.unshift({
+        time: clockStamp(),
+        title: "CONTROL ACCEPTED",
+        detail: verification.frames.length + " canonical frames projected; all nine layers measured green.",
+        state: "pass"
+      });
+    }
+    renderVerification(verification, "Control run");
+    renderAll();
+    setBusy(false);
+    if (!quiet) announce("Control accepted. All nine verification layers passed.");
+  }
+
+  async function executeAttack(id, { quiet = false } = {}) {
+    if (state.busy) return;
+    const definition = attackDefinitions.find(item => item.id === id);
+    setBusy(true);
+    const candidate = await makeAttack(id);
+    const verification = await verify(candidate.bytes);
+    state.currentSignals = Object.fromEntries(detectorOrder.map(key => [key, verification.result[key].status]));
+    detectorOrder.forEach(key => {
+      if (verification.result[key].status === "fail") state.redSeen[key] = true;
+    });
+    state.lastAction = { type: "attack", id };
+
+    const exact = verification.firstFailure === definition.layer;
+    if (!verification.accepted) {
+      const preview = Array.from(candidate.bytes.slice(0, 32), byte => byte.toString(16).padStart(2, "0")).join("");
+      state.quarantine.unshift({
+        attack: definition.title,
+        layer: verification.firstFailure,
+        size: candidate.bytes.byteLength,
+        preview
+      });
+      state.ledger.unshift({
+        time: clockStamp(),
+        title: "REJECTED · " + detectorMeta[verification.firstFailure].label,
+        detail: definition.title + (exact ? " hit its exact expected boundary." : " reached " + detectorMeta[verification.firstFailure].label + " first."),
+        state: "fail"
+      });
+    } else {
+      state.ledger.unshift({
+        time: clockStamp(),
+        title: "UNEXPECTED ACCEPT",
+        detail: definition.title + " crossed every boundary.",
+        state: "fail"
+      });
+    }
+    renderVerification(verification, definition.title, definition);
+    renderAll();
+    setBusy(false);
+    if (!quiet) announce(definition.title + " rejected at " + detectorMeta[verification.firstFailure].label + ". Last verified projection preserved.");
+  }
+
+  async function attackAll() {
+    if (state.busy) return;
+    await executeControl({ quiet: true });
+    for (const attack of attackDefinitions) {
+      await executeAttack(attack.id, { quiet: true });
+      if (!reducedMotion.matches) await new Promise(resolve => setTimeout(resolve, 190));
+    }
+    announce("Attack all complete. Nine hostile candidates rejected and the verified projection stayed visible.");
+  }
+
+  async function replayLast() {
+    if (state.lastAction.type === "attack") await executeAttack(state.lastAction.id);
+    else await executeControl();
+  }
+
+  async function guidedNext() {
+    const attack = attackDefinitions[state.guidedIndex % attackDefinitions.length];
+    state.guidedIndex = (state.guidedIndex + 1) % attackDefinitions.length;
+    await executeAttack(attack.id);
+    el("guidedBtn").textContent = "Guided: " + attackDefinitions[state.guidedIndex].title;
+  }
+
+  async function resetLab() {
+    if (state.busy) return;
+    state.ledger = [];
+    state.quarantine = [];
+    state.redSeen = Object.fromEntries(detectorOrder.map(key => [key, false]));
+    state.controlSignals = Object.fromEntries(detectorOrder.map(key => [key, "unmeasured"]));
+    state.currentSignals = Object.fromEntries(detectorOrder.map(key => [key, "unmeasured"]));
+    state.guidedIndex = 0;
+    state.clock = 0;
+    el("guidedBtn").textContent = "Guided: next attack";
+    await executeControl();
+  }
+
+  function renderVerification(verification, label, definition = null) {
+    const banner = el("resultBanner");
+    const firstFailure = verification.firstFailure;
+    banner.dataset.state = verification.accepted ? "verified" : "rejected";
+    el("resultCode").textContent = verification.accepted ? "ACCEPT" : "REJECT";
+    if (verification.accepted) {
+      el("resultTitle").textContent = label + " verified";
+      el("resultDetail").textContent = "All nine layers were measured. Candidate may update the projection.";
+    } else {
+      const expected = definition ? detectorMeta[definition.layer].label : "a rejecting layer";
+      el("resultTitle").textContent = detectorMeta[firstFailure].label + " stopped the candidate";
+      el("resultDetail").textContent = "Expected first boundary: " + expected + ". " + verification.result[firstFailure].detail + ".";
+    }
+    detectorOrder.forEach(key => {
+      const signal = document.querySelector('[data-signal="' + key + '"]');
+      const detail = document.querySelector('[data-detail="' + key + '"]');
+      const status = verification.result[key].status;
+      signal.className = "signal " + (status === "unmeasured" ? "" : status);
+      signal.textContent = status === "pass" ? "Measured · pass" : status === "fail" ? "Measured · red" : "Unmeasured";
+      detail.textContent = verification.result[key].detail;
+    });
+  }
+
+  function renderTimeline() {
+    el("timeline").innerHTML = state.healthy.map(frame => `
+      <li class="frame-row">
+        <div class="rail"><span class="node">${frame.seq}</span></div>
+        <div class="frame-card">
+          <div class="frame-top"><span>${escapeHTML(frame.type.toUpperCase())}</span><span>world ${frame.payload.worldVersion}</span></div>
+          <div class="hash" title="${frame.hash}">hash ${frame.hash.slice(0, 18)}… · prev ${frame.prevHash.slice(0, 12)}…</div>
+        </div>
+      </li>
+    `).join("");
+  }
+
+  function renderProjection() {
+    if (!state.projection) return;
+    el("worldTitle").textContent = state.projection.title;
+    el("worldHead").textContent = "head " + state.projection.head.slice(0, 22) + "…";
+    el("worldPolicy").textContent = state.projection.policy;
+    el("worldCredits").textContent = String(state.projection.credits);
+    el("worldConsumed").textContent = state.projection.consumed;
+    el("worldHighWater").textContent = "#" + state.projection.highWater;
+  }
+
+  function renderLedger() {
+    el("ledger").innerHTML = state.ledger.length ? state.ledger.map(item => `
+      <li>
+        <time>${item.time}</time>
+        <div><strong>${escapeHTML(item.title)}</strong><p>${escapeHTML(item.detail)}</p></div>
+      </li>
+    `).join("") : '<li class="empty">No verification attempts yet.</li>';
+  }
+
+  function renderQuarantine() {
+    el("quarantine").innerHTML = state.quarantine.length ? state.quarantine.map((item, index) => `
+      <article class="quarantine-item">
+        <strong><span>${escapeHTML(item.attack)}</span><span>#${String(state.quarantine.length - index).padStart(2, "0")}</span></strong>
+        <code>${item.size} bytes · ${escapeHTML(item.layer)} · ${item.preview}…</code>
+      </article>
+    `).join("") : '<div class="empty">Quarantine empty. Run an attack to retain rejected bytes here.</div>';
+  }
+
+  function renderAssertions() {
+    el("assertions").innerHTML = detectorOrder.map(key => {
+      const controlPass = state.controlSignals[key] === "pass";
+      const challenged = state.redSeen[key];
+      const status = controlPass && challenged ? "pass" : (!controlPass && state.controlSignals[key] !== "unmeasured" ? "fail" : "unmeasured");
+      const text = !controlPass
+        ? (state.controlSignals[key] === "unmeasured" ? "Control unmeasured—not pass." : "Control failed.")
+        : challenged ? "Green in control; red observed." : "Control green; red not observed yet.";
+      return `
+        <article class="assertion" data-state="${status}">
+          <strong>${escapeHTML(detectorMeta[key].label)}</strong>
+          <p>${escapeHTML(text)}</p>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function renderStatus() {
+    if (state.busy) return;
+    const rejected = detectorOrder.some(key => state.currentSignals[key] === "fail");
+    el("labStatus").dataset.state = rejected ? "rejected" : "verified";
+    el("labStatus").textContent = rejected ? "Candidate quarantined" : "Projection verified";
+  }
+
+  function renderAll() {
+    renderProjection();
+    renderLedger();
+    renderQuarantine();
+    renderAssertions();
+    renderStatus();
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    })[character]);
+  }
+
+  function buildStaticUI() {
+    el("attackGrid").innerHTML = attackDefinitions.map(attack => `
+      <button class="attack" type="button" data-attack="${attack.id}" aria-label="${escapeHTML(attack.title)}; expected detector ${escapeHTML(detectorMeta[attack.layer].label)}">
+        <strong>${escapeHTML(attack.title)}</strong>
+        <span>→ ${escapeHTML(detectorMeta[attack.layer].label)}</span>
+      </button>
+    `).join("");
+
+    el("detectorRows").innerHTML = detectorOrder.map(key => `
+      <tr>
+        <td><span class="detector"><span class="dot"></span>${escapeHTML(detectorMeta[key].label)}</span></td>
+        <td><span class="signal" data-signal="${key}">Unmeasured</span></td>
+        <td class="detail" data-detail="${key}">${escapeHTML(detectorMeta[key].detail)}</td>
+      </tr>
+    `).join("");
+  }
+
+  async function copyPrompt() {
+    const prompt = el("prompt");
+    try {
+      await navigator.clipboard.writeText(prompt.value);
+    } catch {
+      prompt.focus();
+      prompt.select();
+      document.execCommand("copy");
+    }
+    el("copyStatus").textContent = "Prompt copied.";
+    announce("Build prompt copied to clipboard.");
+  }
+
+  function toggleTheme() {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    announce(next + " theme active.");
+  }
+
+  async function boot() {
+    buildStaticUI();
+    state.healthy = await buildHealthyChain();
+    state.trustedHighWater = state.healthy.length - 1;
+    renderTimeline();
+    document.querySelectorAll("[data-attack]").forEach(button => {
+      button.addEventListener("click", () => executeAttack(button.dataset.attack));
+    });
+    el("controlBtn").addEventListener("click", () => executeControl());
+    el("attackAllBtn").addEventListener("click", attackAll);
+    el("guidedBtn").addEventListener("click", guidedNext);
+    el("replayBtn").addEventListener("click", replayLast);
+    el("resetBtn").addEventListener("click", resetLab);
+    el("themeBtn").addEventListener("click", toggleTheme);
+    el("copyBtn").addEventListener("click", copyPrompt);
+    await executeControl({ quiet: true });
+  }
+
+  boot().catch(error => {
+    el("labStatus").dataset.state = "rejected";
+    el("labStatus").textContent = "Verifier unavailable";
+    el("resultCode").textContent = "ERROR";
+    el("resultTitle").textContent = "Web Crypto initialization failed";
+    el("resultDetail").textContent = error.message;
+    announce("Verifier initialization failed: " + error.message);
+  });
+})();
+</script>
+</body>
+</html>

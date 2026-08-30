@@ -1,0 +1,47 @@
+{
+  "id": "09-attack-timeline",
+  "frame": 9,
+  "number": 9,
+  "order": 9,
+  "slug": "attack-timeline",
+  "title": "Attack the Timeline",
+  "eyebrow": "Frame 09 · Adversarial Verification Laboratory",
+  "description": "A cinematic, offline laboratory for attacking a synthetic frame chain and watching the exact verification layer reject it without replacing the last verified projection.",
+  "path": "showcase/09-attack-timeline/index.html",
+  "href": "showcase/09-attack-timeline/",
+  "entry": "index.html",
+  "kind": "interactive",
+  "status": "ready",
+  "theme": "clawpilot",
+  "offline": true,
+  "minimumViewportWidth": 390,
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Web Crypto SHA-256"
+  ],
+  "features": [
+    "control run",
+    "guided attacks",
+    "manual attacks",
+    "attack all",
+    "replay",
+    "reset",
+    "verification ledger",
+    "quarantine",
+    "assertions",
+    "copyable prompt"
+  ],
+  "detectors": [
+    "bytes",
+    "payload hash",
+    "frame hash",
+    "sequence",
+    "predecessor",
+    "semantics",
+    "causality",
+    "concurrency/high-water",
+    "provenance"
+  ]
+}
