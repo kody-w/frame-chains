@@ -123,6 +123,7 @@ button.primary {
   background: linear-gradient(135deg, var(--mars), #9d2d19);
   color: #fff;
 }
+html[data-theme="light"] button.primary { border-color: #762416; background: #762416; color: #fff; }
 button.secondary { background: var(--panel-soft); }
 button.failure { border-color: var(--red); color: var(--red); }
 button.success { border-color: var(--green); color: var(--green); }
@@ -385,6 +386,8 @@ html[data-theme="light"] .module { background: rgba(255, 250, 244, .93); }
   font-size: 11px;
 }
 .offline-orbit strong { color: var(--yellow); }
+html[data-theme="light"] .offline-orbit { color: #f4f0e9; }
+html[data-theme="light"] .offline-orbit strong { color: #ffd166; }
 .side-stack { display: grid; gap: 14px; }
 .side-panel { padding: 17px; }
 .side-panel h2 { margin-bottom: 10px; font-size: 15px; }
