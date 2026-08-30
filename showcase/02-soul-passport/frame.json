@@ -1,0 +1,32 @@
+{
+  "frame": 2,
+  "slug": "soul-passport",
+  "title": "The AI Soul Passport",
+  "claim": "An AI identity can remain independently verifiable across device migration, an offline fork, deterministic reattachment, and a copied-appearance counterfeit because continuity is derived from canonical content-addressed frames rather than location or resemblance.",
+  "entry": "showcase/02-soul-passport/index.html",
+  "synthetic_only": true,
+  "network_required": false,
+  "invariants": [
+    "Every admitted AI turn is an immutable recursive-canonical-JSON frame addressed with browser Web Crypto SHA-256.",
+    "Displayed identity state and deterministic non-humanoid morphology derive only from a verified frame.",
+    "Every frame independently recomputes its content address, morphology seed, state-read addresses, schema, device, sequence, and previous link before admission.",
+    "Older verified selves remain immutable and browsable without replacing the current verified head.",
+    "An offline append remains a separate dimension until an ordered candidate ladder finds the first empty contradiction set.",
+    "A graft records exact source frame, selected base, candidate order, contradiction sets, target head, and imported identity fields.",
+    "A counterfeit that copies appearance but changes identity content is rejected and cannot mutate the last verified self."
+  ],
+  "positive_path": [
+    "Append a synthetic AI turn on Lumen Tablet.",
+    "Migrate the verified identity to Archive Cube and append another AI turn.",
+    "Migrate the same verified identity to Field Lens.",
+    "Advance Archive Cube online while Field Lens appends offline from their shared verified base.",
+    "Compare the offline frame's declared read addresses against the newest-to-oldest candidate ladder.",
+    "Select the first contradiction-free base and append a graft frame with exact provenance."
+  ],
+  "failure_path": [
+    "Clone the current verified head and copy its hologram appearance.",
+    "Change exactly one synthetic memory and one declared read address while retaining the copied address and morphology metadata.",
+    "Run independent canonical hashing, morphology, and state-read verification.",
+    "Reject the counterfeit, keep it outside the verified ledger, and preserve the prior verified head and hologram source."
+  ]
+}
