@@ -1,0 +1,99 @@
+{
+  "schema": "frame-chains.succession/1",
+  "fixture_class": "synthetic",
+  "chain": [
+    {
+      "seq": 0,
+      "prev": null,
+      "kind": "estate.roster",
+      "payload": {
+        "ranks": [
+          1,
+          2,
+          3
+        ],
+        "grace_beats": 2
+      },
+      "claimed_ms": null,
+      "hash": "afdba6e625bc2f96884587bbe3e7a956337d8ab3862b34ac1ab5f0d7d0cfec6f"
+    },
+    {
+      "seq": 1,
+      "prev": "afdba6e625bc2f96884587bbe3e7a956337d8ab3862b34ac1ab5f0d7d0cfec6f",
+      "kind": "leadership.start",
+      "payload": {
+        "actor_rank": 1,
+        "beat": 0,
+        "lease_until": 4
+      },
+      "claimed_ms": null,
+      "hash": "2e8218829cdf6ba86b9921cd5b3ad166329fb549ae54b2630167d14a1ef01e3e"
+    },
+    {
+      "seq": 2,
+      "prev": "2e8218829cdf6ba86b9921cd5b3ad166329fb549ae54b2630167d14a1ef01e3e",
+      "kind": "node.down",
+      "payload": {
+        "rank": 1,
+        "beat": 0,
+        "lease_until": 4
+      },
+      "claimed_ms": null,
+      "hash": "eaafee535900e7b2daa49efaaada90773dc12554631a4344e6d01d7392e9ee8f"
+    },
+    {
+      "seq": 3,
+      "prev": "eaafee535900e7b2daa49efaaada90773dc12554631a4344e6d01d7392e9ee8f",
+      "kind": "estate.succession",
+      "payload": {
+        "actor_rank": 2,
+        "beat": 6,
+        "previous_lease_until": 4,
+        "candidates": [
+          {
+            "rank": 2,
+            "eligible_beat": 6
+          },
+          {
+            "rank": 3,
+            "eligible_beat": 10
+          }
+        ],
+        "next_lease_until": 10
+      },
+      "claimed_ms": null,
+      "hash": "6d7f5104ae38f82d26396094aa13ed6f14fb2c28a0f2804536420f2877ee51cb"
+    },
+    {
+      "seq": 4,
+      "prev": "6d7f5104ae38f82d26396094aa13ed6f14fb2c28a0f2804536420f2877ee51cb",
+      "kind": "node.up",
+      "payload": {
+        "rank": 1,
+        "beat": 6
+      },
+      "claimed_ms": null,
+      "hash": "db2bdce5300b120f3775270fedb0be478d360799090aa0d8c887bc3bd123d620"
+    },
+    {
+      "seq": 5,
+      "prev": "db2bdce5300b120f3775270fedb0be478d360799090aa0d8c887bc3bd123d620",
+      "kind": "estate.resumption",
+      "payload": {
+        "actor_rank": 1,
+        "beat": 10,
+        "previous_lease_until": 10,
+        "next_lease_until": 14
+      },
+      "claimed_ms": null,
+      "hash": "b43cd367d9805586da9af0f6fd07374e2692d6b0265b30608517173d89ec23e8"
+    }
+  ],
+  "expected": {
+    "first_successor_rank": 2,
+    "successor_claim_beat": 6,
+    "rank_3_eligible_beat": 10,
+    "resumption_rank": 1,
+    "resumption_beat": 10
+  }
+}

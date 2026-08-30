@@ -1,0 +1,121 @@
+{
+  "schema": "frame-chains.merge-fidelity/1",
+  "fixture_class": "synthetic",
+  "histories": {
+    "left": {
+      "roster": {
+        "10": {
+          "value": {
+            "leader": "r1",
+            "lease_beats": 6
+          },
+          "content_hash": "1b1b29a3274a58b171406af30e6ae2150db9296d12add0b9f51451572587837e"
+        },
+        "11": {
+          "value": {
+            "leader": "r1",
+            "lease_beats": 6
+          },
+          "content_hash": "1b1b29a3274a58b171406af30e6ae2150db9296d12add0b9f51451572587837e"
+        }
+      },
+      "notes": {
+        "10": {
+          "value": {
+            "format": "markdown"
+          },
+          "content_hash": "c72a9b76e67dabdd008394b531ddd57942e4b9260235262934e064c1bb99e13e"
+        },
+        "11": {
+          "value": {
+            "note": "left-continuation"
+          },
+          "content_hash": "841fe8dd3fcd3986a43c7e3afc5d8a2f70681e8dd91b14f7268f7525446225c6"
+        }
+      },
+      "configuration": {
+        "10": {
+          "value": {
+            "mode": "safe",
+            "retries": 3
+          },
+          "content_hash": "f7a887e5d3844f46996544849c7a197ded9d5a40a3665f8434d8ccbe20c849e4"
+        }
+      },
+      "telemetry": {
+        "10": {
+          "value": {
+            "nodes": 5
+          },
+          "content_hash": "ebe99ce74576c45bc0690fad545bfcccce0ca8d8066535dcd2dbc40bf0e82914"
+        }
+      }
+    },
+    "right": {
+      "roster": {
+        "10": {
+          "value": {
+            "leader": "r1",
+            "lease_beats": 6
+          },
+          "content_hash": "1b1b29a3274a58b171406af30e6ae2150db9296d12add0b9f51451572587837e"
+        }
+      },
+      "notes": {
+        "10": {
+          "value": {
+            "format": "markdown"
+          },
+          "content_hash": "c72a9b76e67dabdd008394b531ddd57942e4b9260235262934e064c1bb99e13e"
+        },
+        "12": {
+          "value": {
+            "note": "right-continuation"
+          },
+          "content_hash": "ceef1cfb92eb7e43eaa0d2b865707343b5e2b88a5fcd27f402d14c37a6973db9"
+        }
+      },
+      "configuration": {
+        "10": {
+          "value": {
+            "mode": "fast",
+            "retries": 1
+          },
+          "content_hash": "9c29bd23e17ea001107cdd57fd345b7ae616737cc72cd37ca0713bd9df094684"
+        }
+      },
+      "diagnostics": {
+        "10": {
+          "value": {
+            "checks": 12
+          },
+          "content_hash": "e37f10f36b977e56cfb5787e9234fc07d0a1414a4833d27457ea9d4d9c69cd45"
+        }
+      }
+    }
+  },
+  "expected": {
+    "shared_dimensions": [
+      "configuration",
+      "notes",
+      "roster"
+    ],
+    "mergeable_shared_dimensions": [
+      "notes",
+      "roster"
+    ],
+    "conflicted_dimensions": [
+      "configuration"
+    ],
+    "one_sided_dimensions": [
+      "diagnostics",
+      "telemetry"
+    ],
+    "fidelity": {
+      "numerator": 2,
+      "denominator": 3,
+      "decimal": "0.667"
+    },
+    "conflict_mode": "parallel"
+  }
+}

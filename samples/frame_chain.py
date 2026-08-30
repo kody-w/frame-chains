@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""frame_chain.py — a ~120-line teaching toy for the Frame Chains paper.
+"""frame_chain.py — a ~90-line teaching toy for the Frame Chains paper.
 
 Real SHA-256, zero dependencies. Shows four things:
   1. mint + append: every frame holds the fingerprint of the one before it
-  2. verify: the chain proves its own order and integrity
+  2. verify: recomputation detects changed content or links in the given chain
   3. tamper: change one byte of history and verification says exactly where
   4. the chain is the clock: two devices with disagreeing clocks still
      produce one true order — because order comes from hand-offs, not clocks

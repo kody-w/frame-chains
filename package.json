@@ -7,7 +7,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "check": "node papercheck.mjs chromium full",
+    "check": "npm run evidence:check && node papercheck.mjs chromium full",
+    "evidence:generate": "node evidence/generate.mjs",
+    "evidence:check": "node evidence/generate.mjs --check && node evidence/verify.mjs && node evidence/privacycheck.mjs",
     "smoke": "node papercheck.mjs chromium smoke",
     "papercheck": "node papercheck.mjs"
   },

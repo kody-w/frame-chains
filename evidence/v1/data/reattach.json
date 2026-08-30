@@ -1,0 +1,156 @@
+{
+  "schema": "frame-chains.reattach/1",
+  "fixture_class": "synthetic",
+  "stranded": {
+    "kind": "stranded.frame",
+    "reads": {
+      "model.runtime": "dd97fa8313dfb47403653c9ced262636ae9d0646fe9a79fdc9d350ccdac621e9",
+      "policy.retention": "9d6ae87f59d9b31cf8032f45a41f74256991c99df905f0fa46bcd4862a181327",
+      "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14"
+    },
+    "frame_hash": "7e57011d82b980bb2cde7099647d794ca5af62463e886e8e2eaec71b57992175"
+  },
+  "candidates": [
+    {
+      "kind": "candidate.base",
+      "order": 0,
+      "tier": "local-head",
+      "name": "candidate-a",
+      "reads": {
+        "model.runtime": "dd97fa8313dfb47403653c9ced262636ae9d0646fe9a79fdc9d350ccdac621e9",
+        "policy.retention": "b5a761175daebfc19b7d0c12bdad874c4d388737b3178bfd1d38b632fc3a4d83"
+      },
+      "base_hash": "08cb98234d3108d66415474409b0e6459311e97266aced049d94c76b098c1cf1"
+    },
+    {
+      "kind": "candidate.base",
+      "order": 1,
+      "tier": "local-dimension",
+      "name": "candidate-b",
+      "reads": {
+        "model.runtime": "229f4be6b03afb5c2b6731cc271872ad2358811b4d26c1f841845be7ae50651e",
+        "policy.retention": "9d6ae87f59d9b31cf8032f45a41f74256991c99df905f0fa46bcd4862a181327",
+        "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14"
+      },
+      "base_hash": "7d5be47873c4f1e90786d3f1d4db6a059c22d59b4bdb1e88cf441f372ea59105"
+    },
+    {
+      "kind": "candidate.base",
+      "order": 2,
+      "tier": "public-history",
+      "name": "candidate-c",
+      "reads": {
+        "model.runtime": "dd97fa8313dfb47403653c9ced262636ae9d0646fe9a79fdc9d350ccdac621e9",
+        "policy.retention": "9d6ae87f59d9b31cf8032f45a41f74256991c99df905f0fa46bcd4862a181327",
+        "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14",
+        "notes.format": "09e7b12e9925d5106bf76f0a73c345c331904f1619c45ffd434a7dd5c0e91806"
+      },
+      "base_hash": "54500ef8a96e071055ea1a16c91b2cc6d11876f41b43e661d60729879958f24c"
+    },
+    {
+      "kind": "candidate.base",
+      "order": 3,
+      "tier": "public-history",
+      "name": "candidate-d",
+      "reads": {
+        "policy.retention": "9d6ae87f59d9b31cf8032f45a41f74256991c99df905f0fa46bcd4862a181327",
+        "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14"
+      },
+      "base_hash": "aa11cd142888f6bf55444516449bcd83c5aae711c47ed0ae65f3a2337139c623"
+    }
+  ],
+  "dry_hole_candidates": [
+    {
+      "kind": "candidate.base",
+      "order": 0,
+      "tier": "local-head",
+      "name": "candidate-a-blocked",
+      "reads": {
+        "model.runtime": "dd97fa8313dfb47403653c9ced262636ae9d0646fe9a79fdc9d350ccdac621e9",
+        "policy.retention": "5a4bf3a73e5ed2adb966cdbb55cfeb8a298f63b760a9b96c3e6fc6241ead0d4f"
+      },
+      "base_hash": "a1f843043dd7607cdde6415c12bc2200cfa373d87ea404bbf694a3840b48e3f9"
+    },
+    {
+      "kind": "candidate.base",
+      "order": 1,
+      "tier": "local-dimension",
+      "name": "candidate-b-blocked",
+      "reads": {
+        "model.runtime": "229f4be6b03afb5c2b6731cc271872ad2358811b4d26c1f841845be7ae50651e",
+        "policy.retention": "5a4bf3a73e5ed2adb966cdbb55cfeb8a298f63b760a9b96c3e6fc6241ead0d4f",
+        "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14"
+      },
+      "base_hash": "f1a8e6a960be37d53ecab5a149796f29fc836bd0e335c034b3a8178471de96d7"
+    },
+    {
+      "kind": "candidate.base",
+      "order": 2,
+      "tier": "public-history",
+      "name": "candidate-c-blocked",
+      "reads": {
+        "model.runtime": "dd97fa8313dfb47403653c9ced262636ae9d0646fe9a79fdc9d350ccdac621e9",
+        "policy.retention": "5a4bf3a73e5ed2adb966cdbb55cfeb8a298f63b760a9b96c3e6fc6241ead0d4f",
+        "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14",
+        "notes.format": "09e7b12e9925d5106bf76f0a73c345c331904f1619c45ffd434a7dd5c0e91806"
+      },
+      "base_hash": "22f195b17f6fd810effbee06dd1fac8b594bac07424660b6f9f7242b81c3e759"
+    },
+    {
+      "kind": "candidate.base",
+      "order": 3,
+      "tier": "public-history",
+      "name": "candidate-d-blocked",
+      "reads": {
+        "policy.retention": "5a4bf3a73e5ed2adb966cdbb55cfeb8a298f63b760a9b96c3e6fc6241ead0d4f",
+        "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14"
+      },
+      "base_hash": "4c4531fb0744d58dd71955dac69f153170e1fe09298268e02c43715e35b8d944"
+    }
+  ],
+  "expected": {
+    "conflict_sets": [
+      {
+        "base_hash": "08cb98234d3108d66415474409b0e6459311e97266aced049d94c76b098c1cf1",
+        "conflicts": [
+          "policy.retention"
+        ]
+      },
+      {
+        "base_hash": "7d5be47873c4f1e90786d3f1d4db6a059c22d59b4bdb1e88cf441f372ea59105",
+        "conflicts": [
+          "model.runtime"
+        ]
+      },
+      {
+        "base_hash": "54500ef8a96e071055ea1a16c91b2cc6d11876f41b43e661d60729879958f24c",
+        "conflicts": []
+      },
+      {
+        "base_hash": "aa11cd142888f6bf55444516449bcd83c5aae711c47ed0ae65f3a2337139c623",
+        "conflicts": []
+      }
+    ],
+    "selected_base": "54500ef8a96e071055ea1a16c91b2cc6d11876f41b43e661d60729879958f24c",
+    "graft": {
+      "kind": "graft.frame",
+      "grafted_from": "7e57011d82b980bb2cde7099647d794ca5af62463e886e8e2eaec71b57992175",
+      "selected_base": "54500ef8a96e071055ea1a16c91b2cc6d11876f41b43e661d60729879958f24c",
+      "reads": {
+        "model.runtime": "dd97fa8313dfb47403653c9ced262636ae9d0646fe9a79fdc9d350ccdac621e9",
+        "policy.retention": "9d6ae87f59d9b31cf8032f45a41f74256991c99df905f0fa46bcd4862a181327",
+        "schema.frame": "9f572bbcbc18b09af473029d25248fee7ad21787c756b02ec54f932920fdce14"
+      },
+      "frame_hash": "f91e961f29bcd7194ef77b93262491f86a3f3c587803c64dd8fc7ad86c329d6d"
+    },
+    "original_history": [
+      "7e57011d82b980bb2cde7099647d794ca5af62463e886e8e2eaec71b57992175"
+    ],
+    "dry_hole_history_before": [
+      "7e57011d82b980bb2cde7099647d794ca5af62463e886e8e2eaec71b57992175"
+    ],
+    "dry_hole_history_after": [
+      "7e57011d82b980bb2cde7099647d794ca5af62463e886e8e2eaec71b57992175"
+    ]
+  }
+}

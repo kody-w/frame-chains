@@ -1,0 +1,72 @@
+{
+  "schema": "frame-chains.claim-ledger/1",
+  "release": "frame-chains-evidence-v1.0.0",
+  "claims": [
+    {
+      "id": "mechanism.clock-order",
+      "classification": "publicly-reproducible-mechanism",
+      "evidence": [
+        "data/clock-skew.json"
+      ]
+    },
+    {
+      "id": "mechanism.scan-heal",
+      "classification": "publicly-reproducible-mechanism",
+      "evidence": [
+        "data/scan-heal.json"
+      ]
+    },
+    {
+      "id": "mechanism.succession",
+      "classification": "publicly-reproducible-mechanism",
+      "evidence": [
+        "data/succession.json"
+      ]
+    },
+    {
+      "id": "mechanism.membrane",
+      "classification": "publicly-reproducible-mechanism",
+      "evidence": [
+        "data/membrane.json"
+      ]
+    },
+    {
+      "id": "mechanism.reattach",
+      "classification": "publicly-reproducible-mechanism",
+      "evidence": [
+        "data/reattach.json"
+      ]
+    },
+    {
+      "id": "mechanism.merge-fidelity",
+      "classification": "publicly-reproducible-mechanism",
+      "evidence": [
+        "data/merge-fidelity.json"
+      ]
+    },
+    {
+      "id": "field.estate-survey",
+      "classification": "aggregated-field-observation",
+      "public_aggregate": "eight devices; five reachable during the reported survey",
+      "raw_record_published": false
+    },
+    {
+      "id": "field.scan-and-heal",
+      "classification": "aggregated-field-observation",
+      "public_aggregate": "66 findings; 35 after the reported deterministic repair pass",
+      "raw_record_published": false
+    },
+    {
+      "id": "field.recursive-drill",
+      "classification": "aggregated-field-observation",
+      "public_aggregate": "27 findings re-dimensioned in a 29-frame sub-chain",
+      "raw_record_published": false
+    },
+    {
+      "id": "field.clock-disagreement",
+      "classification": "aggregated-field-observation",
+      "public_aggregate": "17,620 ms reported clock disagreement",
+      "raw_record_published": false
+    }
+  ]
+}

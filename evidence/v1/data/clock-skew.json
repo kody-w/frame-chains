@@ -1,0 +1,67 @@
+{
+  "schema": "frame-chains.clock-skew/1",
+  "fixture_class": "synthetic",
+  "chain": [
+    {
+      "seq": 0,
+      "prev": null,
+      "kind": "action",
+      "payload": {
+        "node": "node-a",
+        "action": "store-snapshot"
+      },
+      "claimed_ms": 1000000,
+      "hash": "66d32e76b85bac89a7d8a3502bd0cafee639c6671c8d479d261b9a2127100e29"
+    },
+    {
+      "seq": 1,
+      "prev": "66d32e76b85bac89a7d8a3502bd0cafee639c6671c8d479d261b9a2127100e29",
+      "kind": "action",
+      "payload": {
+        "node": "node-b",
+        "action": "save-session"
+      },
+      "claimed_ms": 987400,
+      "hash": "887d173e4b1e6c8ff664065a9221a90b226e319fc96a6501c3bd2c37ca0b0cb6"
+    },
+    {
+      "seq": 2,
+      "prev": "887d173e4b1e6c8ff664065a9221a90b226e319fc96a6501c3bd2c37ca0b0cb6",
+      "kind": "action",
+      "payload": {
+        "node": "node-a",
+        "action": "record-result"
+      },
+      "claimed_ms": 1010000,
+      "hash": "6d3116e67e0bfac4d269ac9a157705c8010c349968cb46dd2e5cf3808a82bf5b"
+    },
+    {
+      "seq": 3,
+      "prev": "6d3116e67e0bfac4d269ac9a157705c8010c349968cb46dd2e5cf3808a82bf5b",
+      "kind": "action",
+      "payload": {
+        "node": "node-b",
+        "action": "publish-summary"
+      },
+      "claimed_ms": 997400,
+      "hash": "7979f0e6e4e19833a873fca686b23e75d08a768eb373b86223aa848dd2a9d263"
+    }
+  ],
+  "expected": {
+    "dependency_order": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "claimed_time_order": [
+      1,
+      3,
+      0,
+      2
+    ],
+    "node_b_skew_ms": -17600,
+    "chain_valid": true,
+    "wall_clock_matches_chain": false
+  }
+}

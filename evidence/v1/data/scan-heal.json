@@ -1,0 +1,149 @@
+{
+  "schema": "frame-chains.scan-heal/1",
+  "fixture_class": "synthetic",
+  "nodes": [
+    {
+      "id": "node-a",
+      "findings": 4,
+      "healable": 3
+    },
+    {
+      "id": "node-b",
+      "findings": 0,
+      "healable": 0
+    },
+    {
+      "id": "node-c",
+      "findings": 3,
+      "healable": 3
+    },
+    {
+      "id": "node-d",
+      "findings": 1,
+      "healable": 1
+    },
+    {
+      "id": "node-e",
+      "findings": 2,
+      "healable": 1
+    }
+  ],
+  "chain": [
+    {
+      "seq": 0,
+      "prev": null,
+      "kind": "scan.baseline",
+      "payload": {
+        "targets": [
+          "node-a",
+          "node-b",
+          "node-c",
+          "node-d",
+          "node-e"
+        ],
+        "report": [
+          4,
+          0,
+          3,
+          1,
+          2
+        ]
+      },
+      "claimed_ms": null,
+      "hash": "062f8ff3e272a9c50e5b23d3db81bbd8c7df702789640f88cc321682a7bd8828"
+    },
+    {
+      "seq": 1,
+      "prev": "062f8ff3e272a9c50e5b23d3db81bbd8c7df702789640f88cc321682a7bd8828",
+      "kind": "repair.delta",
+      "payload": {
+        "targets": [
+          "node-a",
+          "node-c",
+          "node-d",
+          "node-e"
+        ],
+        "before": [
+          4,
+          0,
+          3,
+          1,
+          2
+        ],
+        "after": [
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "claimed_ms": null,
+      "hash": "ee01d6502759a4c5c05ba13c00a8135a2528659d600de5b7cf51e33368112ff0"
+    },
+    {
+      "seq": 2,
+      "prev": "ee01d6502759a4c5c05ba13c00a8135a2528659d600de5b7cf51e33368112ff0",
+      "kind": "scan.followup",
+      "payload": {
+        "targets": [
+          "node-a",
+          "node-c",
+          "node-d",
+          "node-e"
+        ],
+        "report": [
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "claimed_ms": null,
+      "hash": "3fdf3e38065e7cb5fbc956087da179c3db2e304869ab37f64ceba29949831f24"
+    },
+    {
+      "seq": 3,
+      "prev": "3fdf3e38065e7cb5fbc956087da179c3db2e304869ab37f64ceba29949831f24",
+      "kind": "scan.stable",
+      "payload": {
+        "targets": [
+          "node-a",
+          "node-e"
+        ],
+        "report": [
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "claimed_ms": null,
+      "hash": "2f9e4d267aca2f651afa6ebc80bb7ed3a62a1290d4a5a270c44897e89ae8408a"
+    }
+  ],
+  "expected": {
+    "baseline_responses": 5,
+    "repair_targets": [
+      "node-a",
+      "node-c",
+      "node-d",
+      "node-e"
+    ],
+    "followup_targets": [
+      "node-a",
+      "node-c",
+      "node-d",
+      "node-e"
+    ],
+    "stable_targets": [
+      "node-a",
+      "node-e"
+    ],
+    "final_findings": 2,
+    "identical_reports_required": 2,
+    "converged": true
+  }
+}

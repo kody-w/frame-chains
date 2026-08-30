@@ -1,0 +1,66 @@
+{
+  "schema": "frame-chains.evidence-manifest/1",
+  "release": "frame-chains-evidence-v1.0.0",
+  "release_date": "2026-08-30",
+  "fixture_class": "synthetic",
+  "contains_raw_estate_data": false,
+  "tooling": [
+    {
+      "path": "../generate.mjs",
+      "bytes": 14792,
+      "sha256": "be25b5063f44e6adadbc29936c7f51f8888ea9c2e1a9d3148b42013ba854a97e"
+    },
+    {
+      "path": "../verify.mjs",
+      "bytes": 12673,
+      "sha256": "7562a41ce12256bc0aaf4155b123a940cd7ae2cc8998b11d9e75de4369717afe"
+    },
+    {
+      "path": "../privacycheck.mjs",
+      "bytes": 4620,
+      "sha256": "27765ac520c6f12ca4b3cff5495e6b238b3d6d854584d16e8a4000097cba35d9"
+    }
+  ],
+  "files": [
+    {
+      "path": "claims.json",
+      "bytes": 2000,
+      "sha256": "584fe18df7c62f90e46df7a8c5b71e11f85842fd9055d1cf06373097fdc40190"
+    },
+    {
+      "path": "data/clock-skew.json",
+      "bytes": 1615,
+      "sha256": "bff722d790118a53f746de562316a3282f46e832de0277d6fb62af3b710f8670"
+    },
+    {
+      "path": "data/membrane.json",
+      "bytes": 2536,
+      "sha256": "2c84e6883e1c7f54e7338077781361b3d9e5876cf5bd945524b96fe591b588fb"
+    },
+    {
+      "path": "data/merge-fidelity.json",
+      "bytes": 2982,
+      "sha256": "5e14c82e46ffc098f0e22c3a028fd6ba1290f83b436f4a4240d5459ff1a655ef"
+    },
+    {
+      "path": "data/reattach.json",
+      "bytes": 6214,
+      "sha256": "01d953760881ddedb674b1b245e0b4f97e77fdba666afb0bb4c1577ce1d2af10"
+    },
+    {
+      "path": "data/scan-heal.json",
+      "bytes": 2812,
+      "sha256": "1083c4c08c9c3e13ba689c35aa8d34d29803688fd47bfc0bc5ce0ae1a03c3913"
+    },
+    {
+      "path": "data/succession.json",
+      "bytes": 2538,
+      "sha256": "5d5dbbbfdfe210f60ba73a32eb3175a32ab46e739529ccf3c108b8a2e12ff529"
+    },
+    {
+      "path": "environment.json",
+      "bytes": 453,
+      "sha256": "e2281f74c58822f1e772272e3f043aef5286f72b4f71e515ee6050b24212f087"
+    }
+  ]
+}

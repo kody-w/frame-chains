@@ -30,9 +30,9 @@ result does—and does not—demonstrate.
 | Exercise | What it teaches |
 |---|---|
 | [⏱ The Chain Is the Clock](https://kody-w.github.io/frame-chains/play/chain-is-the-clock.html) | Order comes from hand-offs, not timestamps — drag a clock 2 minutes wrong and the story stays true |
-| [🛰 Scan Tiles & the Healing Loop](https://kody-w.github.io/frame-chains/play/scan-tile.html) | One frame asks the whole fleet; only the delta pays; the estate converges and goes quiet |
-| [👑 Succession Without Elections](https://kody-w.github.io/frame-chains/play/succession.html) | Knock out the leader — staggered leases hand over power; lag can never cause a coup |
-| [Membrane](https://kody-w.github.io/frame-chains/play/membrane.html) | Verified public facts may enrich a private estate, while private frames have no outward path |
+| [🛰 Scan Tiles & the Healing Loop](https://kody-w.github.io/frame-chains/play/scan-tile.html) | Establish a baseline, then bound follow-up to prior exhaust and locally signaled changes |
+| [👑 Succession Without Elections](https://kody-w.github.io/frame-chains/play/succession.html) | Under the modeled lease assumptions, staggered ranks hand over authority and delayed observation only adds waiting |
+| [Membrane](https://kody-w.github.io/frame-chains/play/membrane.html) | Verified public facts may enrich a private estate while the modeled transfer gate refuses private-frame export |
 | [Deterministic Reattach](https://kody-w.github.io/frame-chains/play/reattach.html) | A stranded frame finds the first contradiction-free base by exact set comparison |
 | [Merge Fidelity](https://kody-w.github.io/frame-chains/play/merge-fidelity.html) | Independent histories merge agreement while preserving genuine contradictions |
 
@@ -52,6 +52,28 @@ python3 samples/frame_chain.py
 ~90 lines, stdlib only: mint, append, verify, catch tampering (twice — the
 chain remembers even if the attacker re-hashes), and watch two skewed-clock
 devices produce one true order.
+
+## Reproduce the public evidence
+
+The immutable
+[Frame Chains evidence release](https://github.com/kody-w/frame-chains/tree/frame-chains-evidence-v1.0.0/evidence)
+contains deterministic synthetic fixtures for clock ordering, scan/heal,
+succession, the one-way membrane, re-attachment, and merge fidelity.
+
+```sh
+npm run evidence:generate
+npm run evidence:check
+```
+
+The verifier independently derives every result and proves deliberate
+mutations fail. A publication-blocking privacy scan rejects network addresses,
+local hostnames, home paths, emails, credentials, token formats, and
+non-synthetic identifiers.
+
+No raw estate frames, device names, network details, repository inventory,
+prompts, source artifacts, or proprietary records are included. Aggregate
+field observations remain labeled separately and are not presented as
+independently reproduced by the synthetic bundle.
 
 ## Verify the publication
 
@@ -74,6 +96,7 @@ index.html      the landing page
 guide.html      the newcomer-first guided evidence path
 play/           six interactive exercises (self-contained HTML)
 samples/        frame_chain.py — the runnable toy
+evidence/       synthetic fixtures, generator, verifier, and privacy gate
 papercheck.mjs  structural and browser verification for the publication
 ```
 

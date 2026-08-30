@@ -1,0 +1,68 @@
+{
+  "schema": "frame-chains.membrane/1",
+  "fixture_class": "synthetic",
+  "private_records": [
+    {
+      "kind": "declaration",
+      "name": "policy.retention",
+      "visibility": "private",
+      "content_hash": "d13e5e9586bf6af38972308c0b062a8c644b1cba9c15d87e62d930a4dddf3c79",
+      "value": {
+        "days": 30
+      },
+      "frame_hash": "21505bdfb984b10545d0798818058c39f775d5118159a65bd45a745d9b54ded0"
+    },
+    {
+      "kind": "declaration",
+      "name": "local.setting",
+      "visibility": "private",
+      "content_hash": "6946ea7badc6a1b693d30529073c6ea270891a16d9ed82a1c3dae154e117dac7",
+      "value": {
+        "mode": "local-only"
+      },
+      "frame_hash": "0155be2e42520116858819d54164d2c2627bf6cf3808ab9ef9139705a39028fa"
+    }
+  ],
+  "public_records": [
+    {
+      "kind": "declaration",
+      "name": "policy.retention",
+      "visibility": "public",
+      "content_hash": "d13e5e9586bf6af38972308c0b062a8c644b1cba9c15d87e62d930a4dddf3c79",
+      "value": {
+        "days": 30
+      },
+      "frame_hash": "6f1b10c9903bab26f859a48ee269b4104771a4d59d15326815a2d10e3e0d29c5"
+    },
+    {
+      "kind": "declaration",
+      "name": "catalog.agent",
+      "visibility": "public",
+      "content_hash": "9af23cea10a478f3bb916ff35c07a36debe444adf9b56814ab63861ec674ab8b",
+      "value": {
+        "version": 3
+      },
+      "frame_hash": "fd9cb9b3a69139ccc0a30b57d422d4db49afee2b5c22a1e665c1bb45642ada07"
+    },
+    {
+      "kind": "declaration",
+      "name": "policy.retention",
+      "visibility": "public",
+      "content_hash": "a2e0f104633a5821e6d1ec00745f8f1a10727d392249d4ddf92f4fcf7d3095ed",
+      "value": {
+        "days": 7
+      },
+      "frame_hash": "e125ccf5637c28bef6449c7d76444442e1a97de480953bd350060598502806ba"
+    }
+  ],
+  "expected": {
+    "accepted_public_frames": [
+      "6f1b10c9903bab26f859a48ee269b4104771a4d59d15326815a2d10e3e0d29c5",
+      "fd9cb9b3a69139ccc0a30b57d422d4db49afee2b5c22a1e665c1bb45642ada07"
+    ],
+    "refused_conflict_frame": "e125ccf5637c28bef6449c7d76444442e1a97de480953bd350060598502806ba",
+    "public_bytes_before_export": "[\"6f1b10c9903bab26f859a48ee269b4104771a4d59d15326815a2d10e3e0d29c5\",\"fd9cb9b3a69139ccc0a30b57d422d4db49afee2b5c22a1e665c1bb45642ada07\"]",
+    "public_bytes_after_blocked_export": "[\"6f1b10c9903bab26f859a48ee269b4104771a4d59d15326815a2d10e3e0d29c5\",\"fd9cb9b3a69139ccc0a30b57d422d4db49afee2b5c22a1e665c1bb45642ada07\"]",
+    "blocked_private_frame": "0155be2e42520116858819d54164d2c2627bf6cf3808ab9ef9139705a39028fa"
+  }
+}

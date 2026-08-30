@@ -9,6 +9,19 @@ permissions:
   contents: read
 
 jobs:
+  evidence-release:
+    name: Synthetic evidence and privacy gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run evidence:check
+
   chromium-full:
     name: Chromium full gate
     runs-on: ubuntu-latest

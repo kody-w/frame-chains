@@ -35,7 +35,7 @@ const guideExercises = [
   "play/reattach.html",
   "play/merge-fidelity.html",
 ];
-const smokePages = ["index.html", "guide.html", "paper.html", ...expectedExercises];
+const smokePages = ["index.html", "guide.html", "paper.html", "evidence/index.html", ...expectedExercises];
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -175,6 +175,12 @@ async function checkPaperEmbeds(context, origin) {
       && /do not substitute for the reported estate runs/i.test(paperText),
     "Paper must distinguish the embedded models from the reported empirical evidence.",
   );
+  check(
+    /sanitized evidence release/i.test(paperText)
+      && /contains no raw estate frames/i.test(paperText)
+      && /does not claim to independently verify the private field observations/i.test(paperText),
+    "Paper must state the public evidence bundle's privacy and evidentiary limits.",
+  );
   assertClean();
   await page.close();
   console.log("  ✓ paper.html embeds six unique, titled standalone exercises");
@@ -239,6 +245,37 @@ async function checkStandaloneGuidance(context, origin) {
     await page.close();
   }
   console.log("  ✓ all six standalone proofs include guidance, scope, reset, and return navigation");
+}
+
+async function checkEvidencePage(context, origin) {
+  const { page, assertClean } = await openCheckedPage(context, origin, "evidence/index.html");
+  const text = compact(await page.locator("body").innerText());
+  check(
+    /no raw estate frames/i.test(text)
+      && /not presented as independently reproduced raw evidence/i.test(text),
+    "Evidence page must state its privacy and field-evidence boundary.",
+  );
+  check(
+    (await page.locator(".scenario").count()) === 6,
+    "Evidence page must expose exactly six reproducible mechanism scenarios.",
+  );
+  for (const path of [
+    "v1/manifest.json",
+    "v1/environment.json",
+    "v1/claims.json",
+    "v1/data/clock-skew.json",
+    "v1/data/scan-heal.json",
+    "v1/data/succession.json",
+    "v1/data/membrane.json",
+    "v1/data/reattach.json",
+    "v1/data/merge-fidelity.json",
+  ]) {
+    const response = await page.request.get(`${origin}/evidence/${path}`);
+    check(response.ok(), `Evidence asset ${path} returned HTTP ${response.status()}.`);
+  }
+  assertClean();
+  await page.close();
+  console.log("  ✓ evidence page exposes six synthetic scenarios and every bound release asset");
 }
 
 async function checkPromptCopy(context, origin) {
@@ -785,6 +822,7 @@ try {
   await checkPaperEmbeds(context, started.origin);
   await checkGuidePath(context, started.origin);
   await checkStandaloneGuidance(context, started.origin);
+  await checkEvidencePage(context, started.origin);
   if (mode === "full") {
     await checkPromptCopy(context, started.origin);
     await checkClockExercise(context, started.origin);
