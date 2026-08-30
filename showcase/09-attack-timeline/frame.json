@@ -1,0 +1,61 @@
+{
+  "id": "09-attack-timeline",
+  "frame": 9,
+  "number": 9,
+  "order": 9,
+  "slug": "09-attack-timeline",
+  "title": "Attack the Timeline",
+  "claim": "Independent verification layers reject adversarial timeline mutations while preserving the last trusted projection.",
+  "eyebrow": "Frame 09 · Adversarial Verification Laboratory",
+  "description": "A cinematic, offline laboratory for attacking a synthetic frame chain and watching the exact verification layer reject it without replacing the last verified projection.",
+  "path": "showcase/09-attack-timeline/index.html",
+  "href": "showcase/09-attack-timeline/",
+  "entry": "index.html",
+  "synthetic_only": true,
+  "network_required": false,
+  "kind": "interactive",
+  "status": "ready",
+  "theme": "clawpilot",
+  "offline": true,
+  "minimumViewportWidth": 390,
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Web Crypto SHA-256"
+  ],
+  "features": [
+    "control run",
+    "guided attacks",
+    "manual attacks",
+    "attack all",
+    "replay",
+    "reset",
+    "verification ledger",
+    "quarantine",
+    "assertions",
+    "copyable prompt"
+  ],
+  "detectors": [
+    "bytes",
+    "payload hash",
+    "frame hash",
+    "sequence",
+    "predecessor",
+    "semantics",
+    "causality",
+    "concurrency/high-water",
+    "provenance"
+  ],
+  "invariants": [
+    "Every accepted frame preserves canonical payload and envelope hashes.",
+    "Every accepted append preserves sequence, predecessor, and causal continuity.",
+    "Rejected candidate bytes never replace the last verified projection.",
+    "An unmeasured detector is never represented as a passing assertion."
+  ],
+  "positive_path": [
+    "Run the control to verify every detector against the healthy synthetic chain.",
+    "Confirm that the accepted chain projects the stable world at its trusted high-water mark."
+  ],
+  "failure_path": "Launch any adversarial mutation and observe the exact rejecting layer, quarantined bytes, and unchanged verified projection."
+}
