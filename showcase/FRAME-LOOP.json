@@ -2,7 +2,7 @@
   "schema": "frame-chains.frame-loop/1",
   "loop": 1,
   "base_commit": "6a7c980837cf33ca8e40fd48feaafd5e63c786ee",
-  "integration_head_before_ledger": "0756b0ff6b921470280e6b8ff12074f6815327ad",
+  "integration_head_before_ledger": "b7fa36ad7b82f2384a23cb301efdc6ebdfaa5b46",
   "merge_strategy": "git merge --no-ff",
   "squash": false,
   "frame_count": 10,
@@ -91,11 +91,12 @@
       "slug": "08-teleporting-roguelike",
       "branch": "frame/08-teleporting-roguelike",
       "path": "showcase/08-teleporting-roguelike",
-      "commit": "d489c38fb36e84297200d85938ffae89dc1f20b1",
+      "commit": "c456b69356c63f49ae971a9697b36d8f0653a342",
       "commits": [
         "431d46d5719c6bb49f2b5570efb91833e649d402",
         "aa05697910cec1a069a565bcc2cd1a991848ba12",
-        "d489c38fb36e84297200d85938ffae89dc1f20b1"
+        "d489c38fb36e84297200d85938ffae89dc1f20b1",
+        "c456b69356c63f49ae971a9697b36d8f0653a342"
       ]
     },
     {
@@ -115,11 +116,12 @@
       "slug": "10-futures-museum",
       "branch": "frame/10-futures-museum",
       "path": "showcase/10-futures-museum",
-      "commit": "fef699ab581f82f5c7b80bcb1e5d0c0c5fd4266a",
+      "commit": "21d882aa405cbf37f0b5f86f0f25940e5437dbd6",
       "commits": [
         "62ba08fb4d977259d9355fcc05e71ba189317525",
         "8778e61c9d87cd98280502462de38f52dde9c8bb",
-        "fef699ab581f82f5c7b80bcb1e5d0c0c5fd4266a"
+        "fef699ab581f82f5c7b80bcb1e5d0c0c5fd4266a",
+        "21d882aa405cbf37f0b5f86f0f25940e5437dbd6"
       ]
     }
   ]
