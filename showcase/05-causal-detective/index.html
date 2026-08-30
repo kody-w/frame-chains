@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The Causal Detective: solve a fictional locked-room mystery using canonical-JSON SHA-256 evidence frames.">
+<title>The Causal Detective · Frame 05</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    linear-gradient(90deg, transparent 23px, var(--cp-border) 24px, transparent 25px),
+    linear-gradient(var(--cp-bg), var(--cp-bg));
+  color: var(--cp-text);
+  font: 16px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button, select, input { font: inherit; }
+button, select {
+  min-height: 44px;
+  border: 1px solid var(--cp-border-strong);
+  border-radius: .625rem;
+}
+button {
+  padding: .65rem .9rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  cursor: pointer;
+  font-weight: 650;
+}
+button:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+button:disabled { cursor: not-allowed; opacity: .56; }
+button.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+button.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+button.danger { border-color: var(--cp-danger); color: var(--cp-danger); }
+button.small { min-height: 44px; padding: .55rem .7rem; font-size: .82rem; }
+a { color: var(--cp-link); }
+:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 3px; }
+.shell { width: min(1480px, 100%); margin: 0 auto; padding: 20px clamp(16px, 3vw, 44px) 64px; }
+.masthead {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, .6fr);
+  gap: 28px;
+  align-items: end;
+  padding: clamp(24px, 5vw, 64px);
+  background: var(--cp-bg-elevated);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+}
+.masthead::after {
+  content: "05";
+  position: absolute;
+  right: 22px;
+  top: -38px;
+  color: var(--cp-accent-soft);
+  font-size: clamp(9rem, 22vw, 19rem);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--cp-accent);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+h1 { max-width: 900px; margin: 0; font-size: clamp(2.4rem, 6vw, 5.8rem); line-height: .93; letter-spacing: -.055em; }
+.dek { max-width: 760px; margin: 22px 0 0; color: var(--cp-text-muted); font-size: clamp(1rem, 2vw, 1.24rem); }
+.case-stamp {
+  position: relative;
+  z-index: 1;
+  padding: 18px;
+  border: 1px dashed var(--cp-accent);
+  border-radius: 16px;
+  background: var(--cp-panel-strong);
+  transform: rotate(-1deg);
+}
+.case-stamp strong { display: block; color: var(--cp-accent); font-size: 1.28rem; }
+.mono { font-family: Consolas, "Courier New", Courier, monospace; }
+.hash { overflow-wrap: anywhere; color: var(--cp-text-muted); font: .78rem/1.35 Consolas, "Courier New", Courier, monospace; }
+.top-actions, .action-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.top-actions { margin-top: 22px; }
+.newcomer-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 20px 0 12px; }
+.primer, .scope, .card, .panel, .assertion, .theory-card, .slot, .ledger-item {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+}
+.primer { min-height: 156px; padding: 18px; border-radius: 16px; }
+.primer .step { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 800; }
+.primer h2 { margin: 14px 0 6px; font-size: 1rem; }
+.primer p { margin: 0; color: var(--cp-text-muted); font-size: .9rem; }
+.scope { display: grid; grid-template-columns: auto 1fr; gap: 14px; margin-bottom: 22px; padding: 16px 18px; border-left: 5px solid var(--cp-warning); border-radius: .625rem; }
+.scope strong { color: var(--cp-warning); }
+.scope p { margin: 2px 0 0; color: var(--cp-text-muted); }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(330px, .75fr); gap: 18px; align-items: start; }
+.main-stack, .side-stack { display: grid; gap: 18px; }
+.panel { padding: clamp(16px, 2vw, 24px); border-radius: 16px; }
+.panel-head { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.panel h2, .panel h3 { margin: 0; }
+.panel h2 { font-size: 1.25rem; }
+.panel h3 { font-size: 1rem; }
+.subtle { margin: 4px 0 0; color: var(--cp-text-muted); font-size: .9rem; }
+.mode-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.mode-tabs button[aria-pressed="true"], .filter-tabs button[aria-pressed="true"] {
+  background: var(--cp-accent-soft);
+  border-color: var(--cp-accent);
+  color: var(--cp-accent);
+}
+.scene {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 360px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--cp-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cp-border) 1px, transparent 1px),
+    var(--cp-surface-soft);
+  background-size: 40px 40px;
+}
+.scene svg { display: block; width: 100%; height: auto; min-height: 360px; }
+.room { fill: var(--cp-surface); stroke: var(--cp-border-strong); stroke-width: 2; }
+.passage { fill: none; stroke: var(--cp-accent); stroke-width: 8; stroke-dasharray: 10 8; }
+.path { fill: none; stroke: var(--cp-accent); stroke-width: 3; stroke-dasharray: 6 5; }
+.evidence-line { stroke: var(--cp-border-strong); stroke-width: 1.5; }
+.node circle { fill: var(--cp-surface); stroke: var(--cp-accent); stroke-width: 3; }
+.node text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; font-size: 13px; font-weight: 700; }
+.node .tiny { fill: var(--cp-text-muted); font: 11px Consolas, "Courier New", Courier, monospace; }
+.node.hidden { opacity: .16; }
+.pulse circle { animation: pulse 1.2s ease-out; }
+@keyframes pulse { 0% { stroke-width: 10; } 100% { stroke-width: 3; } }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; color: var(--cp-text-muted); font-size: .84rem; }
+.dot { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 50%; background: var(--cp-accent); }
+.dot.ok { background: var(--cp-success); }
+.dot.bad { background: var(--cp-danger); }
+.timeline { display: grid; gap: 8px; margin-top: 16px; }
+.event {
+  display: grid;
+  grid-template-columns: 68px 36px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 58px;
+  padding: 8px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: .625rem;
+  background: var(--cp-surface);
+}
+.event.is-hidden { display: none; }
+.event time { color: var(--cp-accent); font-weight: 800; }
+.type-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--cp-accent-soft); }
+.event-title { font-weight: 700; }
+.event-detail { color: var(--cp-text-muted); font-size: .86rem; }
+.event button { min-width: 72px; }
+.guide {
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid var(--cp-accent);
+  border-radius: .625rem;
+  background: var(--cp-accent-soft);
+}
+.guide strong { color: var(--cp-accent); }
+.slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; }
+.slot { padding: 10px; border-radius: .625rem; }
+.slot label { display: block; margin-bottom: 6px; color: var(--cp-text-muted); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.slot select { width: 100%; padding: 7px; background: var(--cp-surface); color: var(--cp-text); }
+.slot.connected { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+.verdict {
+  display: none;
+  margin-top: 14px;
+  padding: 15px;
+  border-radius: .625rem;
+  border: 1px solid var(--cp-border);
+}
+.verdict.show { display: block; }
+.verdict.ok { border-color: var(--cp-success); }
+.verdict.bad { border-color: var(--cp-danger); }
+.verdict h3 { margin: 0 0 5px; }
+.verdict p { margin: 0; color: var(--cp-text-muted); }
+.assertion-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.assertion { padding: 12px; border-radius: .625rem; border-left: 4px solid var(--cp-border-strong); }
+.assertion.pass { border-left-color: var(--cp-success); }
+.assertion.fail { border-left-color: var(--cp-danger); }
+.assertion.pending { border-left-color: var(--cp-warning); }
+.assertion b { display: block; font-size: .88rem; }
+.assertion span { color: var(--cp-text-muted); font-size: .77rem; }
+.oracle {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: .625rem;
+  background: var(--cp-surface-soft);
+}
+.oracle-light { width: 18px; height: 18px; border-radius: 50%; background: var(--cp-success); box-shadow: 0 0 0 6px var(--cp-highlight); }
+.oracle-light.red { background: var(--cp-danger); }
+.oracle-light.amber { background: var(--cp-warning); }
+.theory-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.theory-card { padding: 14px; border-radius: 16px; }
+.theory-card h3 { margin-bottom: 5px; }
+.theory-card p { min-height: 74px; color: var(--cp-text-muted); font-size: .86rem; }
+.theory-card.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+.compare {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.compare.show { display: grid; }
+.compare > div { padding: 12px; border: 1px solid var(--cp-border); border-radius: .625rem; }
+.compare h4 { margin: 0 0 6px; }
+.compare ul { margin: 0; padding-left: 20px; color: var(--cp-text-muted); font-size: .84rem; }
+.filter-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ledger { display: grid; gap: 8px; max-height: 620px; overflow: auto; padding-right: 3px; }
+.ledger-item { padding: 11px; border-radius: .625rem; }
+.ledger-item.bad { border-color: var(--cp-danger); }
+.ledger-top { display: flex; justify-content: space-between; gap: 8px; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text-muted);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.badge.ok { color: var(--cp-success); }
+.badge.bad { color: var(--cp-danger); }
+.ledger-item summary { cursor: pointer; font-weight: 700; }
+.json { max-height: 220px; overflow: auto; white-space: pre-wrap; word-break: break-word; color: var(--cp-text-muted); font: .73rem/1.45 Consolas, "Courier New", Courier, monospace; }
+.mutation {
+  padding: 16px;
+  border: 1px dashed var(--cp-danger);
+  border-radius: 16px;
+  background: var(--cp-surface-soft);
+}
+.mutation h3 { color: var(--cp-danger); }
+.mutation p { color: var(--cp-text-muted); font-size: .88rem; }
+.prompt-box { margin-top: 18px; }
+.prompt-box textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 12px;
+  resize: vertical;
+  border: 1px solid var(--cp-border);
+  border-radius: .625rem;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+  font: .78rem/1.45 Consolas, "Courier New", Courier, monospace;
+}
+.footer { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: .84rem; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 1050px) {
+  .workspace { grid-template-columns: 1fr; }
+  .side-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .masthead { grid-template-columns: 1fr; }
+  .newcomer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .side-stack { grid-template-columns: 1fr; }
+  .theory-grid { grid-template-columns: 1fr; }
+  .theory-card p { min-height: 0; }
+  .slots { grid-template-columns: 1fr; }
+  .compare { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .shell { padding: 10px 10px 44px; }
+  .masthead { padding: 22px 18px; }
+  .newcomer-grid { grid-template-columns: 1fr; }
+  .primer { min-height: auto; }
+  .scope { grid-template-columns: 1fr; }
+  .panel-head { display: grid; }
+  .event { grid-template-columns: 56px 32px 1fr; }
+  .event button { grid-column: 1 / -1; width: 100%; }
+  .assertion-grid { grid-template-columns: 1fr; }
+  .scene { min-height: 300px; }
+  .scene svg { min-height: 300px; }
+  .top-actions button, .action-row button { flex: 1 1 145px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Frame 05 · Evidence is immutable. Inference is not.</p>
+      <h1>The Causal Detective</h1>
+      <p class="dek">At 21:00, the Blackglass Seal vanished from a room locked from the outside. Every observation is a canonical-JSON SHA-256 frame. Solve the impossible chronology—without rewriting a single fact.</p>
+      <div class="top-actions">
+        <button class="primary" id="guidedBtn">Start guided solve</button>
+        <button id="manualBtn">Open manual puzzle</button>
+        <button id="replayBtn">Replay evidence</button>
+        <button id="resetBtn">Reset case</button>
+      </div>
+    </div>
+    <aside class="case-stamp" aria-label="Case summary">
+      <span class="badge">Case Morrow-17</span>
+      <strong>THE VIOLET ROOM</strong>
+      <span>Blackglass Seal missing<br>20-minute opportunity window<br>3 suspects · 1 hidden passage</span>
+      <p class="hash" id="caseHead">Minting evidence head…</p>
+    </aside>
+  </header>
+
+  <section class="newcomer-grid" aria-label="Four-step newcomer guide">
+    <article class="primer"><span class="step">1</span><h2>Read the fact</h2><p>Each card records one observation, movement, access event, transfer, alibi, or forensic result.</p></article>
+    <article class="primer"><span class="step">2</span><h2>Trust, then test</h2><p>The browser recomputes every canonical frame with real SHA-256. Shape alone is not truth.</p></article>
+    <article class="primer"><span class="step">3</span><h2>Connect causes</h2><p>An accusation must cite exact earlier hashes for person, object, location, lifecycle, and chronology.</p></article>
+    <article class="primer"><span class="step">4</span><h2>Fork interpretation</h2><p>Competing theories share immutable facts while their interpretation frames diverge safely.</p></article>
+  </section>
+
+  <aside class="scope" aria-label="Scope and limits">
+    <strong>Scope</strong>
+    <p>This is a synthetic, fictional teaching model. SHA-256 proves exact bytes and links; the deterministic causal oracle only proves consistency with the explicit rules encoded here. It does not discover truth, assess real people, or replace investigation.</p>
+  </aside>
+
+  <main class="workspace">
+    <div class="main-stack">
+      <section class="panel" aria-labelledby="mapTitle">
+        <div class="panel-head">
+          <div><h2 id="mapTitle">The evidence room</h2><p class="subtle">A locked-room timeline rendered from the current frame set.</p></div>
+          <div class="mode-tabs" aria-label="View mode">
+            <button id="mapViewBtn" aria-pressed="true">Causal map</button>
+            <button id="timeViewBtn" aria-pressed="false">Timeline</button>
+          </div>
+        </div>
+        <div class="scene" id="scene">
+          <svg viewBox="0 0 820 400" role="img" aria-labelledby="mapSvgTitle mapSvgDesc">
+            <title id="mapSvgTitle">Floor plan and causal evidence graph</title>
+            <desc id="mapSvgDesc">The east gallery connects by a concealed service passage to the locked map room. Evidence nodes appear in chronological order.</desc>
+            <rect class="room" x="45" y="70" width="250" height="230" rx="10"/>
+            <rect class="room" x="520" y="70" width="250" height="230" rx="10"/>
+            <path class="passage" d="M295 245 C360 310, 455 310, 520 245"/>
+            <text x="170" y="105" text-anchor="middle" fill="var(--cp-text)" font-weight="800">EAST GALLERY</text>
+            <text x="645" y="105" text-anchor="middle" fill="var(--cp-text)" font-weight="800">VIOLET MAP ROOM</text>
+            <text x="405" y="345" text-anchor="middle" fill="var(--cp-accent)" font-weight="800">CONCEALED SERVICE PASSAGE</text>
+            <path class="path" d="M170 155 L170 235 L405 285 L645 235 L645 150"/>
+            <g id="mapNodes"></g>
+          </svg>
+        </div>
+        <div class="legend">
+          <span><i class="dot"></i>evidence hash</span>
+          <span><i class="dot ok"></i>causally consistent</span>
+          <span><i class="dot bad"></i>semantic contradiction</span>
+        </div>
+        <div class="timeline" id="timeline" aria-label="Evidence timeline" hidden></div>
+      </section>
+
+      <section class="panel" aria-labelledby="accuseTitle">
+        <div class="panel-head">
+          <div><h2 id="accuseTitle">Accusation assembler</h2><p class="subtle">Select exact earlier frame hashes. Reusing one hash in two roles is rejected.</p></div>
+          <span class="badge" id="modeBadge">Guided</span>
+        </div>
+        <div class="guide" id="guideBox">
+          <strong id="guideTitle">Step 1 of 5 · Who had access?</strong>
+          <div id="guideText">Find the access event that places a named person inside the opportunity window.</div>
+        </div>
+        <div class="slots" id="slots"></div>
+        <div class="action-row" style="margin-top:12px">
+          <button class="primary" id="accuseBtn">Mint accusation frame</button>
+          <button id="clearSlotsBtn">Clear connections</button>
+        </div>
+        <div class="verdict" id="verdict" role="status"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="theoryTitle">
+        <div class="panel-head">
+          <div><h2 id="theoryTitle">Fork competing suspect theories</h2><p class="subtle">Theory frames point to the same evidence head. Facts remain unchanged; interpretation branches.</p></div>
+          <span class="badge" id="forkCount">0 forks</span>
+        </div>
+        <div class="theory-grid" id="theories"></div>
+        <div class="compare" id="compare"></div>
+      </section>
+    </div>
+
+    <aside class="side-stack">
+      <section class="panel" aria-labelledby="assertTitle">
+        <div class="panel-head"><div><h2 id="assertTitle">Live assertions</h2><p class="subtle">Two independent gates: cryptographic shape and causal meaning.</p></div></div>
+        <div class="assertion-grid" id="assertions"></div>
+        <div class="oracle">
+          <span class="oracle-light" id="oracleLight" aria-hidden="true"></span>
+          <div><strong id="oracleTitle">Causal transition oracle: green</strong><div class="subtle" id="oracleDetail">All active transitions are semantically possible.</div></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="ledgerTitle">
+        <div class="panel-head"><div><h2 id="ledgerTitle">Frame ledger</h2><p class="subtle">Canonical JSON, full hashes, predecessors, and cited causes.</p></div></div>
+        <div class="filter-tabs" id="filters" aria-label="Ledger filters">
+          <button aria-pressed="true" data-filter="all">All</button>
+          <button aria-pressed="false" data-filter="evidence">Evidence</button>
+          <button aria-pressed="false" data-filter="theory">Theories</button>
+          <button aria-pressed="false" data-filter="conclusion">Conclusions</button>
+          <button aria-pressed="false" data-filter="failure">Failures</button>
+        </div>
+        <div class="ledger" id="ledger"></div>
+      </section>
+
+      <section class="mutation" aria-labelledby="mutationTitle">
+        <h3 id="mutationTitle">Failure lab · the perfect forgery</h3>
+        <p>Append a clue claiming Elias crossed the Map Room while a continuous terrace frame already places him elsewhere. The forged clue is canonical and correctly rehashed. Watch cryptography pass while causality turns red.</p>
+        <button class="danger" id="mutateBtn">Inject + rehash forged clue</button>
+      </section>
+    </aside>
+  </main>
+
+  <section class="panel prompt-box" aria-labelledby="promptTitle">
+    <div class="panel-head">
+      <div><h2 id="promptTitle">Rebuild this proof with any LLM</h2><p class="subtle">Copy a model-neutral specification. Ask for an independent implementation, not an explanation.</p></div>
+      <button id="copyPromptBtn">Copy prompt</button>
+    </div>
+    <label class="sr-only" for="promptText">Any-LLM implementation prompt</label>
+    <textarea id="promptText" readonly>Build one offline HTML file called “The Causal Detective.” Use synthetic fictional locked-room evidence represented only as canonical JSON frames hashed with the browser’s real Web Crypto SHA-256. Each frame must include a previous-frame hash and may cite exact earlier hashes as causes. Let a reader assemble an accusation by selecting hashes for person, object, location, lifecycle, and chronology. Accept only the exact causally supported combination; reject duplicate evidence and unsupported conclusions. Let readers fork at least three competing theory frames from one immutable evidence head and compare shared cited facts versus divergent interpretations. Include a failure control that appends a semantically impossible clue, correctly recomputes its SHA-256, shows cryptographic validation passing, and shows a deterministic causal-transition oracle failing. Include four newcomer panels, a scope/limitations note, guided and manual modes, evidence replay, reset, a canonical JSON ledger, live assertions, mutation controls, keyboard access, aria-live announcements, 44px targets, 390px layout, reduced-motion handling, and light/dark theme support. Do not use external assets or services.</textarea>
+  </section>
+
+  <footer class="footer">Synthetic fiction · all names, places, objects, and events are invented · offline browser proof · Frame 05</footer>
+  <div class="sr-only" id="live" aria-live="polite" aria-atomic="true"></div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => [...document.querySelectorAll(selector)];
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const encoder = new TextEncoder();
+
+  const icon = {
+    observation: "◉",
+    access: "⌁",
+    transfer: "⇄",
+    movement: "→",
+    forensic: "⌕",
+    lifecycle: "↺",
+    alibi: "✓",
+    theory: "⑂",
+    conclusion: "⚖",
+    forged: "!"
+  };
+
+  const categoryLabels = {
+    person: "Person",
+    object: "Object",
+    location: "Location",
+    lifecycle: "Lifecycle",
+    chronology: "Chronology"
+  };
+
+  const evidenceSpecs = [
+    {
+      id: "E01", type: "observation", at: "20:40", title: "Seal witnessed in case",
+      detail: "Jun and Dr. Lark record the Blackglass Seal inside the Violet Room display.",
+      payload: { location: "Violet Map Room", object: "Blackglass Seal", state: "present", witnesses: ["Jun Park", "Dr. Lark"] }
+    },
+    {
+      id: "E02", type: "access", at: "20:42", title: "Mara enters East Gallery",
+      detail: "Master fob M-7 opens the staff entrance for curator Mara Voss.",
+      payload: { actor: "Mara Voss", credential: "Master fob M-7", location: "East Gallery", action: "enter" }
+    },
+    {
+      id: "E03", type: "transfer", at: "20:44", title: "Service key leaves lockbox",
+      detail: "The brass service key transfers from lockbox custody to Mara.",
+      payload: { actor: "Mara Voss", object: "Brass service key", from: "East Gallery lockbox", to: "Mara Voss", lifecycle: "borrowed" },
+      causes: ["E02"]
+    },
+    {
+      id: "E04", type: "movement", at: "20:47", title: "Passage pressure strip trips",
+      detail: "A weight matching Mara’s logged kit moves East Gallery → Map Room.",
+      payload: { actor: "Mara Voss", from: "East Gallery", to: "Violet Map Room", route: "concealed service passage" },
+      causes: ["E02", "E03"]
+    },
+    {
+      id: "E05", type: "forensic", at: "20:50", title: "Chalk transfer matches latch",
+      detail: "Blue conservation chalk on the brass key matches the passage-side latch.",
+      payload: { object: "Brass service key", location: "Violet Map Room", result: "blue chalk concordance", supports: "passage latch opened" },
+      causes: ["E03", "E04"]
+    },
+    {
+      id: "E06", type: "lifecycle", at: "20:54", title: "Service key returned",
+      detail: "Lockbox sensor records the same brass key returning after passage use.",
+      payload: { actor: "Mara Voss", object: "Brass service key", location: "East Gallery lockbox", lifecycle: "returned" },
+      causes: ["E03", "E04", "E05"]
+    },
+    {
+      id: "E07", type: "access", at: "20:55", title: "Corridor lock seals",
+      detail: "The public Map Room door is locked from the corridor after the key returns.",
+      payload: { location: "Violet Map Room", action: "corridor door sealed", after: "service key returned", state: "locked from outside" },
+      causes: ["E06"]
+    },
+    {
+      id: "E08", type: "alibi", at: "20:58", title: "Elias remains on terrace",
+      detail: "Continuous camera + pressure mat place Elias outside from 20:44–20:58.",
+      payload: { actor: "Elias Finch", location: "North Terrace", interval: ["20:44", "20:58"], continuity: "unbroken", sources: ["camera", "pressure mat"] }
+    },
+    {
+      id: "E09", type: "alibi", at: "21:01", title: "Jun’s archive call ends",
+      detail: "A witnessed live inventory call places Jun in the Archive from 20:40–21:01.",
+      payload: { actor: "Jun Park", location: "Archive", interval: ["20:40", "21:01"], continuity: "witnessed live", witness: "Nia Sol" }
+    },
+    {
+      id: "E10", type: "observation", at: "21:02", title: "Locked room opened; seal gone",
+      detail: "Dr. Lark opens the corridor lock. The case is empty; no corridor entry occurred.",
+      payload: { location: "Violet Map Room", object: "Blackglass Seal", state: "missing", corridorEntries: 0 },
+      causes: ["E01", "E07"]
+    }
+  ];
+
+  const theorySpecs = [
+    {
+      id: "T-MARA", name: "The curator’s loop", suspect: "Mara Voss",
+      summary: "Mara borrows the service key, uses the concealed passage, returns the key, then lets the corridor lock create the illusion.",
+      causeIds: ["E02", "E03", "E04", "E05", "E06", "E07", "E10"]
+    },
+    {
+      id: "T-ELIAS", name: "The conservator’s frame-up", suspect: "Elias Finch",
+      summary: "Elias plants chalk and manipulates sensors to make Mara’s legitimate key inspection look like theft.",
+      causeIds: ["E03", "E05", "E06", "E08", "E10"]
+    },
+    {
+      id: "T-JUN", name: "The inventory illusion", suspect: "Jun Park",
+      summary: "Jun removes the seal before the call and exploits a delayed observation; the locked room is narrative misdirection.",
+      causeIds: ["E01", "E07", "E09", "E10"]
+    }
+  ];
+
+  const guideSteps = [
+    ["person", "Who had access?", "Use the access event that places a named person inside the opportunity window."],
+    ["object", "What changed custody?", "Use the transfer frame for the tool needed to traverse the hidden route."],
+    ["location", "How did the room become reachable?", "Use the movement frame that enters the locked room without the corridor."],
+    ["lifecycle", "Was the tool restored?", "Use the lifecycle frame that closes the borrow → use → return loop."],
+    ["chronology", "What makes the room look impossible?", "Use the later lock event: the public door seals only after the tool returns."]
+  ];
+
+  let evidence = [];
+  let theories = [];
+  let sessionFrames = [];
+  let selectedTheories = [];
+  let selected = { person: "", object: "", location: "", lifecycle: "", chronology: "" };
+  let expected = {};
+  let mode = "guided";
+  let guideIndex = 0;
+  let visibleCount = evidenceSpecs.length;
+  let ledgerFilter = "all";
+  let replayTimer = null;
+
+  function canonicalize(value) {
+    if (Array.isArray(value)) return value.map(canonicalize);
+    if (value && typeof value === "object") {
+      return Object.keys(value).sort().reduce((out, key) => {
+        if (value[key] !== undefined) out[key] = canonicalize(value[key]);
+        return out;
+      }, {});
+    }
+    return value;
+  }
+
+  function canonicalJSON(value) {
+    return JSON.stringify(canonicalize(value));
+  }
+
+  async function sha256(value) {
+    const bytes = encoder.encode(typeof value === "string" ? value : canonicalJSON(value));
+    const result = await crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(result)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function mint(spec, seq, prev, causes = []) {
+    const body = {
+      version: "causal-frame/1",
+      id: spec.id,
+      seq,
+      kind: spec.type,
+      at: `2042-11-17T${spec.at}:00Z`,
+      prev,
+      causes,
+      payload: {
+        title: spec.title || spec.name,
+        ...spec.payload
+      }
+    };
+    return { ...body, hash: await sha256(body), detail: spec.detail || spec.summary || "" };
+  }
+
+  function short(hash) {
+    return hash ? `${hash.slice(0, 8)}…${hash.slice(-5)}` : "GENESIS";
+  }
+
+  function bodyOf(frame) {
+    const { hash, detail, oracle, group, spec, crypto, ...body } = frame;
+    return body;
+  }
+
+  async function buildEvidence() {
+    const byId = new Map();
+    evidence = [];
+    for (let index = 0; index < evidenceSpecs.length; index++) {
+      const spec = evidenceSpecs[index];
+      const causes = (spec.causes || []).map(id => byId.get(id).hash);
+      const frame = await mint(spec, index, evidence[index - 1]?.hash || null, causes);
+      frame.group = "evidence";
+      evidence.push(frame);
+      byId.set(spec.id, frame);
+    }
+    expected = {
+      person: byId.get("E02").hash,
+      object: byId.get("E03").hash,
+      location: byId.get("E04").hash,
+      lifecycle: byId.get("E06").hash,
+      chronology: byId.get("E07").hash
+    };
+    theories = [];
+    for (const spec of theorySpecs) {
+      const frame = await mint({
+        id: spec.id,
+        type: "theory",
+        at: "21:08",
+        name: spec.name,
+        summary: spec.summary,
+        payload: { suspect: spec.suspect, interpretation: spec.summary }
+      }, evidence.length, evidence.at(-1).hash, spec.causeIds.map(id => byId.get(id).hash));
+      frame.group = "theory";
+      frame.spec = spec;
+      theories.push(frame);
+    }
+  }
+
+  function allFrames() {
+    return [...evidence, ...theories.filter(frame => selectedTheories.includes(frame.id)), ...sessionFrames];
+  }
+
+  async function cryptoStatus(frame, knownHashes) {
+    const hashOk = (await sha256(bodyOf(frame))) === frame.hash;
+    const prevOk = frame.prev === null || knownHashes.has(frame.prev);
+    const causesOk = frame.causes.every(hash => knownHashes.has(hash));
+    return { pass: hashOk && prevOk && causesOk, hashOk, prevOk, causesOk };
+  }
+
+  function minutes(time) {
+    const [hour, minute] = time.split(":").map(Number);
+    return hour * 60 + minute;
+  }
+
+  function semanticStatus(frame) {
+    if (frame.kind === "forged") {
+      const [start, end] = frame.payload.interval.map(minutes);
+      const conflict = evidence.find(candidate =>
+        candidate.kind === "alibi" &&
+        candidate.payload.actor === frame.payload.actor &&
+        candidate.payload.continuity === "unbroken" &&
+        Math.max(start, minutes(candidate.payload.interval[0])) < Math.min(end, minutes(candidate.payload.interval[1])) &&
+        candidate.payload.location !== frame.payload.location
+      );
+      return conflict
+        ? { pass: false, reason: `${frame.payload.actor} cannot occupy ${frame.payload.location} while ${short(conflict.hash)} continuously places him at ${conflict.payload.location}.` }
+        : { pass: true, reason: "No explicit transition conflict." };
+    }
+    if (frame.kind === "conclusion") {
+      const values = Object.values(frame.payload.connections);
+      if (new Set(values).size !== values.length) return { pass: false, reason: "One evidence hash was reused for multiple causal roles." };
+      const mismatch = Object.keys(expected).find(key => frame.payload.connections[key] !== expected[key]);
+      if (mismatch) return { pass: false, reason: `Unsupported ${mismatch} cause. The conclusion does not match the encoded transition rules.` };
+      if (!values.every(hash => evidence.some(item => item.hash === hash))) return { pass: false, reason: "A cited cause is not an earlier evidence frame." };
+      return { pass: true, reason: "Person, object, location, lifecycle, and chronology all match exact earlier causes." };
+    }
+    return { pass: true, reason: "Transition is consistent with the explicit case rules." };
+  }
+
+  function announce(message) {
+    $("#live").textContent = "";
+    requestAnimationFrame(() => { $("#live").textContent = message; });
+  }
+
+  function renderMap() {
+    const positions = [
+      [645, 145], [170, 155], [170, 235], [405, 285], [645, 235],
+      [250, 260], [645, 150], [100, 350], [700, 350], [645, 205]
+    ];
+    $("#mapNodes").innerHTML = evidence.map((frame, index) => {
+      const [x, y] = positions[index];
+      const hidden = index >= visibleCount ? " hidden" : "";
+      const pulse = index === visibleCount - 1 ? " pulse" : "";
+      return `<g class="node${hidden}${pulse}" transform="translate(${x} ${y})">
+        <circle r="21"></circle>
+        <text text-anchor="middle" y="5">${frame.id.slice(1)}</text>
+        <text class="tiny" text-anchor="middle" y="39">${short(frame.hash).slice(0, 8)}</text>
+      </g>`;
+    }).join("");
+  }
+
+  function renderTimeline() {
+    $("#timeline").innerHTML = evidence.map((frame, index) => `
+      <article class="event${index >= visibleCount ? " is-hidden" : ""}">
+        <time datetime="${frame.at}">${frame.at.slice(11, 16)}</time>
+        <span class="type-icon" aria-hidden="true">${icon[frame.kind]}</span>
+        <div><div class="event-title">${frame.payload.title}</div><div class="event-detail">${frame.detail} · <span class="mono">${short(frame.hash)}</span></div></div>
+        <button class="small cite-btn" data-hash="${frame.hash}" data-id="${frame.id}">Cite</button>
+      </article>
+    `).join("");
+    $$(".cite-btn").forEach(button => button.addEventListener("click", () => citeFrame(button.dataset.hash, button.dataset.id)));
+  }
+
+  function evidenceOption(frame) {
+    return `${frame.id} · ${frame.payload.title} · ${short(frame.hash)}`;
+  }
+
+  function renderSlots() {
+    $("#slots").innerHTML = Object.keys(categoryLabels).map(category => `
+      <div class="slot${selected[category] ? " connected" : ""}">
+        <label for="slot-${category}">${categoryLabels[category]}</label>
+        <select id="slot-${category}" data-category="${category}">
+          <option value="">Choose frame hash…</option>
+          ${evidence.map(frame => `<option value="${frame.hash}"${selected[category] === frame.hash ? " selected" : ""}>${evidenceOption(frame)}</option>`).join("")}
+        </select>
+      </div>
+    `).join("");
+    $$("#slots select").forEach(select => select.addEventListener("change", () => {
+      selected[select.dataset.category] = select.value;
+      if (mode === "guided" && select.dataset.category === guideSteps[guideIndex]?.[0] && select.value === expected[select.dataset.category]) {
+        guideIndex = Math.min(guideIndex + 1, guideSteps.length);
+      }
+      renderSlots();
+      renderGuide();
+      renderAssertions();
+    }));
+  }
+
+  function citeFrame(hash, id) {
+    const open = Object.keys(selected).find(category => !selected[category]) || Object.keys(selected)[0];
+    const target = mode === "guided" && guideIndex < guideSteps.length ? guideSteps[guideIndex][0] : open;
+    selected[target] = hash;
+    if (mode === "guided" && hash === expected[target]) guideIndex = Math.min(guideIndex + 1, guideSteps.length);
+    renderSlots();
+    renderGuide();
+    renderAssertions();
+    announce(`${id} connected to ${categoryLabels[target]}.`);
+    $("#slot-" + (guideSteps[guideIndex]?.[0] || target)).focus();
+  }
+
+  function renderGuide() {
+    $("#modeBadge").textContent = mode === "guided" ? "Guided" : "Manual";
+    $("#guideBox").hidden = mode !== "guided";
+    if (mode !== "guided") return;
+    if (guideIndex >= guideSteps.length) {
+      $("#guideTitle").textContent = "All five causes connected";
+      $("#guideText").textContent = "Mint the accusation. The oracle will compare your exact hashes—not just the labels.";
+      return;
+    }
+    const [, title, text] = guideSteps[guideIndex];
+    $("#guideTitle").textContent = `Step ${guideIndex + 1} of 5 · ${title}`;
+    $("#guideText").textContent = text;
+  }
+
+  async function mintConclusion() {
+    if (Object.values(selected).some(value => !value)) {
+      showVerdict(false, "Incomplete accusation", "Connect one earlier evidence hash to every causal role.");
+      announce("Accusation rejected: five causal roles are required.");
+      return;
+    }
+    const frame = await mint({
+      id: `C${String(sessionFrames.filter(item => item.kind === "conclusion").length + 1).padStart(2, "0")}`,
+      type: "conclusion",
+      at: "21:12",
+      title: "Accusation: Mara Voss",
+      payload: {
+        suspect: "Mara Voss",
+        charge: "removing the Blackglass Seal through the concealed passage",
+        connections: { ...selected }
+      }
+    }, evidence.length + sessionFrames.length + 1, evidence.at(-1).hash, Object.values(selected));
+    frame.group = "conclusion";
+    frame.oracle = semanticStatus(frame);
+    sessionFrames.push(frame);
+    const verdict = frame.oracle;
+    showVerdict(verdict.pass, verdict.pass ? "Accusation accepted" : "Accusation rejected", verdict.reason);
+    renderAll();
+    announce(`${verdict.pass ? "Accepted" : "Rejected"}: ${verdict.reason}`);
+  }
+
+  function showVerdict(pass, title, detail) {
+    const verdict = $("#verdict");
+    verdict.className = `verdict show ${pass ? "ok" : "bad"}`;
+    verdict.innerHTML = `<h3>${pass ? "✓" : "×"} ${title}</h3><p>${detail}</p>`;
+  }
+
+  function renderTheories() {
+    $("#forkCount").textContent = `${selectedTheories.length} fork${selectedTheories.length === 1 ? "" : "s"}`;
+    $("#theories").innerHTML = theories.map(frame => {
+      const active = selectedTheories.includes(frame.id);
+      return `<article class="theory-card${active ? " active" : ""}">
+        <span class="badge">${frame.payload.suspect}</span>
+        <h3>${frame.payload.title}</h3>
+        <p>${frame.detail}</p>
+        <div class="hash">${short(frame.hash)} · cites ${frame.causes.length}</div>
+        <button class="small theory-btn" data-id="${frame.id}">${active ? "Remove fork" : "Fork theory"}</button>
+      </article>`;
+    }).join("");
+    $$(".theory-btn").forEach(button => button.addEventListener("click", () => toggleTheory(button.dataset.id)));
+    renderComparison();
+  }
+
+  function toggleTheory(id) {
+    if (selectedTheories.includes(id)) selectedTheories = selectedTheories.filter(item => item !== id);
+    else selectedTheories = [...selectedTheories, id].slice(-2);
+    renderAll();
+    announce(selectedTheories.length === 2 ? "Two theory forks selected. Comparison ready." : "Theory fork updated.");
+  }
+
+  function labelForHash(hash) {
+    const frame = evidence.find(item => item.hash === hash);
+    return frame ? `${frame.id} ${frame.payload.title}` : short(hash);
+  }
+
+  function renderComparison() {
+    const box = $("#compare");
+    if (selectedTheories.length < 2) {
+      box.className = "compare";
+      box.innerHTML = "";
+      return;
+    }
+    const [a, b] = selectedTheories.map(id => theories.find(frame => frame.id === id));
+    const shared = a.causes.filter(hash => b.causes.includes(hash));
+    const onlyA = a.causes.filter(hash => !b.causes.includes(hash));
+    const onlyB = b.causes.filter(hash => !a.causes.includes(hash));
+    box.className = "compare show";
+    box.innerHTML = `
+      <div><h4>Shared immutable facts</h4><ul>${shared.length ? shared.map(hash => `<li>${labelForHash(hash)}</li>`).join("") : "<li>No shared citations</li>"}</ul></div>
+      <div><h4>Divergent interpretations</h4>
+        <ul><li><b>${a.payload.suspect}:</b> ${onlyA.map(labelForHash).join("; ") || "shared facts only"}</li>
+        <li><b>${b.payload.suspect}:</b> ${onlyB.map(labelForHash).join("; ") || "shared facts only"}</li></ul>
+      </div>`;
+  }
+
+  async function injectForgery() {
+    if (sessionFrames.some(frame => frame.kind === "forged")) {
+      announce("Forged clue already present.");
+      return;
+    }
+    const alibi = evidence.find(frame => frame.id === "E08");
+    const forged = await mint({
+      id: "F01",
+      type: "forged",
+      at: "20:51",
+      title: "Elias seen inside Map Room",
+      payload: {
+        actor: "Elias Finch",
+        location: "Violet Map Room",
+        interval: ["20:49", "20:51"],
+        source: "anonymous passage sensor",
+        claim: "physical presence"
+      }
+    }, evidence.length + sessionFrames.length + 1, evidence.at(-1).hash, [alibi.hash]);
+    forged.group = "failure";
+    forged.oracle = semanticStatus(forged);
+    sessionFrames.push(forged);
+    ledgerFilter = "failure";
+    renderAll();
+    announce("Forged clue appended and rehashed. Cryptographic shape passes. Causal oracle fails.");
+  }
+
+  async function renderAssertions() {
+    const frames = allFrames();
+    const known = new Set();
+    let cryptoPass = true;
+    for (const frame of frames) {
+      const status = await cryptoStatus(frame, known);
+      frame.crypto = status;
+      if (!status.pass) cryptoPass = false;
+      known.add(frame.hash);
+    }
+    const semanticFailures = sessionFrames.filter(frame => frame.oracle && !frame.oracle.pass);
+    const duplicate = new Set(Object.values(selected).filter(Boolean)).size !== Object.values(selected).filter(Boolean).length;
+    const lastConclusion = [...sessionFrames].reverse().find(frame => frame.kind === "conclusion");
+    const assertions = [
+      ["Cryptographic shape", cryptoPass ? "pass" : "fail", cryptoPass ? `${frames.length} hashes recomputed` : "Hash, predecessor, or cause mismatch"],
+      ["Causal transitions", semanticFailures.length ? "fail" : "pass", semanticFailures.length ? `${semanticFailures.length} contradiction detected` : "All active transitions possible"],
+      ["Evidence uniqueness", duplicate ? "fail" : "pass", duplicate ? "A hash fills multiple roles" : "No cited hash reused"],
+      ["Conclusion support", lastConclusion ? (lastConclusion.oracle.pass ? "pass" : "fail") : "pending", lastConclusion ? lastConclusion.oracle.reason : "No accusation minted"]
+    ];
+    $("#assertions").innerHTML = assertions.map(([name, state, detail]) => `
+      <div class="assertion ${state}"><b>${state === "pass" ? "✓" : state === "fail" ? "×" : "·"} ${name}</b><span>${detail}</span></div>
+    `).join("");
+    const light = $("#oracleLight");
+    if (semanticFailures.length) {
+      light.className = "oracle-light red";
+      $("#oracleTitle").textContent = "Causal transition oracle: red";
+      $("#oracleDetail").textContent = semanticFailures.at(-1).oracle.reason;
+    } else if (!lastConclusion) {
+      light.className = "oracle-light amber";
+      $("#oracleTitle").textContent = "Causal transition oracle: waiting";
+      $("#oracleDetail").textContent = "Evidence is consistent. Mint a conclusion or inject the forgery.";
+    } else {
+      light.className = "oracle-light";
+      $("#oracleTitle").textContent = "Causal transition oracle: green";
+      $("#oracleDetail").textContent = lastConclusion.oracle.reason;
+    }
+  }
+
+  function frameLabel(frame) {
+    if (frame.group === "evidence") return frame.kind;
+    return frame.group;
+  }
+
+  function renderLedger() {
+    $$("#filters button").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.filter === ledgerFilter)));
+    const filtered = allFrames().filter(frame => ledgerFilter === "all" || frame.group === ledgerFilter);
+    $("#ledger").innerHTML = filtered.map(frame => {
+      const semantic = frame.oracle || semanticStatus(frame);
+      const isBad = !semantic.pass;
+      return `<article class="ledger-item${isBad ? " bad" : ""}">
+        <div class="ledger-top"><span class="badge ${isBad ? "bad" : "ok"}">${frameLabel(frame)}</span><span class="mono">${frame.id}</span></div>
+        <strong>${frame.payload.title}</strong>
+        <div class="hash">sha256 ${frame.hash}</div>
+        <details>
+          <summary>Canonical frame JSON</summary>
+          <pre class="json">${escapeHTML(canonicalJSON(bodyOf(frame)))}</pre>
+        </details>
+      </article>`;
+    }).join("") || `<p class="subtle">No ${ledgerFilter} frames yet.</p>`;
+  }
+
+  function escapeHTML(value) {
+    return value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+  }
+
+  function renderAll() {
+    $("#caseHead").textContent = `evidence head · ${evidence.length ? evidence.at(-1).hash : "minting…"}`;
+    renderMap();
+    renderTimeline();
+    renderSlots();
+    renderGuide();
+    renderTheories();
+    renderLedger();
+    renderAssertions();
+  }
+
+  function setMode(nextMode) {
+    mode = nextMode;
+    if (mode === "guided") {
+      const firstIncomplete = guideSteps.findIndex(([category]) => selected[category] !== expected[category]);
+      guideIndex = firstIncomplete === -1 ? guideSteps.length : firstIncomplete;
+    }
+    renderGuide();
+    announce(`${mode === "guided" ? "Guided solve" : "Manual puzzle"} enabled.`);
+    $("#accuseTitle").scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "start" });
+  }
+
+  function replay() {
+    if (replayTimer) clearInterval(replayTimer);
+    visibleCount = reducedMotion.matches ? evidence.length : 0;
+    renderMap();
+    renderTimeline();
+    if (reducedMotion.matches) {
+      announce("Evidence replay complete. Reduced motion preference honored.");
+      return;
+    }
+    announce("Evidence replay started.");
+    replayTimer = setInterval(() => {
+      visibleCount++;
+      renderMap();
+      renderTimeline();
+      const current = evidence[visibleCount - 1];
+      if (current) announce(`${current.at.slice(11, 16)}. ${current.payload.title}.`);
+      if (visibleCount >= evidence.length) {
+        clearInterval(replayTimer);
+        replayTimer = null;
+      }
+    }, 520);
+  }
+
+  function reset() {
+    if (replayTimer) clearInterval(replayTimer);
+    replayTimer = null;
+    selected = { person: "", object: "", location: "", lifecycle: "", chronology: "" };
+    sessionFrames = [];
+    selectedTheories = [];
+    mode = "guided";
+    guideIndex = 0;
+    visibleCount = evidence.length;
+    ledgerFilter = "all";
+    $("#verdict").className = "verdict";
+    renderAll();
+    announce("Case reset to the immutable evidence head.");
+  }
+
+  async function copyPrompt() {
+    const text = $("#promptText").value;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      $("#promptText").focus();
+      $("#promptText").select();
+      document.execCommand("copy");
+    }
+    $("#copyPromptBtn").textContent = "Copied";
+    announce("Prompt copied to clipboard.");
+    setTimeout(() => { $("#copyPromptBtn").textContent = "Copy prompt"; }, 1400);
+  }
+
+  async function init() {
+    if (!window.crypto?.subtle) {
+      $("#live").className = "";
+      $("#live").textContent = "This browser does not provide Web Crypto SHA-256. The case cannot mint fake hashes.";
+      throw new Error("Web Crypto unavailable");
+    }
+    await buildEvidence();
+    renderAll();
+
+    $("#guidedBtn").addEventListener("click", () => setMode("guided"));
+    $("#manualBtn").addEventListener("click", () => setMode("manual"));
+    $("#replayBtn").addEventListener("click", replay);
+    $("#resetBtn").addEventListener("click", reset);
+    $("#accuseBtn").addEventListener("click", mintConclusion);
+    $("#clearSlotsBtn").addEventListener("click", () => {
+      selected = { person: "", object: "", location: "", lifecycle: "", chronology: "" };
+      guideIndex = 0;
+      renderSlots();
+      renderGuide();
+      renderAssertions();
+      announce("Causal connections cleared.");
+    });
+    $("#mutateBtn").addEventListener("click", injectForgery);
+    $("#copyPromptBtn").addEventListener("click", copyPrompt);
+    $("#mapViewBtn").addEventListener("click", () => {
+      $("#scene").hidden = false;
+      $("#timeline").hidden = true;
+      $("#mapViewBtn").setAttribute("aria-pressed", "true");
+      $("#timeViewBtn").setAttribute("aria-pressed", "false");
+    });
+    $("#timeViewBtn").addEventListener("click", () => {
+      $("#scene").hidden = true;
+      $("#timeline").hidden = false;
+      $("#mapViewBtn").setAttribute("aria-pressed", "false");
+      $("#timeViewBtn").setAttribute("aria-pressed", "true");
+    });
+    $("#filters").addEventListener("click", event => {
+      const button = event.target.closest("button[data-filter]");
+      if (!button) return;
+      ledgerFilter = button.dataset.filter;
+      renderLedger();
+    });
+  }
+
+  init().catch(error => {
+    console.error(error);
+    announce("Case initialization failed.");
+  });
+})();
+</script>
+</body>
+</html>
