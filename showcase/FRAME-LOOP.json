@@ -2,7 +2,7 @@
   "schema": "frame-chains.frame-loop/1",
   "loop": 1,
   "base_commit": "6a7c980837cf33ca8e40fd48feaafd5e63c786ee",
-  "integration_head_before_ledger": "b7fa36ad7b82f2384a23cb301efdc6ebdfaa5b46",
+  "integration_head_before_ledger": "a52eff007da130c0c64113a23fcdae5556cb0fa3",
   "merge_strategy": "git merge --no-ff",
   "squash": false,
   "frame_count": 10,
@@ -91,12 +91,13 @@
       "slug": "08-teleporting-roguelike",
       "branch": "frame/08-teleporting-roguelike",
       "path": "showcase/08-teleporting-roguelike",
-      "commit": "c456b69356c63f49ae971a9697b36d8f0653a342",
+      "commit": "c0fc9cdcf049b15a1a1b2079b765f1f6edc26f0e",
       "commits": [
         "431d46d5719c6bb49f2b5570efb91833e649d402",
         "aa05697910cec1a069a565bcc2cd1a991848ba12",
         "d489c38fb36e84297200d85938ffae89dc1f20b1",
-        "c456b69356c63f49ae971a9697b36d8f0653a342"
+        "c456b69356c63f49ae971a9697b36d8f0653a342",
+        "c0fc9cdcf049b15a1a1b2079b765f1f6edc26f0e"
       ]
     },
     {
