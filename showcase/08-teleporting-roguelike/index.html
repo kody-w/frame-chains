@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="en" data-theme="clawpilot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>The Teleporting Roguelike — Frame 08</title>
+  <style>
+    :root {
+      --bg: #07110f;
+      --panel: #0d1b18;
+      --panel-2: #10231f;
+      --ink: #effff8;
+      --muted: #9eb9ae;
+      --line: #28483e;
+      --accent: #7dffb3;
+      --accent-2: #72d8ff;
+      --danger: #ff7d8e;
+      --warn: #ffd166;
+      --shadow: 0 18px 50px rgba(0,0,0,.28);
+      --radius: 18px;
+    }
+    html[data-theme="midnight"] {
+      --bg:#070a18; --panel:#10162a; --panel-2:#151d36; --ink:#f4f6ff;
+      --muted:#a7b0d1; --line:#2d3966; --accent:#9ba8ff; --accent-2:#72e3ff;
+      --danger:#ff8298; --warn:#ffd36f;
+    }
+    html[data-theme="paper"] {
+      --bg:#f3efe4; --panel:#fffdf7; --panel-2:#f7f1e4; --ink:#1c2822;
+      --muted:#596b62; --line:#c9d2ca; --accent:#087a4d; --accent-2:#006f98;
+      --danger:#b92743; --warn:#8a5b00; --shadow:0 18px 42px rgba(44,53,48,.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 12% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 33rem),
+        var(--bg);
+      color: var(--ink);
+      font: 15px/1.48 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    button, select, input { font: inherit; }
+    button, select {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+    button {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 760;
+    }
+    button:hover { border-color: var(--accent); transform: translateY(-1px); }
+    button:focus-visible, select:focus-visible, input:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent) 65%, transparent);
+      outline-offset: 2px;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #06110d; }
+    button.danger { color: var(--danger); }
+    button:disabled { cursor: not-allowed; opacity: .5; transform: none; }
+    .wrap { width: min(1480px, 100%); margin: auto; padding: 22px; }
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 5px 0 6px; font-size: clamp(28px, 5vw, 54px); line-height: .98; letter-spacing: -.055em; }
+    h2, h3, p { margin-top: 0; }
+    h2 { font-size: 17px; }
+    h3 { font-size: 14px; margin-bottom: 8px; }
+    .lede { max-width: 860px; color: var(--muted); font-family: system-ui, sans-serif; }
+    .header-tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .header-tools select { padding: 0 12px; }
+    .newcomer {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+    .card, .panel {
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 95%, transparent);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .card { padding: 15px; }
+    .card b { color: var(--accent); }
+    .card p { color: var(--muted); font: 13px/1.45 system-ui, sans-serif; margin: 7px 0 0; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(350px, 1.08fr) minmax(350px, .92fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .panel { padding: 16px; min-width: 0; }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .panel-head h2 { margin: 0; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .game-shell { display: grid; grid-template-columns: minmax(0,1fr) 160px; gap: 13px; }
+    #dungeon {
+      --cols: 15;
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      width: 100%;
+      aspect-ratio: 15 / 11;
+      background: #030706;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      overflow: hidden;
+    }
+    .tile {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      color: #385047;
+      background: #07100d;
+      font-size: clamp(8px, 1.3vw, 16px);
+      user-select: none;
+    }
+    .tile.wall { background: #15231f; color: #2d4039; }
+    .tile.unknown { background: #020403; color: transparent; }
+    .tile.exit { color: var(--accent-2); }
+    .tile.enemy { color: var(--danger); font-weight: 1000; }
+    .tile.item { color: var(--warn); }
+    .tile.player {
+      color: #06110d;
+      background: var(--accent);
+      border-radius: 30%;
+      font-weight: 1000;
+      z-index: 2;
+    }
+    .stats {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+    .stat {
+      padding: 10px;
+      border-radius: 11px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+    }
+    .stat small { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.1em; }
+    .stat strong { font-size: 18px; }
+    .controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .dpad {
+      display:grid;
+      grid-template-columns:repeat(3,44px);
+      grid-template-rows:repeat(2,44px);
+      gap:5px;
+      margin-top:12px;
+    }
+    .dpad button { padding:0; }
+    .dpad .up { grid-column:2; }
+    .dpad .left { grid-column:1; grid-row:2; }
+    .dpad .down { grid-column:2; grid-row:2; }
+    .dpad .right { grid-column:3; grid-row:2; }
+    .statusline {
+      min-height: 44px;
+      display:flex;
+      align-items:center;
+      margin-top:12px;
+      padding:10px 12px;
+      border-left:3px solid var(--accent);
+      background:var(--panel-2);
+      color:var(--muted);
+      font-family:system-ui,sans-serif;
+    }
+    .wide { grid-column: 1 / -1; }
+    .device-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+    .device {
+      min-width: 0;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:13px;
+      background:var(--panel-2);
+    }
+    .device.active { border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
+    .device h3 { display:flex; justify-content:space-between; gap:8px; }
+    .device p { color:var(--muted); font-size:12px; margin-bottom:7px; }
+    .headhash { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--accent-2); }
+    .button-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .assertions { display:grid; grid-template-columns:repeat(2,1fr); gap:7px; }
+    .assertion {
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .assertion::before { content:"○"; color:var(--muted); }
+    .assertion.pass { color:var(--ink); border-color:color-mix(in srgb,var(--accent) 45%,var(--line)); }
+    .assertion.pass::before { content:"✓"; color:var(--accent); }
+    .assertion.fail { color:var(--ink); border-color:var(--danger); }
+    .assertion.fail::before { content:"×"; color:var(--danger); }
+    .replay-row { display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; }
+    input[type="range"] { width:100%; min-height:44px; accent-color:var(--accent); }
+    .ledger {
+      max-height: 420px;
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:12px;
+    }
+    table { width:100%; border-collapse:collapse; font-size:11px; }
+    th,td { text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+    th { position:sticky; top:0; z-index:2; background:var(--panel-2); color:var(--muted); }
+    td code { color:var(--accent-2); }
+    .ok { color:var(--accent); }
+    .bad { color:var(--danger); }
+    .scope {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:14px;
+    }
+    .scope p, .scope li { color:var(--muted); font:13px/1.5 system-ui,sans-serif; }
+    details { border-top:1px solid var(--line); padding-top:10px; margin-top:10px; }
+    summary { cursor:pointer; min-height:44px; display:flex; align-items:center; font-weight:800; }
+    pre {
+      white-space:pre-wrap;
+      overflow-wrap:anywhere;
+      color:var(--muted);
+      background:#030706;
+      padding:12px;
+      border-radius:10px;
+      font-size:11px;
+    }
+    .sr-only {
+      position:absolute!important; width:1px!important; height:1px!important; padding:0!important;
+      margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important;
+    }
+    @media (max-width: 940px) {
+      .newcomer { grid-template-columns:repeat(2,1fr); }
+      .layout { grid-template-columns:1fr; }
+    }
+    @media (max-width: 590px) {
+      .wrap { padding:14px; }
+      header { display:block; }
+      .header-tools { justify-content:flex-start; margin-top:14px; }
+      .newcomer, .device-grid, .scope, .assertions { grid-template-columns:1fr; }
+      .game-shell { grid-template-columns:1fr; }
+      .stats { grid-template-columns:repeat(3,1fr); }
+      .stat { padding:8px; }
+      .stat strong { font-size:15px; }
+      .panel { padding:13px; }
+      th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) { display:none; }
+    }
+    @media (max-width: 390px) {
+      .wrap { padding:10px; }
+      h1 { font-size:31px; }
+      .card { padding:12px; }
+      .controls button { flex:1 1 135px; }
+      #dungeon { border-radius:8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; }
+      button:hover { transform:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="eyebrow">Frame 08 · executable proof</div>
+        <h1>The Teleporting Roguelike</h1>
+        <p class="lede">A tiny dungeon whose map, hero, monsters, inventory, combat, discoveries, and device hand-offs exist only as the deterministic projection of an append-only SHA-256 frame chain.</p>
+      </div>
+      <div class="header-tools">
+        <label class="sr-only" for="theme">Theme</label>
+        <select id="theme" aria-label="Color theme">
+          <option value="clawpilot">Clawpilot</option>
+          <option value="midnight">Midnight</option>
+          <option value="paper">Paper</option>
+        </select>
+        <button id="copyPrompt">Copy build prompt</button>
+      </div>
+    </header>
+
+    <section class="newcomer" aria-label="Four things to try">
+      <article class="card"><b>01 · Play</b><p>Use WASD or arrow keys. Every move becomes one hashed frame; the visible game is replayed from genesis.</p></article>
+      <article class="card"><b>02 · Teleport</b><p>Pause A and send only its chain to skew-clock B. Both devices reconstruct identical canonical world bytes.</p></article>
+      <article class="card"><b>03 · Fork</b><p>Let C discover rooms offline from an older frame, then reattach only when every declared read still exists.</p></article>
+      <article class="card"><b>04 · Attack</b><p>Forge an item or parent. Verification rejects the candidate and leaves the last verified game untouched.</p></article>
+    </section>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Deterministic dungeon</h2>
+          <span class="tag" id="viewTag">LIVE · DEVICE A</span>
+        </div>
+        <div class="game-shell">
+          <div>
+            <div id="dungeon" role="img" aria-label="Dungeon map"></div>
+            <div class="dpad" aria-label="Movement controls">
+              <button class="up" data-move="up" aria-label="Move up">↑</button>
+              <button class="left" data-move="left" aria-label="Move left">←</button>
+              <button class="down" data-move="down" aria-label="Move down">↓</button>
+              <button class="right" data-move="right" aria-label="Move right">→</button>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat"><small>Health</small><strong id="hp">—</strong></div>
+            <div class="stat"><small>Turns</small><strong id="turns">—</strong></div>
+            <div class="stat"><small>Rooms seen</small><strong id="rooms">—</strong></div>
+            <div class="stat"><small>Inventory</small><strong id="inventory">—</strong></div>
+            <div class="stat"><small>Enemies</small><strong id="enemies">—</strong></div>
+            <div class="stat"><small>World SHA</small><strong id="worldHash" style="font-size:12px">—</strong></div>
+          </div>
+        </div>
+        <div class="controls">
+          <button id="usePotion">Use potion (H)</button>
+          <button id="waitTurn">Wait (.)</button>
+          <button id="reset" class="danger">Reset genesis</button>
+        </div>
+        <div id="status" class="statusline" aria-live="polite">Minting the genesis frame…</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Guided proof</h2>
+          <span class="tag" id="demoCounter">STEP 0 / 8</span>
+        </div>
+        <p class="lede" id="demoText">Run the scripted proof or use every control manually. The demo uses the same public operations as the game.</p>
+        <div class="button-row">
+          <button id="nextDemo" class="primary">Run next step</button>
+          <button id="runDemo">Run all</button>
+          <button id="replayDemo">Replay proof</button>
+        </div>
+        <details open>
+          <summary>Live assertions</summary>
+          <div class="assertions" id="assertions">
+            <div class="assertion" data-assert="hashes">Canonical SHA-256 chain verifies</div>
+            <div class="assertion" data-assert="derived">World derives from frames only</div>
+            <div class="assertion" data-assert="transfer">A/B world bytes are identical</div>
+            <div class="assertion" data-assert="clock">Skewed clocks cannot reorder parents</div>
+            <div class="assertion" data-assert="fork">C reattaches by declared reads</div>
+            <div class="assertion" data-assert="mutation">Forgery refused; good head preserved</div>
+          </div>
+        </details>
+      </section>
+
+      <section class="panel wide">
+        <div class="panel-head">
+          <h2>Three-device lab</h2>
+          <span class="tag">CHAIN BYTES ARE THE ONLY TRANSFER</span>
+        </div>
+        <div class="device-grid">
+          <article class="device active" id="deviceA">
+            <h3>Device A <span id="aState">LIVE</span></h3>
+            <p>Clock: UTC. Start here, then pause before teleporting the chain.</p>
+            <code class="headhash" id="aHead">—</code>
+          </article>
+          <article class="device" id="deviceB">
+            <h3>Device B <span id="bState">EMPTY</span></h3>
+            <p>Clock: +07:23:00. Dependency order still follows parent hashes.</p>
+            <code class="headhash" id="bHead">—</code>
+          </article>
+          <article class="device" id="deviceC">
+            <h3>Device C <span id="cState">EMPTY</span></h3>
+            <p>Clock: −11:00:00. Continues offline from an older verified frame.</p>
+            <code class="headhash" id="cHead">—</code>
+          </article>
+        </div>
+        <div class="button-row">
+          <button id="pauseA">Pause Device A</button>
+          <button id="transferB">Transfer chain A → B</button>
+          <button id="skewTurn">Append B turn with bad clock</button>
+          <button id="forkC">Fork older frame to C</button>
+          <button id="offlineC">Continue C offline</button>
+          <button id="reattachC">Reattach C if compatible</button>
+          <button id="conflictC" class="danger">Corrupt C declared read</button>
+        </div>
+      </section>
+
+      <section class="panel wide">
+        <div class="panel-head">
+          <h2>Replay + append-only ledger</h2>
+          <span class="tag" id="chainSize">0 FRAMES</span>
+        </div>
+        <div class="replay-row">
+          <label for="replay">Frame</label>
+          <input id="replay" type="range" min="1" max="1" value="1">
+          <output id="replayValue">1 / 1</output>
+        </div>
+        <div class="button-row">
+          <button id="liveHead">Jump to live head</button>
+          <button id="verify">Verify active chain</button>
+          <button id="forgeItem" class="danger">Forge inventory item</button>
+          <button id="forgeParent" class="danger">Forge parent provenance</button>
+        </div>
+        <div class="ledger" tabindex="0" aria-label="Frame ledger">
+          <table>
+            <thead><tr><th>#</th><th>device / event</th><th>frame SHA-256</th><th>parent</th><th>declared reads</th><th>device clock</th></tr></thead>
+            <tbody id="ledgerBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <section class="panel scope">
+      <div>
+        <div class="eyebrow">Scope</div>
+        <h2>What this proves</h2>
+        <ul>
+          <li>Canonical browser SHA-256 detects byte changes.</li>
+          <li>Parent links, not wall clocks, define total dependency order.</li>
+          <li>Independent devices reconstruct the same canonical world bytes.</li>
+          <li>An offline branch can be replayed onto a newer head when its declared reads remain ancestors.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="eyebrow">Boundary</div>
+        <h2>What this does not prove</h2>
+        <p>This is a deterministic, synthetic, single-browser model. It does not model signatures, hostile key custody, network transport, consensus among competing writers, or production persistence. Device identities and clocks are synthetic. The chain is kept in memory and intentionally disappears on reset or refresh.</p>
+      </div>
+    </section>
+
+    <details class="panel">
+      <summary>Copyable independent-build prompt</summary>
+      <pre id="promptText">Build a single offline HTML deterministic roguelike. Store no mutable game snapshot: derive the map, player, enemies, inventory, combat rolls, and discovered rooms solely by replaying an append-only canonical SHA-256 frame chain. Simulate Device A, a badly skewed-clock Device B that receives only chain bytes and reconstructs an identical world, and Device C continuing offline from an older frame before declared-read compatibility reattachment. Include valid-hash semantic inventory forgery and parent-provenance mutation paths; reject each without replacing the last verified game. Make it keyboard playable, responsive at 390px, accessible with aria-live and 44px controls, reduced-motion aware, dependency-free, and explicit about scope.</pre>
+    </details>
+  </div>
+
+  <script>
+    "use strict";
+
+    const SEED = "frame-08::teleporting-roguelike::2026";
+    const GENESIS_TIME = Date.parse("2026-08-30T19:00:00.000Z");
+    const W = 15, H = 11;
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+    const encoder = new TextEncoder();
+    const directions = {
+      up: [0,-1], down: [0,1], left: [-1,0], right: [1,0]
+    };
+    const deviceClockOffset = { A: 0, B: 7 * 3600 + 23 * 60, C: -11 * 3600 };
+    const devices = { A: [], B: [], C: [] };
+    let activeDevice = "A";
+    let pausedA = false;
+    let cBaseLength = 0;
+    let replayLength = 0;
+    let demoStep = 0;
+    let demoRunning = false;
+    let renderTicket = 0;
+    const proof = { hashes:false, derived:false, transfer:false, clock:false, fork:false, mutation:false };
+
+    function canonical(value) {
+      if (value === null || typeof value !== "object") return JSON.stringify(value);
+      if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
+      return "{" + Object.keys(value).sort().map(k => JSON.stringify(k) + ":" + canonical(value[k])).join(",") + "}";
+    }
+
+    async function sha256(value) {
+      const bytes = typeof value === "string" ? encoder.encode(value) : value;
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    function hash32(text) {
+      let h = 2166136261 >>> 0;
+      for (let i=0; i<text.length; i++) {
+        h ^= text.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function rngFrom(text) {
+      let a = hash32(text);
+      return () => {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function shuffled(items, rng) {
+      const out = [...items];
+      for (let i=out.length-1; i>0; i--) {
+        const j = Math.floor(rng() * (i+1));
+        [out[i],out[j]] = [out[j],out[i]];
+      }
+      return out;
+    }
+
+    function generateWorld(genesisId) {
+      const rng = rngFrom(SEED);
+      const map = Array.from({length:H}, () => Array(W).fill("#"));
+      const visited = new Set(["1,1"]);
+      const stack = [[1,1]];
+      map[1][1] = ".";
+      while (stack.length) {
+        const [x,y] = stack[stack.length-1];
+        const options = shuffled([[2,0],[-2,0],[0,2],[0,-2]], rng)
+          .map(([dx,dy]) => [x+dx,y+dy,dx,dy])
+          .filter(([nx,ny]) => nx>0 && nx<W-1 && ny>0 && ny<H-1 && !visited.has(nx+","+ny));
+        if (!options.length) { stack.pop(); continue; }
+        const [nx,ny,dx,dy] = options[0];
+        visited.add(nx+","+ny);
+        map[y+dy/2][x+dx/2] = ".";
+        map[ny][nx] = ".";
+        stack.push([nx,ny]);
+      }
+      const floor = [];
+      map.forEach((row,y) => row.forEach((v,x) => { if (v === ".") floor.push([x,y]); }));
+      const distance = bfsDistances(map, 1, 1);
+      const exit = [...floor].sort((a,b) => (distance.get(b.join(","))||0) - (distance.get(a.join(","))||0))[0];
+      map[exit[1]][exit[0]] = ">";
+      const candidates = shuffled(floor.filter(([x,y]) => !(x===1&&y===1) && !(x===exit[0]&&y===exit[1])), rng);
+      const enemies = {};
+      candidates.slice(0,5).forEach(([x,y],i) => {
+        enemies["shade-"+(i+1)] = { id:"shade-"+(i+1), x, y, hp:2 + (i%2), origin:genesisId };
+      });
+      const occupied = new Set(Object.values(enemies).map(e => e.x+","+e.y));
+      const itemCells = candidates.filter(([x,y]) => !occupied.has(x+","+y)).slice(0,3);
+      const items = {};
+      itemCells.forEach(([x,y],i) => {
+        items["tonic-"+(i+1)] = { id:"tonic-"+(i+1), x, y, kind:"tonic", origin:genesisId };
+      });
+      const discovered = new Set();
+      reveal(discovered, map, 1, 1);
+      return {
+        seed:SEED, map:map.map(r=>r.join("")), x:1, y:1, hp:8, maxHp:8,
+        enemies, items, inventory:[], discovered, turn:0, won:false, lost:false,
+        message:"The chain wakes beneath your feet."
+      };
+    }
+
+    function bfsDistances(map, sx, sy) {
+      const dist = new Map([[sx+","+sy,0]]);
+      const queue = [[sx,sy]];
+      for (let i=0; i<queue.length; i++) {
+        const [x,y] = queue[i];
+        for (const [dx,dy] of Object.values(directions)) {
+          const nx=x+dx, ny=y+dy, key=nx+","+ny;
+          if (nx>=0&&ny>=0&&nx<W&&ny<H&&map[ny][nx]!=="#"&&!dist.has(key)) {
+            dist.set(key,dist.get(x+","+y)+1); queue.push([nx,ny]);
+          }
+        }
+      }
+      return dist;
+    }
+
+    function reveal(set, map, x, y) {
+      for (let dy=-1; dy<=1; dy++) for (let dx=-1; dx<=1; dx++) {
+        const nx=x+dx, ny=y+dy;
+        if (nx>=0&&ny>=0&&nx<W&&ny<H) set.add(nx+","+ny);
+      }
+    }
+
+    function cloneState(state) {
+      return {
+        ...state,
+        map:[...state.map],
+        enemies:Object.fromEntries(Object.entries(state.enemies).map(([k,v])=>[k,{...v}])),
+        items:Object.fromEntries(Object.entries(state.items).map(([k,v])=>[k,{...v}])),
+        inventory:state.inventory.map(v=>({...v})),
+        discovered:new Set(state.discovered)
+      };
+    }
+
+    function worldProjection(state) {
+      return {
+        seed:state.seed, map:state.map, player:{x:state.x,y:state.y,hp:state.hp,maxHp:state.maxHp},
+        enemies:Object.values(state.enemies).sort((a,b)=>a.id.localeCompare(b.id)),
+        items:Object.values(state.items).sort((a,b)=>a.id.localeCompare(b.id)),
+        inventory:[...state.inventory].sort((a,b)=>a.id.localeCompare(b.id)),
+        discovered:[...state.discovered].sort(), turn:state.turn, won:state.won, lost:state.lost
+      };
+    }
+
+    function enemyAt(state,x,y) {
+      return Object.values(state.enemies).find(e => e.hp>0 && e.x===x && e.y===y);
+    }
+
+    function itemAt(state,x,y) {
+      return Object.values(state.items).find(i => i.x===x && i.y===y);
+    }
+
+    function deterministicDamage(frame, enemy) {
+      return 1 + (hash32(frame.parent + "|" + frame.seq + "|" + enemy.id) % 2);
+    }
+
+    function applyEvent(previous, frame) {
+      if (frame.event.type === "genesis") return generateWorld(frame.id);
+      const state = cloneState(previous);
+      const event = frame.event;
+      if (state.lost || state.won) {
+        state.message = "The run is complete. Reset to mint a new genesis.";
+        return state;
+      }
+      if (event.type === "move") {
+        const [dx,dy] = directions[event.dir] || [0,0];
+        const nx=state.x+dx, ny=state.y+dy;
+        state.turn++;
+        if (!state.map[ny] || state.map[ny][nx] === "#") {
+          state.message = "Stone refuses the move; the refusal is still a frame.";
+          return state;
+        }
+        const enemy = enemyAt(state,nx,ny);
+        if (enemy) {
+          const damage = deterministicDamage(frame,enemy);
+          enemy.hp -= damage;
+          if (enemy.hp <= 0) {
+            delete state.enemies[enemy.id];
+            state.message = `${enemy.id} dissolves under ${damage} deterministic damage.`;
+          } else {
+            state.hp -= 1;
+            state.message = `${enemy.id} takes ${damage}, then answers for 1.`;
+          }
+        } else {
+          state.x=nx; state.y=ny; reveal(state.discovered,state.map,nx,ny);
+          const item = itemAt(state,nx,ny);
+          if (item) {
+            state.inventory.push({id:item.id,kind:item.kind,origin:item.origin});
+            delete state.items[item.id];
+            state.message = `Picked up ${item.id}; provenance ${item.origin.slice(0,10)}…`;
+          } else {
+            state.message = state.map[ny][nx] === ">" ? "The exit glyph hums." : "The corridor is replayed into existence.";
+          }
+          if (state.map[ny][nx] === ">") { state.won=true; state.message="Escaped: every step remains independently replayable."; }
+        }
+      } else if (event.type === "use") {
+        state.turn++;
+        const index = state.inventory.findIndex(i=>i.id===event.item);
+        if (index >= 0) {
+          state.inventory.splice(index,1);
+          state.hp=Math.min(state.maxHp,state.hp+3);
+          state.message=`Used ${event.item}; its origin was declared before replay.`;
+        }
+      } else if (event.type === "wait") {
+        state.turn++;
+        state.message="Waited. The clock changed; dependency order did not.";
+      } else if (event.type === "scout") {
+        reveal(state.discovered,state.map,event.x,event.y);
+        state.turn++;
+        state.message=`Offline scout disclosed room ${event.x},${event.y}.`;
+      }
+      if (state.hp <= 0) { state.hp=0; state.lost=true; state.message="The hero fell. The chain still replays exactly."; }
+      return state;
+    }
+
+    function requiredReads(state,event,genesisId) {
+      if (event.type === "use") {
+        const item=state.inventory.find(i=>i.id===event.item);
+        return item ? [item.origin] : [];
+      }
+      if (event.type === "move") {
+        const [dx,dy]=directions[event.dir]||[0,0];
+        const enemy=enemyAt(state,state.x+dx,state.y+dy);
+        return enemy ? [enemy.origin] : [];
+      }
+      if (event.type === "scout") return [genesisId];
+      return [];
+    }
+
+    async function frameId(frame) {
+      const unsigned = {...frame};
+      delete unsigned.id;
+      return sha256(canonical(unsigned));
+    }
+
+    function syntheticClock(device,seq) {
+      return new Date(GENESIS_TIME + (seq + deviceClockOffset[device]) * 1000).toISOString();
+    }
+
+    async function mint(chain,device,event,readsOverride) {
+      const parent=chain.at(-1)?.id || null;
+      const seq=chain.length;
+      let reads=readsOverride;
+      if (!reads) {
+        const state=replay(chain);
+        reads=event.type==="genesis" ? [] : requiredReads(state,event,chain[0].id);
+      }
+      const frame={version:1,seq,parent,device,clock:syntheticClock(device,seq),reads:[...reads],event:{...event}};
+      frame.id=await frameId(frame);
+      return frame;
+    }
+
+    function replay(chain, length=chain.length) {
+      let state=null;
+      for (const frame of chain.slice(0,length)) state=applyEvent(state,frame);
+      return state;
+    }
+
+    async function verifyChain(chain) {
+      if (!Array.isArray(chain)||!chain.length) return {ok:false,error:"empty chain",index:-1};
+      const ancestors=new Set();
+      let state=null;
+      for (let i=0;i<chain.length;i++) {
+        const f=chain[i];
+        if (f.id !== await frameId(f)) return {ok:false,error:"canonical SHA-256 mismatch",index:i};
+        if (f.seq !== i) return {ok:false,error:"sequence discontinuity",index:i};
+        if (f.parent !== (i ? chain[i-1].id : null)) return {ok:false,error:"parent provenance is not the previous verified frame",index:i};
+        if (!Array.isArray(f.reads) || f.reads.some(r=>!ancestors.has(r))) return {ok:false,error:"declared read is not a verified ancestor",index:i};
+        if (i===0) {
+          if (f.event.type!=="genesis" || f.event.seed!==SEED || f.reads.length) return {ok:false,error:"invalid genesis",index:i};
+        } else {
+          const required=requiredReads(state,f.event,chain[0].id);
+          if (required.some(r=>!f.reads.includes(r))) return {ok:false,error:"missing semantic provenance read",index:i};
+          if (f.event.type==="use" && !state.inventory.some(item=>item.id===f.event.item)) return {ok:false,error:"forged inventory item",index:i};
+          if (f.event.type==="move" && !directions[f.event.dir]) return {ok:false,error:"unknown movement",index:i};
+          if (f.event.type==="scout") {
+            if (!Number.isInteger(f.event.x)||!Number.isInteger(f.event.y)||f.event.x<0||f.event.y<0||f.event.x>=W||f.event.y>=H||state.map[f.event.y][f.event.x]==="#") {
+              return {ok:false,error:"invalid scout room",index:i};
+            }
+          }
+          if (!["move","use","wait","scout"].includes(f.event.type)) return {ok:false,error:"unknown event",index:i};
+        }
+        state=applyEvent(state,f);
+        ancestors.add(f.id);
+      }
+      return {ok:true,state};
+    }
+
+    async function init() {
+      const genesis=await mint([],"A",{type:"genesis",seed:SEED},[]);
+      devices.A=[genesis]; devices.B=[]; devices.C=[];
+      activeDevice="A"; pausedA=false; cBaseLength=0; replayLength=1; demoStep=0;
+      Object.keys(proof).forEach(k=>proof[k]=false);
+      proof.hashes=true; proof.derived=true;
+      await renderAll("Genesis verified. Use WASD, arrows, or run the guided proof.");
+    }
+
+    function activeChain() { return devices[activeDevice]; }
+
+    async function appendActive(event) {
+      if (activeDevice==="A" && pausedA) return announce("Device A is paused. Transfer its chain to B or unpause it.");
+      const chain=activeChain();
+      if (!chain.length) return announce(`Device ${activeDevice} has no chain.`);
+      const frame=await mint(chain,activeDevice,event);
+      const candidate=[...chain,frame];
+      const result=await verifyChain(candidate);
+      if (!result.ok) return announce(`Append refused at frame ${result.index}: ${result.error}.`);
+      devices[activeDevice]=candidate;
+      replayLength=candidate.length;
+      proof.hashes=true; proof.derived=true;
+      await renderAll(result.state.message);
+    }
+
+    async function move(dir) { await appendActive({type:"move",dir}); }
+
+    async function usePotion() {
+      const state=replay(activeChain());
+      const potion=state.inventory[0];
+      if (!potion) return announce("No tonic is present in the replayed inventory.");
+      await appendActive({type:"use",item:potion.id});
+    }
+
+    async function pauseDeviceA() {
+      pausedA=!pausedA;
+      await renderAll(`Device A ${pausedA?"paused at a content-addressed head":"resumed"}.`);
+    }
+
+    async function transferToB() {
+      if (!pausedA) return announce("Pause Device A before transferring its chain.");
+      const wire=JSON.stringify(devices.A);
+      const candidate=JSON.parse(wire);
+      const verified=await verifyChain(candidate);
+      if (!verified.ok) return announce(`Transfer refused: ${verified.error}.`);
+      const aBytes=canonical(worldProjection(replay(devices.A)));
+      const bBytes=canonical(worldProjection(verified.state));
+      devices.B=candidate;
+      proof.transfer=aBytes===bBytes && await sha256(aBytes)===await sha256(bBytes);
+      activeDevice="B"; replayLength=devices.B.length;
+      await renderAll(`${encoder.encode(wire).byteLength} chain bytes teleported. A/B canonical worlds are byte-identical.`);
+    }
+
+    async function appendSkewTurn() {
+      if (!devices.B.length) return announce("Transfer a chain to Device B first.");
+      activeDevice="B";
+      await appendActive({type:"wait"});
+      const chain=devices.B;
+      proof.clock=chain.every((f,i)=>i===0||f.parent===chain[i-1].id) &&
+        Date.parse(chain.at(-1).clock)>Date.parse(devices.A.at(-1).clock);
+      await renderAll("B appended under a +07:23 clock. Parent hashes—not timestamps—kept dependency order.");
+    }
+
+    async function forkToC() {
+      const source=devices.A.length ? devices.A : activeChain();
+      cBaseLength=Math.max(1,Math.min(source.length-1,Math.ceil(source.length/2)));
+      devices.C=JSON.parse(JSON.stringify(source.slice(0,cBaseLength)));
+      await renderAll(`Device C detached from older frame ${cBaseLength-1}. Its head is still a verified ancestor.`);
+    }
+
+    function undiscoveredFloor(state) {
+      const cells=[];
+      state.map.forEach((row,y)=>[...row].forEach((tile,x)=>{
+        if (tile!=="#" && !state.discovered.has(x+","+y)) cells.push([x,y]);
+      }));
+      return cells;
+    }
+
+    async function continueCOffline() {
+      if (!devices.C.length) return announce("Fork Device C from an older frame first.");
+      let state=replay(devices.C);
+      let targets=undiscoveredFloor(state);
+      if (!targets.length) targets=[[state.x,state.y]];
+      for (const [x,y] of targets.slice(0,2)) {
+        const frame=await mint(devices.C,"C",{type:"scout",x,y},[devices.C[0].id]);
+        devices.C.push(frame);
+        state=applyEvent(state,frame);
+      }
+      await renderAll(`Device C appended ${Math.min(2,targets.length)} offline discovery frames without contacting A or B.`);
+    }
+
+    async function reattachC() {
+      if (!devices.C.length || devices.C.length<=cBaseLength) return announce("Device C has no offline continuation to reattach.");
+      const destination=activeChain();
+      const destinationIds=new Set(destination.map(f=>f.id));
+      const offline=devices.C.slice(cBaseLength);
+      for (const f of offline) {
+        if (f.reads.some(read=>!destinationIds.has(read))) {
+          proof.fork=false; updateAssertions();
+          return announce("Reattach refused: an offline declared read is not present on the destination chain.");
+        }
+      }
+      let candidate=[...destination];
+      for (const old of offline) {
+        const event={...old.event,reattachedFrom:old.id};
+        const rebased=await mint(candidate,activeDevice,event,old.reads);
+        candidate.push(rebased);
+      }
+      const checked=await verifyChain(candidate);
+      if (!checked.ok) {
+        proof.fork=false; updateAssertions();
+        return announce(`Reattach refused: ${checked.error}.`);
+      }
+      devices[activeDevice]=candidate;
+      replayLength=candidate.length;
+      proof.fork=true;
+      await renderAll(`${offline.length} C frames reattached. Every declared read remained a verified ancestor.`);
+    }
+
+    async function corruptCRead() {
+      if (!devices.C.length || devices.C.length<=cBaseLength) await continueCOffline();
+      const index=Math.max(cBaseLength,devices.C.length-1);
+      const forged=JSON.parse(JSON.stringify(devices.C[index]));
+      forged.reads=["f".repeat(64)];
+      forged.id=await frameId(forged);
+      devices.C[index]=forged;
+      proof.fork=false;
+      await renderAll("C now declares a read that the destination never had. Reattach must refuse it.");
+    }
+
+    async function testMutation(kind) {
+      const chain=activeChain();
+      const goodHead=chain.at(-1).id;
+      let candidate=JSON.parse(JSON.stringify(chain));
+      if (kind==="item") {
+        const forged=await mint(candidate,activeDevice,{type:"use",item:"forged-crown"},[candidate[0].id]);
+        candidate.push(forged);
+      } else {
+        const forged=await mint(candidate,activeDevice,{type:"wait"});
+        forged.parent=candidate[0].id;
+        forged.id=await frameId(forged);
+        candidate.push(forged);
+      }
+      const result=await verifyChain(candidate);
+      const preserved=activeChain().at(-1).id===goodHead;
+      proof.mutation=!result.ok&&preserved;
+      await renderAll(`${kind==="item"?"Inventory forgery":"Parent forgery"} refused at candidate frame ${result.index}: ${result.error}. Last good head ${preserved?"preserved":"changed"}.`);
+    }
+
+    async function verifyActive() {
+      const result=await verifyChain(activeChain());
+      proof.hashes=result.ok;
+      await renderAll(result.ok?`All ${activeChain().length} frames verify against canonical SHA-256 and semantic provenance.`:`Verification failed at ${result.index}: ${result.error}.`);
+    }
+
+    function pathToNearestGoal(state) {
+      const starts=[[state.x,state.y,[]]];
+      const seen=new Set([state.x+","+state.y]);
+      for (let i=0;i<starts.length;i++) {
+        const [x,y,path]=starts[i];
+        if (path.length && (itemAt(state,x,y)||state.map[y][x]===">"||enemyAt(state,x,y))) return path;
+        for (const [name,[dx,dy]] of Object.entries(directions)) {
+          const nx=x+dx,ny=y+dy,key=nx+","+ny;
+          if (state.map[ny]?.[nx]!=="#"&&!seen.has(key)) {
+            seen.add(key); starts.push([nx,ny,[...path,name]]);
+          }
+        }
+      }
+      return ["right"];
+    }
+
+    const demoSteps = [
+      async () => {
+        await init();
+        const path=pathToNearestGoal(replay(devices.A)).slice(0,3);
+        for (const dir of path) await move(dir);
+        return "A appended playable movement frames. No snapshot was stored.";
+      },
+      async () => { await forkToC(); return "C retained an older verified prefix while A continues."; },
+      async () => {
+        const path=pathToNearestGoal(replay(devices.A)).slice(0,4);
+        for (const dir of path) await move(dir);
+        return "A advanced independently; combat and pickup outcomes came from replay.";
+      },
+      async () => { if (!pausedA) await pauseDeviceA(); await transferToB(); return "Only serialized chain bytes moved to B; world bytes match exactly."; },
+      async () => { await appendSkewTurn(); return "B's clock is badly ahead, but its new frame still depends on the transferred head."; },
+      async () => { await continueCOffline(); return "C discovered rooms offline from its older head."; },
+      async () => { await reattachC(); return "C's declared genesis read exists on B, so its discoveries reattached."; },
+      async () => { await testMutation("item"); return "A valid-hash forged item was semantically refused; the verified game did not move."; }
+    ];
+
+    async function runNextDemo() {
+      if (demoStep>=demoSteps.length) return announce("Guided proof complete. Replay it or keep playing on Device B.");
+      const text=await demoSteps[demoStep]();
+      demoStep++;
+      $("#demoText").textContent=text;
+      $("#demoCounter").textContent=`STEP ${demoStep} / ${demoSteps.length}`;
+    }
+
+    async function runAllDemo() {
+      if (demoRunning) return;
+      demoRunning=true;
+      $("#runDemo").disabled=true;
+      while (demoStep<demoSteps.length) {
+        await runNextDemo();
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) await new Promise(r=>setTimeout(r,220));
+      }
+      demoRunning=false; $("#runDemo").disabled=false;
+    }
+
+    async function renderAll(message) {
+      const ticket=++renderTicket;
+      const chain=activeChain();
+      replayLength=Math.max(1,Math.min(replayLength||chain.length,chain.length));
+      const state=replay(chain,replayLength);
+      const live=replayLength===chain.length;
+      renderDungeon(state);
+      $("#hp").textContent=`${state.hp}/${state.maxHp}`;
+      $("#turns").textContent=state.turn;
+      $("#rooms").textContent=state.discovered.size;
+      $("#inventory").textContent=state.inventory.length?state.inventory.map(i=>i.id).join(", "):"empty";
+      $("#enemies").textContent=Object.keys(state.enemies).length;
+      const digest=await sha256(canonical(worldProjection(state)));
+      if (ticket!==renderTicket) return;
+      $("#worldHash").textContent=digest.slice(0,12)+"…";
+      $("#viewTag").textContent=`${live?"LIVE":"REPLAY"} · DEVICE ${activeDevice}`;
+      $("#chainSize").textContent=`${chain.length} FRAME${chain.length===1?"":"S"}`;
+      $("#replay").max=chain.length; $("#replay").value=replayLength;
+      $("#replayValue").textContent=`${replayLength} / ${chain.length}`;
+      renderDevices();
+      renderLedger(chain);
+      updateAssertions();
+      if (message) announce(message);
+    }
+
+    function renderDungeon(state) {
+      const dungeon=$("#dungeon");
+      dungeon.innerHTML="";
+      dungeon.style.setProperty("--cols",W);
+      for (let y=0;y<H;y++) for (let x=0;x<W;x++) {
+        const tile=document.createElement("span");
+        tile.className="tile";
+        const known=state.discovered.has(x+","+y);
+        let text="·", label="floor";
+        if (!known) { tile.classList.add("unknown"); text=""; label="undiscovered"; }
+        else if (state.map[y][x]==="#") { tile.classList.add("wall"); text="▪"; label="wall"; }
+        else if (state.map[y][x]===">") { tile.classList.add("exit"); text="◇"; label="exit"; }
+        const item=known&&itemAt(state,x,y);
+        const enemy=known&&enemyAt(state,x,y);
+        if (item) { tile.classList.add("item"); text="✦"; label=item.id; }
+        if (enemy) { tile.classList.add("enemy"); text="×"; label=`${enemy.id}, ${enemy.hp} health`; }
+        if (x===state.x&&y===state.y) { tile.className="tile player"; text="@"; label="player"; }
+        tile.title=label;
+        tile.setAttribute("aria-label",`${x},${y}: ${label}`);
+        dungeon.append(tile);
+      }
+      dungeon.setAttribute("aria-label",`Dungeon. Player at ${state.x},${state.y}. ${state.hp} health. ${Object.keys(state.enemies).length} enemies remain.`);
+    }
+
+    function renderDevices() {
+      for (const d of ["A","B","C"]) {
+        const chain=devices[d];
+        $("#"+d.toLowerCase()+"Head").textContent=chain.length?chain.at(-1).id:"—";
+        $("#device"+d).classList.toggle("active",activeDevice===d);
+      }
+      $("#aState").textContent=pausedA?"PAUSED":activeDevice==="A"?"LIVE":"STORED";
+      $("#bState").textContent=devices.B.length?(activeDevice==="B"?"LIVE":"VERIFIED"):"EMPTY";
+      $("#cState").textContent=devices.C.length>cBaseLength?"OFFLINE +"+(devices.C.length-cBaseLength):devices.C.length?"FORKED":"EMPTY";
+      $("#pauseA").textContent=pausedA?"Resume Device A":"Pause Device A";
+    }
+
+    function renderLedger(chain) {
+      $("#ledgerBody").innerHTML=chain.slice(0,replayLength).map((f,i)=>`
+        <tr>
+          <td>${i}</td>
+          <td><b>${escapeHtml(f.device)}</b> / ${escapeHtml(f.event.type)}${f.event.dir?" "+escapeHtml(f.event.dir):""}</td>
+          <td><code>${f.id.slice(0,14)}…</code></td>
+          <td><code>${f.parent?f.parent.slice(0,10)+"…":"GENESIS"}</code></td>
+          <td>${f.reads.length?f.reads.map(r=>`<code>${r.slice(0,8)}…</code>`).join(" "):"—"}</td>
+          <td>${f.clock.slice(11,19)}</td>
+        </tr>`).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+
+    function updateAssertions() {
+      Object.entries(proof).forEach(([key,value])=>{
+        const el=document.querySelector(`[data-assert="${key}"]`);
+        el.classList.toggle("pass",value===true);
+        el.classList.toggle("fail",value==="fail");
+      });
+    }
+
+    function announce(message) { $("#status").textContent=message; }
+
+    $$("[data-move]").forEach(button=>button.addEventListener("click",()=>move(button.dataset.move)));
+    $("#usePotion").addEventListener("click",usePotion);
+    $("#waitTurn").addEventListener("click",()=>appendActive({type:"wait"}));
+    $("#reset").addEventListener("click",init);
+    $("#pauseA").addEventListener("click",pauseDeviceA);
+    $("#transferB").addEventListener("click",transferToB);
+    $("#skewTurn").addEventListener("click",appendSkewTurn);
+    $("#forkC").addEventListener("click",forkToC);
+    $("#offlineC").addEventListener("click",continueCOffline);
+    $("#reattachC").addEventListener("click",reattachC);
+    $("#conflictC").addEventListener("click",corruptCRead);
+    $("#forgeItem").addEventListener("click",()=>testMutation("item"));
+    $("#forgeParent").addEventListener("click",()=>testMutation("parent"));
+    $("#verify").addEventListener("click",verifyActive);
+    $("#nextDemo").addEventListener("click",runNextDemo);
+    $("#runDemo").addEventListener("click",runAllDemo);
+    $("#replayDemo").addEventListener("click",async()=>{ await init(); demoStep=0; await runAllDemo(); });
+    $("#liveHead").addEventListener("click",async()=>{ replayLength=activeChain().length; await renderAll("Returned to the verified live head."); });
+    $("#replay").addEventListener("input",async e=>{ replayLength=Number(e.target.value); await renderAll(`Replaying prefix through frame ${replayLength-1}.`); });
+    $("#theme").addEventListener("change",e=>document.documentElement.dataset.theme=e.target.value);
+    $("#copyPrompt").addEventListener("click",async()=>{
+      const text=$("#promptText").textContent.trim();
+      try { await navigator.clipboard.writeText(text); announce("Independent-build prompt copied."); }
+      catch { const range=document.createRange(); range.selectNodeContents($("#promptText")); getSelection().removeAllRanges(); getSelection().addRange(range); announce("Prompt selected; press Ctrl/Cmd+C to copy."); }
+    });
+    addEventListener("keydown",event=>{
+      if (event.target.matches("input,select,button,summary")) return;
+      const key=event.key.toLowerCase();
+      const map={arrowup:"up",w:"up",arrowdown:"down",s:"down",arrowleft:"left",a:"left",arrowright:"right",d:"right"};
+      if (map[key]) { event.preventDefault(); move(map[key]); }
+      else if (key==="h") { event.preventDefault(); usePotion(); }
+      else if (key===".") { event.preventDefault(); appendActive({type:"wait"}); }
+    });
+
+    init();
+  </script>
+</body>
+</html>
