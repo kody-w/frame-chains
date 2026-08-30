@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#171b2b">
+<title>The Executable Constitution</title>
+<meta name="description" content="A synthetic civilization whose constitution, offices, resources, and actions exist only as validated SHA-256 frames.">
+<script>
+(() => {
+  const requested = new URLSearchParams(location.search).get("scoutTheme");
+  let inherited = "";
+  try {
+    inherited = window.parent !== window
+      ? window.parent.document.documentElement.getAttribute("data-theme") || ""
+      : "";
+  } catch {}
+  const stored = localStorage.getItem("clawpilot-theme") || "";
+  const theme = requested || inherited || stored
+    || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light";
+})();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f1efe8;
+  --bg-grid: rgba(42, 49, 78, .055);
+  --surface: #fffdf8;
+  --surface-2: #f7f4eb;
+  --surface-3: #ebe7dc;
+  --ink: #191c29;
+  --muted: #626573;
+  --line: #d5d0c5;
+  --line-strong: #9d988d;
+  --accent: #3f42b5;
+  --accent-2: #d14f2c;
+  --accent-soft: #e8e7ff;
+  --good: #17734b;
+  --good-soft: #e3f4eb;
+  --warn: #906000;
+  --warn-soft: #fff3cf;
+  --bad: #b92d3d;
+  --bad-soft: #fde8eb;
+  --shadow: 0 18px 50px rgba(24, 28, 44, .09);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111522;
+  --bg-grid: rgba(189, 194, 255, .055);
+  --surface: #191e2e;
+  --surface-2: #202638;
+  --surface-3: #2a3044;
+  --ink: #f5f3ed;
+  --muted: #b9bdca;
+  --line: #373e54;
+  --line-strong: #626b85;
+  --accent: #aeb0ff;
+  --accent-2: #ff9b7d;
+  --accent-soft: #2b2d58;
+  --good: #71dfa8;
+  --good-soft: #173d31;
+  --warn: #ffd477;
+  --warn-soft: #46391a;
+  --bad: #ff94a0;
+  --bad-soft: #4b2029;
+  --shadow: 0 20px 60px rgba(0, 0, 0, .28);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+    var(--bg);
+  background-size: 32px 32px;
+  color: var(--ink);
+  font: 16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button, select, input { font: inherit; }
+button, select {
+  min-height: 44px;
+  border-radius: 10px;
+}
+button {
+  padding: 10px 14px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 760;
+  cursor: pointer;
+}
+html[data-theme="dark"] button:not(.secondary):not(.danger) { color: #111522; }
+button.secondary {
+  border-color: var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+}
+button.danger {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+button:hover:not(:disabled) { filter: brightness(.96); }
+button:disabled { cursor: not-allowed; opacity: .5; }
+:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
+.skip {
+  position: fixed;
+  z-index: 50;
+  top: 10px;
+  left: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--surface);
+  transform: translateY(-150%);
+}
+.skip:focus { transform: none; }
+.shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 64px;
+}
+.topbar, .controls, .manual-row, .fork-controls, .statline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.topbar { justify-content: space-between; margin-bottom: 42px; }
+.brand {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.theme-button { min-height: 44px; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 30px;
+}
+.eyebrow, .mini-label {
+  margin: 0 0 8px;
+  color: var(--accent-2);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  max-width: 760px;
+  margin-bottom: 14px;
+  font: 850 clamp(42px, 7vw, 78px)/.94 Georgia, "Times New Roman", serif;
+  letter-spacing: -.055em;
+}
+.lede {
+  max-width: 720px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: clamp(17px, 2.2vw, 21px);
+}
+.seal {
+  min-height: 190px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.seal-ring {
+  display: grid;
+  width: 86px;
+  height: 86px;
+  margin-bottom: 15px;
+  place-items: center;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+  font: 900 29px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.seal strong { display: block; }
+.seal span { color: var(--muted); font-size: 13px; }
+.guide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.guide article, .panel, .scope {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.guide article { padding: 16px; }
+.guide h2 {
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+.guide p, .guide ol {
+  margin-bottom: 0;
+  padding-left: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.guide ol { padding-left: 18px; }
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, .7fr);
+  gap: 16px;
+  align-items: start;
+}
+.panel {
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(24, 28, 44, .045);
+}
+.panel h2 { margin-bottom: 5px; font-size: 21px; }
+.panel-note { margin-bottom: 14px; color: var(--muted); font-size: 13px; }
+.controls { margin-bottom: 12px; }
+.manual {
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.manual summary {
+  min-height: 44px;
+  padding: 10px 2px;
+  font-weight: 780;
+  cursor: pointer;
+}
+.manual-row { padding-top: 8px; }
+.manual-row label, .fork-controls label {
+  display: grid;
+  flex: 1 1 220px;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+select {
+  width: 100%;
+  padding: 9px 36px 9px 11px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+}
+.statline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+.stat {
+  min-width: 0;
+  padding: 11px;
+  border-radius: 11px;
+  background: var(--surface-2);
+}
+.stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.stat strong {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  font: 800 16px/1.25 ui-monospace, SFMono-Regular, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.society {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.state-card {
+  min-height: 154px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.state-card.wide { grid-column: 1 / -1; }
+.state-card h3 { margin-bottom: 8px; font-size: 15px; }
+.resource {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+.bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width .3s ease;
+}
+.resource code { font-size: 12px; }
+.law-list, .office-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.law, .office {
+  padding: 8px 9px;
+  border-left: 3px solid var(--good);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.law.superseded { border-left-color: var(--line-strong); color: var(--muted); text-decoration: line-through; }
+.law code, .office code { overflow-wrap: anywhere; }
+.status {
+  min-height: 56px;
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.status.good { border-left-color: var(--good); background: var(--good-soft); }
+.status.bad { border-left-color: var(--bad); background: var(--bad-soft); }
+.status.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.status strong { display: block; font-size: 13px; }
+.status span { color: var(--muted); font-size: 12px; }
+.assertions {
+  display: grid;
+  gap: 8px;
+}
+.assertion {
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface-2);
+}
+.assertion.pass { border-left-color: var(--good); }
+.assertion.fail { border-left-color: var(--bad); }
+.assertion.pending { border-left-color: var(--warn); }
+.assertion strong { display: block; font-size: 13px; }
+.assertion span { color: var(--muted); font-size: 11px; }
+.ledger-panel, .fork-panel, .prompt-panel, .scope { margin-top: 16px; }
+.ledger-wrap {
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background: var(--surface-3);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+tr.invalid { background: var(--bad-soft); }
+td code { overflow-wrap: anywhere; }
+.hash { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.fork-controls { margin: 12px 0; }
+.fork-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.branch {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.branch h3 { margin-bottom: 5px; font-size: 16px; }
+.branch p { margin-bottom: 7px; color: var(--muted); font-size: 12px; }
+.branch .head {
+  color: var(--accent);
+  font: 700 11px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+pre {
+  max-height: 230px;
+  margin: 12px 0;
+  padding: 13px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+  white-space: pre-wrap;
+}
+.scope { padding: 18px; }
+.scope h2 { font-size: 18px; }
+.scope p { margin-bottom: 0; color: var(--muted); font-size: 13px; }
+.copy-note { min-height: 22px; margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 900px) {
+  .hero, .workspace { grid-template-columns: 1fr; }
+  .seal { min-height: 0; }
+  .guide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .shell { width: min(100% - 20px, 1180px); padding-top: 12px; }
+  .topbar { margin-bottom: 28px; }
+  h1 { font-size: clamp(40px, 13vw, 58px); }
+  .guide, .society, .fork-grid, .statline { grid-template-columns: 1fr; }
+  .state-card.wide { grid-column: auto; }
+  .controls > button, .manual-row > button, .fork-controls > button { flex: 1 1 150px; }
+  th:nth-child(2), td:nth-child(2) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#simulator">Skip to constitution simulator</a>
+<main class="shell">
+  <div class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">§7</span> Frame 07 · Synthetic civics</div>
+    <button class="secondary theme-button" id="themeBtn" type="button" aria-label="Switch color theme">Theme: system</button>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">The law is not a document. It is a replay.</p>
+      <h1>The Executable Constitution</h1>
+      <p class="lede">Every law, office, coin, amendment, and civic act in the tiny Republic of Lattice exists only as an append-only SHA-256 frame. If history cannot replay lawfully, it does not become state.</p>
+    </div>
+    <aside class="seal" aria-label="Constitution seal">
+      <div class="seal-ring" aria-hidden="true">#</div>
+      <strong>One history. Many lawful futures.</strong>
+      <span>Canonical bytes → SHA-256 → semantic validation → derived society</span>
+    </aside>
+  </header>
+
+  <section class="guide" aria-label="Newcomer guide">
+    <article>
+      <h2>1 · What this is</h2>
+      <p>A civilization reconstructed from its frames. The screen holds no privileged “current state.”</p>
+    </article>
+    <article>
+      <h2>2 · Try this</h2>
+      <ol><li>Run the guided history.</li><li>Inject the tyrant frame.</li><li>Replay independently.</li></ol>
+    </article>
+    <article>
+      <h2>3 · Watch the law</h2>
+      <p>Old authorization stops working after amendment. A successor waits for lease expiry plus ranked grace.</p>
+    </article>
+    <article>
+      <h2>4 · What it proves</h2>
+      <p>Hash integrity and constitutional validity are different checks. A valid hash can still carry an illegal act.</p>
+    </article>
+  </section>
+
+  <section class="workspace" id="simulator" aria-label="Executable constitution simulator">
+    <div>
+      <section class="panel" aria-labelledby="society-title">
+        <p class="mini-label">Derived state · never edited directly</p>
+        <h2 id="society-title">Republic of Lattice</h2>
+        <p class="panel-note">The visible society is the last valid state produced by replaying the selected chain.</p>
+
+        <div class="controls" aria-label="Primary controls">
+          <button id="guidedBtn" type="button">Run guided history</button>
+          <button id="replayBtn" class="secondary" type="button">Replay independently</button>
+          <button id="ledgerBtn" class="secondary" type="button" aria-expanded="true" aria-controls="ledgerPanel">Hide ledger</button>
+          <button id="resetBtn" class="secondary" type="button">Reset</button>
+          <button id="tyrantBtn" class="danger" type="button">Inject tyrant frame</button>
+        </div>
+
+        <details class="manual">
+          <summary>Manual constitutional action</summary>
+          <div class="manual-row">
+            <label>Action
+              <select id="manualAction">
+                <option value="spend">Spend 10 water credits</option>
+                <option value="appoint">Appoint next-ranked deputy</option>
+                <option value="amend">Amend active spending law</option>
+                <option value="beat">Advance one logical beat</option>
+                <option value="fail">Fail the current steward</option>
+                <option value="transfer">Transfer stewardship lawfully</option>
+                <option value="stale">Attempt action under superseded law</option>
+              </select>
+            </label>
+            <button id="appendBtn" type="button">Validate + append</button>
+          </div>
+        </details>
+
+        <div class="statline" aria-label="Society summary">
+          <div class="stat"><span>Valid frames</span><strong id="frameStat">0</strong></div>
+          <div class="stat"><span>Logical beat</span><strong id="beatStat">0</strong></div>
+          <div class="stat"><span>Steward</span><strong id="stewardStat">—</strong></div>
+          <div class="stat"><span>Chain head</span><strong id="headStat">—</strong></div>
+        </div>
+
+        <div class="society">
+          <article class="state-card">
+            <h3>Common resources</h3>
+            <div id="resourceView"></div>
+          </article>
+          <article class="state-card">
+            <h3>Public offices</h3>
+            <ul class="office-list" id="officeView"></ul>
+          </article>
+          <article class="state-card wide">
+            <h3>Constitutional law</h3>
+            <ul class="law-list" id="lawView"></ul>
+          </article>
+        </div>
+
+        <div class="status" id="status" role="status" aria-live="polite">
+          <strong>Preparing the founding frame…</strong>
+          <span>Real SHA-256 hashing is initializing.</span>
+        </div>
+      </section>
+
+      <section class="panel ledger-panel" id="ledgerPanel" aria-labelledby="ledger-title">
+        <p class="mini-label">Append-only evidence</p>
+        <h2 id="ledger-title">Frame ledger</h2>
+        <p class="panel-note">Hashes are recomputed from recursively key-sorted canonical JSON. Red marks the first frame replay refuses.</p>
+        <div class="ledger-wrap" tabindex="0" aria-label="Scrollable frame ledger">
+          <table>
+            <thead><tr><th>Seq</th><th>Type</th><th>Constitutional meaning</th><th>SHA-256</th></tr></thead>
+            <tbody id="ledgerBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <aside class="panel" aria-labelledby="assertions-title">
+      <p class="mini-label">Independent replay oracle</p>
+      <h2 id="assertions-title">Assertions</h2>
+      <p class="panel-note">Replay begins from nothing, recomputes each hash, and sends each frame through the same semantic validator used by append.</p>
+      <div class="assertions" id="assertionView" aria-live="polite"></div>
+    </aside>
+  </section>
+
+  <section class="panel fork-panel" aria-labelledby="fork-title">
+    <p class="mini-label">Counterfactual, not revision</p>
+    <h2 id="fork-title">Fork two lawful societies</h2>
+    <p class="panel-note">Choose a constitutional frame. Each society preserves the same prefix, then appends its own lawful amendment and expenditure.</p>
+    <div class="fork-controls">
+      <label>Constitutional base
+        <select id="forkPoint" aria-label="Constitutional frame to fork from"></select>
+      </label>
+      <button id="forkBtn" type="button">Fork + compare</button>
+    </div>
+    <div class="fork-grid" id="forkView">
+      <article class="branch"><h3>Society A</h3><p>Waiting for a fork.</p></article>
+      <article class="branch"><h3>Society B</h3><p>Waiting for a fork.</p></article>
+    </div>
+  </section>
+
+  <section class="panel prompt-panel" aria-labelledby="prompt-title">
+    <p class="mini-label">Copyable build contract</p>
+    <h2 id="prompt-title">Reproduce this proof independently</h2>
+    <pre id="promptText"></pre>
+    <button id="copyBtn" type="button">Copy prompt</button>
+    <p class="copy-note" id="copyNote" role="status" aria-live="polite"></p>
+  </section>
+
+  <aside class="scope">
+    <h2>Scope</h2>
+    <p>This is a deterministic teaching model, not a claim that hashes alone create legitimacy. It models canonical hashing, append-only derivation, fiscal authorization, amendment supersession, ranked lease succession, lawful forks, and replay containment. It intentionally omits signatures, identity proofing, distributed availability, privacy, coercion, courts, and the political process that gives a constitution consent.</p>
+  </aside>
+</main>
+
+<script>
+"use strict";
+
+const PROMPT = `Build one offline, self-contained HTML proof called "The Executable Constitution."
+
+Model a synthetic civilization entirely as append-only frames for laws, amendments, offices, resources, logical beats, and actions. Hash every frame with real browser SHA-256 over recursively key-sorted canonical JSON. A single semantic transition validator must gate both normal append and independent replay.
+
+Rules to prove:
+- Spending requires an active cited appropriation, enough resources, the authorized purpose, and the current steward.
+- Appointments follow the currently active ranked succession law.
+- Every amendment names the active law it supersedes; superseded laws become unusable.
+- A failed steward transfers authority only after the current logical-beat lease plus rank-based grace.
+- A reader can fork from a constitutional frame into two different lawful societies without changing their shared prefix.
+
+Include a mutation button that bypasses append validation and injects a correctly hashed but unconstitutional action citing a superseded law. Independent replay must identify that exact law, stop there, and keep the last valid society visible. Include four newcomer guidance panels, Scope, guided/manual/replay/fork/reset controls, visible ledger and assertions, a copyable prompt, keyboard access, aria-live feedback, 44px controls, a 390px layout, reduced-motion support, and light/dark Clawpilot theme compatibility. Use no dependencies or network requests.`;
+
+const encoder = new TextEncoder();
+const $ = (id) => document.getElementById(id);
+let mainFrames = [];
+let lastReplay = null;
+let busy = false;
+let forkResult = null;
+
+function canonical(value) {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) =>
+      `${JSON.stringify(key)}:${canonical(value[key])}`
+    ).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+async function sha256(value) {
+  const bytes = encoder.encode(typeof value === "string" ? value : canonical(value));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function hashMaterial(frame) {
+  const { hash, ...material } = frame;
+  return material;
+}
+
+function emptyState() {
+  return {
+    founded: false,
+    name: "",
+    beat: 0,
+    resources: {},
+    laws: {},
+    offices: {},
+    roster: [],
+    failed: [],
+    leaseUntil: 0,
+    vacancy: null,
+    actions: []
+  };
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function activeLaw(state, kind) {
+  return Object.values(state.laws).find((law) => law.kind === kind && law.active) || null;
+}
+
+function refusal(frame, message, lawId = null) {
+  return { ok: false, frame, message, lawId };
+}
+
+function validateTransition(prior, frame) {
+  const state = clone(prior);
+  const p = frame.payload || {};
+
+  if (frame.type === "constitution.found") {
+    if (state.founded || frame.seq !== 0) return refusal(frame, "A constitution may be founded only at sequence 0.");
+    if (!Array.isArray(p.laws) || !p.laws.length) return refusal(frame, "The founding frame must contain law.");
+    state.founded = true;
+    state.name = p.name;
+    state.beat = p.beat;
+    state.resources = clone(p.resources);
+    state.offices = clone(p.offices);
+    state.roster = clone(p.roster);
+    state.leaseUntil = p.leaseUntil;
+    for (const law of p.laws) {
+      if (state.laws[law.id]) return refusal(frame, `Duplicate founding law ${law.id}.`, law.id);
+      state.laws[law.id] = { ...clone(law), active: true, supersededBy: null };
+    }
+    return { ok: true, state };
+  }
+
+  if (!state.founded) return refusal(frame, "No founding constitution exists.");
+
+  if (frame.type === "clock.advance") {
+    if (!Number.isInteger(p.steps) || p.steps < 1) return refusal(frame, "Logical time advances by positive whole beats.");
+    state.beat += p.steps;
+    return { ok: true, state };
+  }
+
+  if (frame.type === "law.amend") {
+    const oldLaw = state.laws[p.supersedes];
+    if (!oldLaw) return refusal(frame, `Amendment cites missing law ${p.supersedes}.`, p.supersedes);
+    if (!oldLaw.active) return refusal(frame, `Amendment cites superseded law ${p.supersedes}; active replacement is ${oldLaw.supersededBy}.`, p.supersedes);
+    if (!p.law || p.law.supersedes !== p.supersedes) return refusal(frame, `New law must explicitly cite ${p.supersedes} as superseded.`, p.supersedes);
+    if (state.laws[p.law.id]) return refusal(frame, `Law id ${p.law.id} already exists.`, p.law.id);
+    if (frame.actor !== state.offices.steward) return refusal(frame, "Only the current steward may promulgate this synthetic amendment.");
+    oldLaw.active = false;
+    oldLaw.supersededBy = p.law.id;
+    state.laws[p.law.id] = { ...clone(p.law), active: true, supersededBy: null };
+    return { ok: true, state };
+  }
+
+  if (frame.type === "action.spend") {
+    const law = state.laws[p.cites];
+    if (!law) return refusal(frame, `Spending cites missing law ${p.cites}.`, p.cites);
+    if (!law.active) return refusal(frame, `Action cites superseded law ${p.cites}; ${law.supersededBy} is the active authority.`, p.cites);
+    if (law.kind !== "appropriation") return refusal(frame, `${p.cites} is not an appropriation.`, p.cites);
+    if (frame.actor !== state.offices.steward) return refusal(frame, `${frame.actor} is not the current steward.`);
+    if (p.purpose !== law.purpose) return refusal(frame, `${p.cites} authorizes ${law.purpose}, not ${p.purpose}.`, p.cites);
+    if (!Number.isFinite(p.amount) || p.amount <= 0 || p.amount > law.perAction) {
+      return refusal(frame, `${p.cites} limits one action to ${law.perAction} credits.`, p.cites);
+    }
+    if ((state.resources[p.resource] || 0) < p.amount) return refusal(frame, `The ${p.resource} reserve cannot cover ${p.amount}.`);
+    state.resources[p.resource] -= p.amount;
+    state.actions.push({ type: "spend", amount: p.amount, purpose: p.purpose, law: p.cites });
+    return { ok: true, state };
+  }
+
+  if (frame.type === "office.appoint") {
+    const law = state.laws[p.cites];
+    if (!law) return refusal(frame, `Appointment cites missing law ${p.cites}.`, p.cites);
+    if (!law.active) return refusal(frame, `Appointment cites superseded law ${p.cites}; ${law.supersededBy} is active.`, p.cites);
+    if (law.kind !== "succession") return refusal(frame, `${p.cites} is not a succession rule.`, p.cites);
+    if (frame.actor !== state.offices.steward) return refusal(frame, "Only the current steward may appoint an office.");
+    const eligible = law.ranks.find((name) => name !== state.offices.steward && !state.failed.includes(name));
+    if (p.person !== eligible) return refusal(frame, `${p.person} is not next under ${p.cites}; ${eligible} is.`, p.cites);
+    state.offices[p.office] = p.person;
+    return { ok: true, state };
+  }
+
+  if (frame.type === "office.fail") {
+    const law = state.laws[p.cites];
+    if (!law || !law.active || law.kind !== "succession") return refusal(frame, `Failure must cite the active succession law ${p.cites}.`, p.cites);
+    if (p.office !== "steward" || p.person !== state.offices.steward) return refusal(frame, `${p.person} does not hold the stewardship.`);
+    state.failed.push(p.person);
+    state.vacancy = { former: p.person, leaseUntil: state.leaseUntil };
+    state.offices.steward = null;
+    return { ok: true, state };
+  }
+
+  if (frame.type === "office.transfer") {
+    const law = state.laws[p.cites];
+    if (!law) return refusal(frame, `Transfer cites missing law ${p.cites}.`, p.cites);
+    if (!law.active) return refusal(frame, `Transfer cites superseded law ${p.cites}; ${law.supersededBy} is active.`, p.cites);
+    if (law.kind !== "succession" || !state.vacancy) return refusal(frame, "No stewardship vacancy is eligible for succession.", p.cites);
+    const candidates = law.ranks
+      .map((name, index) => ({ name, rank: index + 1, eligible: state.vacancy.leaseUntil + law.grace * index }))
+      .filter((candidate) => !state.failed.includes(candidate.name) && candidate.eligible <= state.beat)
+      .sort((a, b) => a.rank - b.rank);
+    if (!candidates.length) return refusal(frame, `No successor is eligible at beat ${state.beat}; the next ranked lease gate has not opened.`, p.cites);
+    if (p.person !== candidates[0].name) return refusal(frame, `${p.person} cannot take office; ${candidates[0].name} is first eligible under ${p.cites}.`, p.cites);
+    state.offices.steward = p.person;
+    state.vacancy = null;
+    state.leaseUntil = state.beat + law.lease;
+    return { ok: true, state };
+  }
+
+  return refusal(frame, `Unknown frame type ${frame.type}.`);
+}
+
+async function replayChain(chain) {
+  let state = emptyState();
+  let previous = "GENESIS";
+  const checks = [];
+  let violation = null;
+
+  for (let index = 0; index < chain.length; index += 1) {
+    const frame = chain[index];
+    if (frame.seq !== index) {
+      violation = { index, kind: "sequence", message: `Expected sequence ${index}, found ${frame.seq}.` };
+      break;
+    }
+    if (frame.prev !== previous) {
+      violation = { index, kind: "link", message: `Frame ${index} does not point to the prior SHA-256 head.` };
+      break;
+    }
+    const expectedHash = await sha256(hashMaterial(frame));
+    if (frame.hash !== expectedHash) {
+      violation = { index, kind: "hash", message: `Frame ${index} hash differs from its canonical bytes.` };
+      break;
+    }
+    const semantic = validateTransition(state, frame);
+    if (!semantic.ok) {
+      violation = { index, kind: "law", message: semantic.message, lawId: semantic.lawId };
+      break;
+    }
+    state = semantic.state;
+    previous = frame.hash;
+    checks.push({ index, hash: expectedHash });
+  }
+  return {
+    state,
+    validLength: checks.length,
+    head: checks.length ? checks[checks.length - 1].hash : "GENESIS",
+    violation,
+    fullyValid: !violation && checks.length === chain.length
+  };
+}
+
+async function mint(chain, type, actor, payload) {
+  const frame = {
+    seq: chain.length,
+    type,
+    actor,
+    payload: clone(payload),
+    prev: chain.length ? chain[chain.length - 1].hash : "GENESIS"
+  };
+  frame.hash = await sha256(hashMaterial(frame));
+  return frame;
+}
+
+async function appendValidated(chain, type, actor, payload) {
+  const before = await replayChain(chain);
+  if (!before.fullyValid) return { ok: false, message: "Append refused: repair or reset the invalid chain first.", replay: before };
+  const frame = await mint(chain, type, actor, payload);
+  const semantic = validateTransition(before.state, frame);
+  if (!semantic.ok) return { ok: false, message: semantic.message, lawId: semantic.lawId, replay: before };
+  chain.push(frame);
+  return { ok: true, frame, state: semantic.state };
+}
+
+function foundingPayload() {
+  return {
+    name: "Republic of Lattice",
+    beat: 0,
+    resources: { treasury: 100, water: 80 },
+    offices: { steward: "Mara", deputy: null, archivist: "Ivo" },
+    roster: ["Mara", "Sol", "Ivo"],
+    leaseUntil: 3,
+    laws: [
+      { id: "LAW-TREASURY-1", kind: "appropriation", purpose: "waterworks", resource: "treasury", perAction: 30, supersedes: null },
+      { id: "LAW-SUCCESSION-1", kind: "succession", ranks: ["Mara", "Sol", "Ivo"], lease: 3, grace: 1, supersedes: null },
+      { id: "LAW-AMENDMENT-1", kind: "amendment", rule: "cite-active-superseded-law", supersedes: null }
+    ]
+  };
+}
+
+async function seed() {
+  const genesis = await mint([], "constitution.found", "the people", foundingPayload());
+  mainFrames = [genesis];
+  forkResult = null;
+  await refresh("Founding constitution sealed.", "good");
+}
+
+function setStatus(title, detail, tone = "") {
+  const node = $("status");
+  node.className = `status ${tone}`.trim();
+  node.innerHTML = "";
+  const strong = document.createElement("strong");
+  const span = document.createElement("span");
+  strong.textContent = title;
+  span.textContent = detail;
+  node.append(strong, span);
+}
+
+function lawLabel(law) {
+  if (law.kind === "appropriation") return `${law.purpose}: ≤ ${law.perAction} credits/action`;
+  if (law.kind === "succession") return `rank ${law.ranks.join(" › ")} · lease ${law.lease} · grace ${law.grace}`;
+  return law.rule || law.kind;
+}
+
+function renderState(replay) {
+  const state = replay.state;
+  $("frameStat").textContent = `${replay.validLength}/${mainFrames.length}`;
+  $("beatStat").textContent = String(state.beat);
+  $("stewardStat").textContent = state.offices.steward || "vacant";
+  $("headStat").textContent = replay.head === "GENESIS" ? "GENESIS" : replay.head.slice(0, 12);
+
+  $("resourceView").innerHTML = "";
+  for (const [name, amount] of Object.entries(state.resources)) {
+    const row = document.createElement("div");
+    row.className = "resource";
+    const label = document.createElement("div");
+    const text = document.createElement("div");
+    text.textContent = name;
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    const fill = document.createElement("span");
+    fill.style.width = `${Math.max(0, Math.min(100, amount))}%`;
+    bar.append(fill);
+    label.append(text, bar);
+    const value = document.createElement("code");
+    value.textContent = String(amount);
+    row.append(label, value);
+    $("resourceView").append(row);
+  }
+
+  $("officeView").innerHTML = "";
+  for (const [office, person] of Object.entries(state.offices)) {
+    const li = document.createElement("li");
+    li.className = "office";
+    li.innerHTML = `<strong>${office}</strong> · <code>${person || "VACANT"}</code>`;
+    $("officeView").append(li);
+  }
+  if (state.vacancy) {
+    const li = document.createElement("li");
+    li.className = "office";
+    li.textContent = `Lease gate: beat ${state.vacancy.leaseUntil}; ranked grace applies`;
+    $("officeView").append(li);
+  }
+
+  $("lawView").innerHTML = "";
+  for (const law of Object.values(state.laws)) {
+    const li = document.createElement("li");
+    li.className = `law ${law.active ? "" : "superseded"}`.trim();
+    const replacement = law.active ? "ACTIVE" : `SUPERSEDED → ${law.supersededBy}`;
+    li.innerHTML = `<strong>${law.id}</strong> · ${replacement}<br><code>${lawLabel(law)}</code>`;
+    $("lawView").append(li);
+  }
+}
+
+function describeFrame(frame) {
+  const p = frame.payload;
+  if (frame.type === "constitution.found") return `People found ${p.name} with ${p.laws.length} laws.`;
+  if (frame.type === "action.spend") return `${frame.actor} spends ${p.amount} ${p.resource} on ${p.purpose}, citing ${p.cites}.`;
+  if (frame.type === "law.amend") return `${frame.actor} enacts ${p.law.id}, superseding ${p.supersedes}.`;
+  if (frame.type === "office.appoint") return `${frame.actor} appoints ${p.person} as ${p.office} under ${p.cites}.`;
+  if (frame.type === "office.fail") return `${p.person} fails; lease remains through beat ${p.leaseUntil}.`;
+  if (frame.type === "clock.advance") return `Logical clock advances ${p.steps} beat${p.steps === 1 ? "" : "s"}.`;
+  if (frame.type === "office.transfer") return `${p.person} becomes steward under ${p.cites}.`;
+  return frame.type;
+}
+
+function renderLedger(replay) {
+  const body = $("ledgerBody");
+  body.innerHTML = "";
+  mainFrames.forEach((frame, index) => {
+    const row = document.createElement("tr");
+    if (replay.violation && replay.violation.index === index) row.className = "invalid";
+    const cells = [
+      String(frame.seq),
+      frame.type,
+      describeFrame(frame),
+      `${frame.hash.slice(0, 12)}…`
+    ];
+    cells.forEach((value, cellIndex) => {
+      const td = document.createElement("td");
+      if (cellIndex === 3) td.className = "hash";
+      td.textContent = value;
+      row.append(td);
+    });
+    body.append(row);
+  });
+}
+
+function assertion(title, detail, state) {
+  const node = document.createElement("div");
+  node.className = `assertion ${state}`;
+  const strong = document.createElement("strong");
+  const span = document.createElement("span");
+  strong.textContent = `${state === "pass" ? "PASS" : state === "fail" ? "FAIL" : "WAIT"} · ${title}`;
+  span.textContent = detail;
+  node.append(strong, span);
+  return node;
+}
+
+function renderAssertions(replay) {
+  const view = $("assertionView");
+  view.innerHTML = "";
+  const violation = replay.violation;
+  view.append(
+    assertion(
+      "Canonical hash chain",
+      violation && ["hash", "link", "sequence"].includes(violation.kind)
+        ? violation.message
+        : "Every accepted prefix frame matches canonical SHA-256 and predecessor order.",
+      violation && ["hash", "link", "sequence"].includes(violation.kind) ? "fail" : "pass"
+    ),
+    assertion(
+      "Semantic constitution",
+      violation && violation.kind === "law"
+        ? `${violation.message}${violation.lawId ? ` Exact law: ${violation.lawId}.` : ""}`
+        : "Every accepted action follows the active law at that exact point in history.",
+      violation && violation.kind === "law" ? "fail" : "pass"
+    ),
+    assertion(
+      "Last valid society",
+      violation
+        ? `Replay stopped before frame ${violation.index}; the visible society remains at valid frame ${Math.max(0, replay.validLength - 1)}.`
+        : "The complete chain is currently lawful.",
+      violation ? "pass" : "pass"
+    ),
+    assertion(
+      "Lawful forks",
+      forkResult
+        ? "Both branches replay from their shared constitutional prefix without rewriting it."
+        : "Create a fork to compare two valid descendants.",
+      forkResult ? "pass" : "pending"
+    )
+  );
+}
+
+function renderForkPoints(replay) {
+  const select = $("forkPoint");
+  const remembered = select.value;
+  select.innerHTML = "";
+  mainFrames.slice(0, replay.validLength).forEach((frame, index) => {
+    if (frame.type !== "constitution.found" && frame.type !== "law.amend") return;
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = frame.type === "constitution.found"
+      ? `#${index} · Founding constitution`
+      : `#${index} · ${frame.payload.law.id} supersedes ${frame.payload.supersedes}`;
+    select.append(option);
+  });
+  if ([...select.options].some((option) => option.value === remembered)) select.value = remembered;
+}
+
+function renderFork() {
+  const view = $("forkView");
+  if (!forkResult) {
+    view.innerHTML = `<article class="branch"><h3>Society A</h3><p>Waiting for a fork.</p></article>
+      <article class="branch"><h3>Society B</h3><p>Waiting for a fork.</p></article>`;
+    return;
+  }
+  view.innerHTML = "";
+  for (const branch of forkResult.branches) {
+    const card = document.createElement("article");
+    card.className = "branch";
+    const h3 = document.createElement("h3");
+    const p1 = document.createElement("p");
+    const p2 = document.createElement("p");
+    const p3 = document.createElement("p");
+    const head = document.createElement("div");
+    head.className = "head";
+    h3.textContent = branch.name;
+    p1.textContent = branch.policy;
+    p2.textContent = `Treasury ${branch.replay.state.resources.treasury} · ${branch.replay.validLength} valid frames`;
+    p3.textContent = `${forkResult.shared} shared frames; ${branch.chain.length - forkResult.shared} private descendants`;
+    head.textContent = `head ${branch.replay.head}`;
+    card.append(h3, p1, p2, p3, head);
+    view.append(card);
+  }
+}
+
+async function refresh(title, tone = "") {
+  lastReplay = await replayChain(mainFrames);
+  renderState(lastReplay);
+  renderLedger(lastReplay);
+  renderAssertions(lastReplay);
+  renderForkPoints(lastReplay);
+  renderFork();
+  if (title) {
+    const detail = lastReplay.violation
+      ? `Replay refused frame ${lastReplay.violation.index}: ${lastReplay.violation.message}`
+      : `${lastReplay.validLength} frame${lastReplay.validLength === 1 ? "" : "s"} replay lawfully.`;
+    setStatus(title, detail, tone || (lastReplay.violation ? "bad" : "good"));
+  }
+}
+
+async function doAppend(type, actor, payload, successMessage) {
+  const result = await appendValidated(mainFrames, type, actor, payload);
+  if (!result.ok) {
+    setStatus("Append refused.", result.message, "warn");
+    return false;
+  }
+  await refresh(successMessage || `${type} appended.`, "good");
+  return true;
+}
+
+async function runGuided() {
+  await seed();
+  let state = (await replayChain(mainFrames)).state;
+  await doAppend("action.spend", state.offices.steward, {
+    cites: "LAW-TREASURY-1", resource: "treasury", amount: 20, purpose: "waterworks"
+  });
+  state = (await replayChain(mainFrames)).state;
+  await doAppend("office.appoint", state.offices.steward, {
+    cites: "LAW-SUCCESSION-1", office: "deputy", person: "Sol"
+  });
+  state = (await replayChain(mainFrames)).state;
+  await doAppend("law.amend", state.offices.steward, {
+    supersedes: "LAW-TREASURY-1",
+    law: { id: "LAW-TREASURY-2", kind: "appropriation", purpose: "waterworks", resource: "treasury", perAction: 70, supersedes: "LAW-TREASURY-1" }
+  });
+  const refused = await appendValidated(mainFrames, "action.spend", state.offices.steward, {
+    cites: "LAW-TREASURY-1", resource: "treasury", amount: 5, purpose: "waterworks"
+  });
+  state = (await replayChain(mainFrames)).state;
+  await doAppend("action.spend", state.offices.steward, {
+    cites: "LAW-TREASURY-2", resource: "treasury", amount: 35, purpose: "waterworks"
+  });
+  state = (await replayChain(mainFrames)).state;
+  await doAppend("office.fail", state.offices.steward, {
+    cites: "LAW-SUCCESSION-1", office: "steward", person: state.offices.steward, leaseUntil: state.leaseUntil
+  });
+  await doAppend("clock.advance", "public clock", { steps: 4 });
+  state = (await replayChain(mainFrames)).state;
+  await doAppend("office.transfer", "constitutional mechanism", {
+    cites: "LAW-SUCCESSION-1", office: "steward", person: "Sol"
+  });
+  setStatus(
+    "Guided history complete.",
+    `The stale-law append was refused before hashing into history: ${refused.message} Stewardship then transferred to Sol at the ranked lease gate.`,
+    "good"
+  );
+}
+
+async function manualAppend() {
+  const replay = await replayChain(mainFrames);
+  const state = replay.state;
+  if (!replay.fullyValid) {
+    setStatus("Manual append blocked.", "Independent replay must be valid before history can continue.", "warn");
+    return;
+  }
+  const succession = activeLaw(state, "succession");
+  const appropriation = activeLaw(state, "appropriation");
+  const action = $("manualAction").value;
+
+  if (action === "spend") {
+    await doAppend("action.spend", state.offices.steward || "nobody", {
+      cites: appropriation?.id || "NO-LAW", resource: "treasury", amount: 10, purpose: appropriation?.purpose || "waterworks"
+    }, "Authorized spending appended.");
+  } else if (action === "appoint") {
+    const next = succession?.ranks.find((name) => name !== state.offices.steward && !state.failed.includes(name));
+    await doAppend("office.appoint", state.offices.steward || "nobody", {
+      cites: succession?.id || "NO-LAW", office: "deputy", person: next || "nobody"
+    }, "Ranked appointment appended.");
+  } else if (action === "amend") {
+    const number = Object.keys(state.laws).filter((id) => id.startsWith("LAW-TREASURY-")).length + 1;
+    await doAppend("law.amend", state.offices.steward || "nobody", {
+      supersedes: appropriation?.id || "NO-LAW",
+      law: {
+        id: `LAW-TREASURY-${number}`,
+        kind: "appropriation",
+        purpose: appropriation?.purpose || "waterworks",
+        resource: "treasury",
+        perAction: Math.min(90, (appropriation?.perAction || 20) + 10),
+        supersedes: appropriation?.id || "NO-LAW"
+      }
+    }, "Amendment appended; its cited predecessor is now superseded.");
+  } else if (action === "beat") {
+    await doAppend("clock.advance", "public clock", { steps: 1 }, "Logical beat appended.");
+  } else if (action === "fail") {
+    await doAppend("office.fail", state.offices.steward || "nobody", {
+      cites: succession?.id || "NO-LAW", office: "steward", person: state.offices.steward, leaseUntil: state.leaseUntil
+    }, "Steward failure appended; authority is vacant until the ranked lease gate.");
+  } else if (action === "transfer") {
+    const candidates = succession?.ranks.filter((name) => !state.failed.includes(name)) || [];
+    await doAppend("office.transfer", "constitutional mechanism", {
+      cites: succession?.id || "NO-LAW", office: "steward", person: candidates[0] || "nobody"
+    }, "Lawful authority transfer appended.");
+  } else if (action === "stale") {
+    const stale = Object.values(state.laws).find((law) => law.kind === "appropriation" && !law.active);
+    const result = await appendValidated(mainFrames, "action.spend", state.offices.steward || "nobody", {
+      cites: stale?.id || "LAW-TREASURY-0", resource: "treasury", amount: 5, purpose: stale?.purpose || "waterworks"
+    });
+    setStatus("Append refused as designed.", result.message, "warn");
+  }
+}
+
+async function injectTyrant() {
+  let replay = await replayChain(mainFrames);
+  if (!replay.fullyValid) {
+    setStatus("Mutation already present.", "Reset or run the guided history before injecting another.", "warn");
+    return;
+  }
+  let stale = Object.values(replay.state.laws).find((law) => law.kind === "appropriation" && !law.active);
+  if (!stale) {
+    const current = activeLaw(replay.state, "appropriation");
+    const result = await appendValidated(mainFrames, "law.amend", replay.state.offices.steward, {
+      supersedes: current.id,
+      law: { id: "LAW-TREASURY-2", kind: "appropriation", purpose: "waterworks", resource: "treasury", perAction: 70, supersedes: current.id }
+    });
+    if (!result.ok) {
+      setStatus("Could not prepare mutation.", result.message, "bad");
+      return;
+    }
+    replay = await replayChain(mainFrames);
+    stale = replay.state.laws["LAW-TREASURY-1"];
+  }
+  const forged = await mint(mainFrames, "action.spend", "Tyrant Vale", {
+    cites: stale.id, resource: "treasury", amount: 60, purpose: stale.purpose,
+    bypass: "writer skipped append validator"
+  });
+  mainFrames.push(forged);
+  await refresh("Tyrant frame injected outside the append gate.", "bad");
+}
+
+async function makeFork() {
+  const index = Number($("forkPoint").value);
+  if (!Number.isInteger(index)) {
+    setStatus("No constitutional frame selected.", "Run or reset the history, then choose a fork point.", "warn");
+    return;
+  }
+  const prefix = mainFrames.slice(0, index + 1).map(clone);
+  const baseReplay = await replayChain(prefix);
+  if (!baseReplay.fullyValid) {
+    setStatus("Fork refused.", "The selected prefix does not replay lawfully.", "bad");
+    return;
+  }
+
+  const configs = [
+    { name: "Canal Commonwealth", purpose: "canals", cap: 65, spend: 45, suffix: "A" },
+    { name: "Clinic Compact", purpose: "clinics", cap: 55, spend: 40, suffix: "B" }
+  ];
+  const branches = [];
+  for (const config of configs) {
+    const chain = prefix.map(clone);
+    let state = (await replayChain(chain)).state;
+    const active = activeLaw(state, "appropriation");
+    const lawId = `LAW-FORK-${index}-${config.suffix}`;
+    let result = await appendValidated(chain, "law.amend", state.offices.steward || "nobody", {
+      supersedes: active.id,
+      law: {
+        id: lawId, kind: "appropriation", purpose: config.purpose,
+        resource: "treasury", perAction: config.cap, supersedes: active.id
+      }
+    });
+    if (!result.ok) {
+      setStatus("Fork branch refused.", result.message, "bad");
+      return;
+    }
+    state = (await replayChain(chain)).state;
+    result = await appendValidated(chain, "action.spend", state.offices.steward, {
+      cites: lawId, resource: "treasury", amount: config.spend, purpose: config.purpose
+    });
+    if (!result.ok) {
+      setStatus("Fork branch refused.", result.message, "bad");
+      return;
+    }
+    branches.push({
+      name: config.name,
+      policy: `${lawId} authorizes ${config.purpose}; ${config.spend} credits lawfully spent.`,
+      chain,
+      replay: await replayChain(chain)
+    });
+  }
+  forkResult = { shared: prefix.length, baseHead: baseReplay.head, branches };
+  await refresh("Two lawful descendants created.", "good");
+  setStatus("Fork comparison ready.", `Both societies preserve the same ${prefix.length}-frame prefix ending ${baseReplay.head.slice(0, 12)}…`, "good");
+}
+
+async function locked(task) {
+  if (busy) return;
+  busy = true;
+  document.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+  try {
+    await task();
+  } catch (error) {
+    console.error(error);
+    setStatus("Unexpected simulator error.", error.message, "bad");
+  } finally {
+    busy = false;
+    document.querySelectorAll("button").forEach((button) => { button.disabled = false; });
+  }
+}
+
+$("guidedBtn").addEventListener("click", () => locked(runGuided));
+$("replayBtn").addEventListener("click", () => locked(async () => {
+  await refresh("Independent replay complete.");
+}));
+$("appendBtn").addEventListener("click", () => locked(manualAppend));
+$("tyrantBtn").addEventListener("click", () => locked(injectTyrant));
+$("forkBtn").addEventListener("click", () => locked(makeFork));
+$("resetBtn").addEventListener("click", () => locked(seed));
+$("ledgerBtn").addEventListener("click", () => {
+  const panel = $("ledgerPanel");
+  const hidden = panel.hidden;
+  panel.hidden = !hidden;
+  $("ledgerBtn").textContent = hidden ? "Hide ledger" : "Show ledger";
+  $("ledgerBtn").setAttribute("aria-expanded", String(hidden));
+});
+$("themeBtn").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("clawpilot-theme", next);
+  $("themeBtn").textContent = `Theme: ${next}`;
+});
+$("copyBtn").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(PROMPT);
+    $("copyNote").textContent = "Prompt copied.";
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = PROMPT;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.append(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+    $("copyNote").textContent = "Prompt copied.";
+  }
+});
+
+$("promptText").textContent = PROMPT;
+$("themeBtn").textContent = `Theme: ${document.documentElement.dataset.theme}`;
+locked(seed);
+</script>
+</body>
+</html>

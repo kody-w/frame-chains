@@ -1,0 +1,66 @@
+{
+  "id": "07-constitution",
+  "frame": 7,
+  "number": 7,
+  "order": 7,
+  "slug": "constitution",
+  "title": "The Executable Constitution",
+  "subtitle": "A civilization whose law is a replay",
+  "description": "An offline constitutional simulator where laws, amendments, offices, resources, logical beats, and actions are append-only canonical SHA-256 frames.",
+  "claim": "One shared semantic validator can make an append-only constitutional frame chain executable: current law gates civic action, ranked logical-beat leases transfer authority, lawful forks preserve their shared history, and replay contains a correctly hashed unconstitutional write at its exact violated law.",
+  "entry": "showcase/07-constitution/index.html",
+  "path": "showcase/07-constitution/index.html",
+  "href": "showcase/07-constitution/",
+  "kind": "interactive-proof",
+  "status": "ready",
+  "theme": "clawpilot",
+  "synthetic_only": true,
+  "network_required": false,
+  "offline": true,
+  "minimumViewportWidth": 390,
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Web Crypto SHA-256"
+  ],
+  "invariants": [
+    "Every frame is hashed with browser Web Crypto SHA-256 over recursively key-sorted canonical JSON and linked to the exact predecessor hash.",
+    "All visible laws, offices, resources, logical beats, and actions are reconstructed only by replaying frames.",
+    "The same semantic transition validator gates both append and independent replay.",
+    "Spending requires the current steward, sufficient resources, the authorized purpose and amount, and an active cited appropriation.",
+    "Appointments and stewardship transfer follow the active ranked succession law and its logical-beat lease plus rank grace.",
+    "Every amendment cites the active law it supersedes, and later actions may not cite the superseded law.",
+    "Forked societies preserve an identical constitutional prefix and append different lawful descendants without rewriting either history.",
+    "Replay stops at the first invalid frame, names the exact violated law, and retains the last valid derived society."
+  ],
+  "positive_path": [
+    "Run the guided history to spend under the founding appropriation, appoint the next-ranked deputy, and amend the spending law.",
+    "Observe an attempted action under the superseded law refused before append, then spend under the active replacement.",
+    "Fail the steward, advance the logical clock to the ranked lease gate, and transfer authority to the first eligible successor.",
+    "Fork from a constitutional frame and compare two independently replayable societies with the same immutable prefix."
+  ],
+  "failure_path": "Use the tyrant mutation to bypass append validation and inject a correctly hashed spend under LAW-TREASURY-1 after LAW-TREASURY-2 supersedes it. Independent replay rejects that exact law citation at the injected frame while the last valid society remains visible.",
+  "capabilities": [
+    "guided",
+    "manual",
+    "replay",
+    "fork",
+    "reset",
+    "ledger",
+    "assertions",
+    "mutation"
+  ],
+  "requirements": {
+    "offline": true,
+    "syntheticDataOnly": true,
+    "networkRequests": false,
+    "dependencies": false,
+    "canonicalHash": "SHA-256",
+    "responsiveMinimumWidth": 390,
+    "keyboardAccessible": true,
+    "ariaLive": true,
+    "reducedMotion": true
+  },
+  "promptCopy": true
+}
