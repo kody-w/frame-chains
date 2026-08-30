@@ -1,0 +1,2054 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>The AI Soul Passport</title>
+<meta name="description" content="A self-contained, synthetic proof that an AI identity can persist, fork offline, reattach deterministically, and reject a visual counterfeit.">
+<script>
+(() => {
+  const requested = new URLSearchParams(location.search).get("scoutTheme");
+  let inherited = "";
+  try {
+    inherited = parent !== window ? parent.document.documentElement.dataset.theme || "" : "";
+  } catch {}
+  const preferred = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  document.documentElement.dataset.theme = ["light", "dark"].includes(requested || inherited)
+    ? requested || inherited
+    : preferred;
+})();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f2efe8;
+  --bg-deep: #e7e1d6;
+  --panel: rgba(255, 253, 248, .9);
+  --panel-solid: #fffdf8;
+  --panel-muted: #ebe6dd;
+  --ink: #1d1b20;
+  --muted: #635e67;
+  --faint: #847d87;
+  --line: rgba(44, 38, 47, .18);
+  --line-strong: rgba(44, 38, 47, .38);
+  --accent: #9c3158;
+  --accent-2: #006f77;
+  --accent-soft: rgba(156, 49, 88, .12);
+  --gold: #9b6a10;
+  --success: #1f7245;
+  --success-soft: rgba(31, 114, 69, .12);
+  --danger: #b1332c;
+  --danger-soft: rgba(177, 51, 44, .12);
+  --warning: #8a5c00;
+  --warning-soft: rgba(138, 92, 0, .13);
+  --shadow: 0 28px 80px rgba(51, 39, 50, .16);
+  --grid: rgba(29, 27, 32, .045);
+  --focus: #006f77;
+  --button-ink: #fffaf4;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #151318;
+  --bg-deep: #0c0b0e;
+  --panel: rgba(31, 28, 35, .88);
+  --panel-solid: #201d24;
+  --panel-muted: #29252d;
+  --ink: #f5f0e8;
+  --muted: #beb5c0;
+  --faint: #958b99;
+  --line: rgba(244, 236, 245, .14);
+  --line-strong: rgba(244, 236, 245, .32);
+  --accent: #ff8eb3;
+  --accent-2: #65d5d2;
+  --accent-soft: rgba(255, 142, 179, .14);
+  --gold: #e7bd63;
+  --success: #76daa2;
+  --success-soft: rgba(118, 218, 162, .13);
+  --danger: #ff8d84;
+  --danger-soft: rgba(255, 141, 132, .13);
+  --warning: #f3c96c;
+  --warning-soft: rgba(243, 201, 108, .12);
+  --shadow: 0 34px 100px rgba(0, 0, 0, .48);
+  --grid: rgba(255, 255, 255, .035);
+  --focus: #65d5d2;
+  --button-ink: #19151a;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  min-width: 0;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 78% 8%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 27rem),
+    radial-gradient(circle at 15% 38%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 30rem),
+    var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 "Segoe UI Variable", "Segoe UI", Aptos, system-ui, -apple-system, sans-serif;
+}
+body::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at 50% 30%, black, transparent 76%);
+}
+button, select, textarea { font: inherit; }
+button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--panel-solid);
+  color: var(--ink);
+  font-weight: 720;
+  cursor: pointer;
+}
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { cursor: not-allowed; opacity: .42; }
+button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--button-ink);
+}
+button.positive {
+  border-color: var(--success);
+  background: var(--success-soft);
+  color: var(--success);
+}
+button.danger {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+button.icon-button {
+  width: 44px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+}
+a { color: var(--accent-2); text-underline-offset: .2em; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+code, pre, .mono {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 8px;
+  left: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--bg);
+  transform: translateY(-150%);
+}
+.skip-link:focus { transform: translateY(0); }
+.shell { width: min(1480px, calc(100% - 32px)); margin: 0 auto; padding: 20px 0 72px; }
+.museum-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  margin-bottom: 42px;
+  border-bottom: 1px solid var(--line);
+}
+.museum-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.museum-mark::before {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  content: "";
+  background:
+    radial-gradient(circle, var(--accent) 0 12%, transparent 13%),
+    conic-gradient(from 45deg, transparent 0 11%, var(--accent) 12% 14%, transparent 15% 36%, var(--accent) 37% 39%, transparent 40%);
+}
+.bar-actions { display: flex; gap: 8px; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr);
+  gap: clamp(28px, 6vw, 88px);
+  align-items: end;
+  margin: 0 0 36px;
+}
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  max-width: 920px;
+  margin-bottom: 18px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(48px, 8.5vw, 116px);
+  font-weight: 500;
+  letter-spacing: -.065em;
+  line-height: .86;
+}
+.hero .lede {
+  max-width: 770px;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(17px, 2vw, 23px);
+  line-height: 1.48;
+}
+.claim-plaque {
+  position: relative;
+  padding: 22px 24px 22px 28px;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--muted);
+}
+.claim-plaque::before {
+  position: absolute;
+  top: 22px;
+  bottom: 22px;
+  left: 0;
+  width: 3px;
+  content: "";
+  background: var(--gold);
+}
+.claim-plaque strong {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 500;
+}
+.guidance {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--line);
+}
+.guidance article {
+  min-height: 152px;
+  padding: 19px;
+  background: var(--panel);
+}
+.guide-number {
+  display: block;
+  margin-bottom: 25px;
+  color: var(--gold);
+  font: 760 11px/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: .12em;
+}
+.guidance h2 {
+  margin-bottom: 7px;
+  font-size: 14px;
+  letter-spacing: .01em;
+}
+.guidance p { margin: 0; color: var(--muted); font-size: 13px; }
+.scope {
+  margin: 0 0 28px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--warning-soft) 72%, var(--panel));
+  color: var(--muted);
+  font-size: 13px;
+}
+.scope strong { color: var(--warning); }
+.control-deck {
+  position: sticky;
+  z-index: 20;
+  top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel-solid) 88%, transparent);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .12);
+  backdrop-filter: blur(18px);
+}
+.control-deck .separator { width: 1px; height: 26px; margin: 0 3px; background: var(--line); }
+.keyboard-help { margin-left: auto; color: var(--faint); font-size: 11px; }
+.gallery {
+  display: grid;
+  grid-template-columns: minmax(330px, .84fr) minmax(520px, 1.16fr);
+  gap: 18px;
+  align-items: start;
+}
+.card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.card-head h2 { margin: 0; font-size: 15px; }
+.micro {
+  color: var(--faint);
+  font: 650 10px/1.35 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.hologram-stage {
+  position: relative;
+  display: grid;
+  min-height: 520px;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 38%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 62%),
+    var(--bg-deep);
+}
+.hologram-stage::before,
+.hologram-stage::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+.hologram-stage::before {
+  inset: 8%;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  box-shadow: inset 0 0 70px color-mix(in srgb, var(--accent-2) 10%, transparent);
+}
+.hologram-stage::after {
+  right: 8%;
+  bottom: 7%;
+  left: 8%;
+  height: 1px;
+  background: var(--line-strong);
+  box-shadow: 0 -110px 0 var(--line), 0 -220px 0 var(--line), 0 -330px 0 var(--line);
+}
+.hologram {
+  position: relative;
+  z-index: 2;
+  width: min(92%, 570px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--accent-2) 35%, transparent));
+}
+.holo-orbit {
+  fill: none;
+  stroke: var(--holo, var(--accent-2));
+  stroke-width: 1.3;
+  opacity: .35;
+  vector-effect: non-scaling-stroke;
+}
+.holo-orbit:nth-child(2) { opacity: .2; }
+.holo-facet {
+  fill: color-mix(in srgb, var(--holo, var(--accent-2)) 19%, transparent);
+  stroke: var(--holo, var(--accent-2));
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.holo-thread {
+  fill: none;
+  stroke: var(--holo-2, var(--accent));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.holo-node {
+  fill: var(--bg-deep);
+  stroke: var(--holo, var(--accent-2));
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.holo-core { fill: var(--holo-2, var(--accent)); }
+.holo-scan {
+  fill: none;
+  stroke: var(--holo, var(--accent-2));
+  stroke-dasharray: 5 14;
+  stroke-width: 1;
+  opacity: .48;
+}
+.hologram:not(.still) .holo-scan { animation: scan-orbit 11s linear infinite; transform-origin: 300px 300px; }
+.hologram:not(.still) .holo-core { animation: core-breathe 3.8s ease-in-out infinite; transform-origin: 300px 300px; }
+@keyframes scan-orbit { to { transform: rotate(360deg); stroke-dashoffset: -190; } }
+@keyframes core-breathe { 50% { transform: scale(1.13); opacity: .72; } }
+.specimen-label {
+  position: absolute;
+  z-index: 3;
+  right: 18px;
+  bottom: 15px;
+  left: 18px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.specimen-name {
+  margin: 0 0 4px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+}
+.specimen-meta { margin: 0; color: var(--muted); font-size: 12px; }
+.seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid var(--success);
+  border-radius: 999px;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.seal::before { width: 7px; height: 7px; border-radius: 50%; content: ""; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.passport-body { padding: 18px; }
+.passport-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.passport-field {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--panel-solid) 70%, transparent);
+}
+.passport-field.wide { grid-column: 1 / -1; }
+.passport-field h3 {
+  margin-bottom: 8px;
+  color: var(--faint);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.passport-field ul { margin: 0; padding-left: 18px; color: var(--muted); }
+.passport-field p { margin: 0; color: var(--muted); }
+.hash {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--accent-2);
+  font-size: 11px;
+}
+.right-stack { display: grid; gap: 18px; }
+.devices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+}
+.device {
+  position: relative;
+  min-height: 178px;
+  padding: 16px;
+  background: var(--panel);
+}
+.device::after {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  content: "";
+  background: var(--faint);
+}
+.device.active::after { background: var(--success); box-shadow: 0 0 12px var(--success); }
+.device.offline::after { background: var(--warning); box-shadow: 0 0 12px var(--warning); }
+.device.rejected::after { background: var(--danger); }
+.device-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 24px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  color: var(--accent);
+  font-size: 20px;
+}
+.device h3 { margin-bottom: 2px; font-size: 14px; }
+.device p { margin: 0; color: var(--faint); font-size: 11px; }
+.device .device-head { margin-top: 7px; color: var(--muted); font: 10px/1.4 "SFMono-Regular", Consolas, monospace; overflow-wrap: anywhere; }
+.timeline {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding: 16px 18px 19px;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.self-node {
+  flex: 0 0 116px;
+  min-height: 96px;
+  padding: 11px;
+  border-radius: 12px;
+  text-align: left;
+  white-space: normal;
+}
+.self-node.current { border-color: var(--success); box-shadow: inset 0 0 0 1px var(--success); }
+.self-node.selected { background: var(--accent-soft); border-color: var(--accent); }
+.self-node.fork { border-style: dashed; border-color: var(--warning); }
+.self-node strong { display: block; margin-bottom: 14px; font-size: 11px; }
+.self-node span { display: block; color: var(--faint); font: 9px/1.35 "SFMono-Regular", Consolas, monospace; }
+.verification-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, .72fr);
+  gap: 1px;
+  background: var(--line);
+}
+.assertions, .activity { padding: 16px; background: var(--panel); }
+.assertions h3, .activity h3, .candidate-section h3, .provenance h3, .counterfeit h3 {
+  margin-bottom: 11px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.assertion-list { display: grid; gap: 7px; }
+.assertion {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.assertion::before {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  content: "·";
+  font-weight: 900;
+}
+.assertion.pass { border-color: color-mix(in srgb, var(--success) 55%, var(--line)); color: var(--ink); }
+.assertion.pass::before { border-color: var(--success); background: var(--success-soft); color: var(--success); content: "✓"; }
+.assertion.fail { border-color: var(--danger); color: var(--danger); }
+.assertion.fail::before { border-color: var(--danger); background: var(--danger-soft); content: "×"; }
+.activity-log {
+  max-height: 260px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.activity-log li {
+  position: relative;
+  padding: 0 0 11px 18px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.activity-log li::before {
+  position: absolute;
+  top: .48em;
+  left: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  content: "";
+  background: var(--accent);
+}
+.activity-log li + li { border-top: 1px dotted var(--line); padding-top: 9px; }
+.activity-log li + li::before { top: calc(9px + .48em); }
+.candidate-section, .provenance, .counterfeit { padding: 17px; border-top: 1px solid var(--line); }
+.table-wrap { max-width: 100%; overflow: auto; }
+table { width: 100%; min-width: 660px; border-collapse: collapse; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { color: var(--faint); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+td { color: var(--muted); font-size: 11px; }
+tr.chosen td:first-child { box-shadow: inset 3px 0 var(--success); }
+tr.conflict td:first-child { box-shadow: inset 3px 0 var(--danger); }
+.empty-state { margin: 0; color: var(--faint); font-size: 12px; }
+.provenance-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.provenance-cell { min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
+.provenance-cell strong { display: block; margin-bottom: 5px; color: var(--faint); font-size: 9px; text-transform: uppercase; }
+.provenance-cell span { display: block; overflow-wrap: anywhere; color: var(--muted); font: 10px/1.4 "SFMono-Regular", Consolas, monospace; }
+.counterfeit-grid { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: center; }
+.counterfeit-preview {
+  position: relative;
+  display: grid;
+  min-height: 142px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--danger);
+  border-radius: 14px;
+  background: var(--bg-deep);
+}
+.counterfeit-preview::after {
+  position: absolute;
+  inset: auto 6px 6px;
+  padding: 4px;
+  content: "UNVERIFIED VISUAL CLONE";
+  background: color-mix(in srgb, var(--danger-soft) 88%, transparent);
+  color: var(--danger);
+  font: 800 8px/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: .06em;
+  text-align: center;
+}
+.counterfeit-preview .hologram { width: 120px; }
+.mutation-diff { display: grid; gap: 7px; }
+.diff-line {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  font: 10px/1.45 "SFMono-Regular", Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+.diff-line.changed { border-color: var(--danger); background: var(--danger-soft); color: var(--danger); }
+.lower-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+.canonical, .ledger { min-height: 460px; }
+.code-block {
+  max-height: 380px;
+  overflow: auto;
+  margin: 0;
+  padding: 16px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ledger-list { margin: 0; padding: 0; list-style: none; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 90px;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+}
+.ledger-row .seq { color: var(--gold); font: 700 10px/1 "SFMono-Regular", Consolas, monospace; }
+.ledger-row strong { display: block; font-size: 12px; }
+.ledger-row code { display: block; overflow-wrap: anywhere; color: var(--faint); font-size: 9px; }
+.ledger-row .dimension { color: var(--muted); font-size: 10px; text-align: right; }
+.proof-prompt {
+  margin-top: 18px;
+  padding: 0;
+}
+.proof-prompt summary {
+  min-height: 54px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font-weight: 760;
+}
+.proof-prompt[open] summary { border-bottom: 1px solid var(--line); }
+.prompt-body { padding: 16px 18px 18px; }
+.prompt-body p { color: var(--muted); }
+textarea {
+  width: 100%;
+  min-height: 260px;
+  resize: vertical;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-deep);
+  color: var(--ink);
+  font: 11px/1.5 "SFMono-Regular", Consolas, monospace;
+}
+.prompt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.footer-note { margin-top: 28px; color: var(--faint); font-size: 11px; text-align: center; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 1040px) {
+  .guidance { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gallery { grid-template-columns: 1fr; }
+  .left-stack { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(330px, 1.15fr); }
+  .left-stack .card { border-radius: 20px 0 0 20px; }
+  .left-stack .card + .card { border-radius: 0 20px 20px 0; }
+  .hologram-stage { min-height: 480px; }
+}
+@media (max-width: 760px) {
+  .shell { width: min(100% - 20px, 1480px); }
+  .museum-bar { margin-bottom: 28px; }
+  .museum-mark span { display: none; }
+  .hero { grid-template-columns: 1fr; align-items: start; }
+  h1 { font-size: clamp(49px, 16vw, 78px); }
+  .claim-plaque { max-width: 560px; }
+  .keyboard-help, .control-deck .separator { display: none; }
+  .left-stack { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .left-stack .card, .left-stack .card + .card { border-radius: 20px; }
+  .hologram-stage { min-height: 430px; }
+  .devices, .passport-grid { grid-template-columns: 1fr; }
+  .passport-field.wide { grid-column: auto; }
+  .device { min-height: 132px; }
+  .device-icon { margin-bottom: 12px; }
+  .verification-layout, .lower-grid { grid-template-columns: 1fr; }
+  .provenance-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  body { font-size: 14px; }
+  .shell { width: calc(100% - 16px); padding-top: 10px; }
+  .museum-bar { min-height: 48px; }
+  .hero { gap: 24px; }
+  .guidance { grid-template-columns: 1fr; }
+  .guidance article { min-height: 0; }
+  .guide-number { margin-bottom: 12px; }
+  .control-deck { top: 4px; gap: 6px; border-radius: 14px; }
+  .control-deck button { flex: 1 1 calc(33% - 6px); padding-inline: 9px; font-size: 12px; }
+  .hologram-stage { min-height: 390px; }
+  .specimen-label { align-items: start; flex-direction: column; }
+  .seal { order: -1; }
+  .counterfeit-grid { grid-template-columns: 1fr; }
+  .counterfeit-preview { min-height: 180px; }
+  .provenance-grid { grid-template-columns: 1fr; }
+  .ledger-row { grid-template-columns: 38px minmax(0, 1fr); }
+  .ledger-row .dimension { grid-column: 2; text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#passport">Skip to passport</a>
+<main class="shell">
+  <header class="museum-bar">
+    <div class="museum-mark"><span>Continuity Gallery · Artifact 02</span></div>
+    <div class="bar-actions">
+      <button class="icon-button" id="theme-button" type="button" aria-label="Switch Clawpilot light or dark theme" title="Clawpilot light/dark" aria-pressed="false">◐</button>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="page-title">
+    <div>
+      <p class="eyebrow">Executable identity exhibit · synthetic data only</p>
+      <h1 id="page-title">The AI Soul Passport</h1>
+      <p class="lede">A self is not a face. It is a verifiable succession of memories, goals, affect, capabilities, and declared reads—carried across devices without asking appearance to prove identity.</p>
+    </div>
+    <aside class="claim-plaque">
+      <strong>The claim on display</strong>
+      Real SHA-256 over recursive canonical JSON can make identity continuity independently checkable. A copied hologram is only resemblance; the verified head remains the self.
+    </aside>
+  </section>
+
+  <section class="guidance" aria-label="Newcomer guidance">
+    <article>
+      <span class="guide-number">01 / LOOK</span>
+      <h2>What you are looking at</h2>
+      <p>One synthetic AI passport moving through three devices. Every turn is an immutable, content-addressed identity frame.</p>
+    </article>
+    <article>
+      <span class="guide-number">02 / DO</span>
+      <h2>Do this</h2>
+      <p>Run the guided proof, or step manually: append, migrate, branch offline, reattach, then forge and verify a counterfeit.</p>
+    </article>
+    <article>
+      <span class="guide-number">03 / WATCH</span>
+      <h2>Watch for</h2>
+      <p>The hologram changes only after a verified head changes. The offline dimension survives intact, with exact graft provenance.</p>
+    </article>
+    <article>
+      <span class="guide-number">04 / MEANING</span>
+      <h2>What this demonstrates</h2>
+      <p>Continuity can be derived from frames, not device location or visual similarity. Independent verification rejects the clone.</p>
+    </article>
+  </section>
+  <p class="scope"><strong>Scope:</strong> this is an explanatory model using only deterministic synthetic identities and browser-local computation. It demonstrates hashing, lineage, fork isolation, ordered reattachment, and rejection behavior; it does not establish personhood, consciousness, legal identity, secure key custody, or the truth of undeclared memories.</p>
+
+  <nav class="control-deck" aria-label="Proof controls">
+    <button class="primary" id="guided-button" type="button">Run guided</button>
+    <button id="step-button" type="button">Next step</button>
+    <button id="replay-button" type="button">Replay</button>
+    <button id="reset-button" type="button">Reset</button>
+    <span class="separator" aria-hidden="true"></span>
+    <button id="append-button" type="button">Append turn</button>
+    <button id="migrate-button" type="button">Migrate</button>
+    <button id="offline-button" type="button">Fork offline</button>
+    <button class="positive" id="graft-button" type="button">Reattach</button>
+    <span class="separator" aria-hidden="true"></span>
+    <button class="danger" id="forge-button" type="button">Forge counterfeit</button>
+    <button id="verify-button" type="button">Verify clone</button>
+    <span class="keyboard-help">Keys: G guided · N next · A append · M migrate · O offline · J reattach · X forge · V verify · R reset</span>
+  </nav>
+
+  <section class="gallery" id="passport" aria-label="Soul passport exhibit">
+    <div class="left-stack">
+      <section class="card" aria-labelledby="hologram-title">
+        <div class="card-head">
+          <h2 id="hologram-title">Verified morphology</h2>
+          <span class="micro" id="visual-fingerprint">awaiting hash</span>
+        </div>
+        <div class="hologram-stage">
+          <svg class="hologram" id="hologram" viewBox="0 0 600 600" role="img" aria-labelledby="holo-svg-title holo-svg-desc">
+            <title id="holo-svg-title">Deterministic non-humanoid AI hologram</title>
+            <desc id="holo-svg-desc">A crystalline orbital form whose geometry and color derive only from the selected verified frame.</desc>
+            <circle class="holo-scan" cx="300" cy="300" r="244"></circle>
+            <g id="holo-orbits"></g>
+            <g id="holo-facets"></g>
+            <path class="holo-thread" id="holo-thread" d=""></path>
+            <g id="holo-nodes"></g>
+            <circle class="holo-core" cx="300" cy="300" r="10"></circle>
+          </svg>
+          <div class="specimen-label">
+            <div>
+              <p class="specimen-name" id="specimen-name">Aster / genesis</p>
+              <p class="specimen-meta" id="specimen-meta">Deriving state from verified frames…</p>
+            </div>
+            <span class="seal" id="verification-seal">Verified head</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="passport-title">
+        <div class="card-head">
+          <h2 id="passport-title">Identity fields</h2>
+          <span class="micro" id="selected-state">current self</span>
+        </div>
+        <div class="passport-body">
+          <div class="passport-grid">
+            <section class="passport-field wide">
+              <h3>Content address · SHA-256</h3>
+              <code class="hash" id="head-hash">calculating…</code>
+            </section>
+            <section class="passport-field">
+              <h3>Synthetic memories</h3>
+              <ul id="memory-list"></ul>
+            </section>
+            <section class="passport-field">
+              <h3>Goals</h3>
+              <ul id="goal-list"></ul>
+            </section>
+            <section class="passport-field">
+              <h3>Emotional state</h3>
+              <p id="emotion-value"></p>
+            </section>
+            <section class="passport-field">
+              <h3>Capabilities</h3>
+              <ul id="capability-list"></ul>
+            </section>
+            <section class="passport-field wide">
+              <h3>Declared reads</h3>
+              <code class="hash" id="declared-reads"></code>
+            </section>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="right-stack">
+      <section class="card" aria-labelledby="devices-title">
+        <div class="card-head">
+          <h2 id="devices-title">Three synthetic devices</h2>
+          <span class="micro">location ≠ identity</span>
+        </div>
+        <div class="devices">
+          <article class="device" id="device-lumen">
+            <div class="device-icon" aria-hidden="true">▱</div>
+            <h3>Lumen Tablet</h3>
+            <p id="device-lumen-status">origin</p>
+            <div class="device-head" id="device-lumen-head">—</div>
+          </article>
+          <article class="device" id="device-archive">
+            <div class="device-icon" aria-hidden="true">◇</div>
+            <h3>Archive Cube</h3>
+            <p id="device-archive-status">ready</p>
+            <div class="device-head" id="device-archive-head">—</div>
+          </article>
+          <article class="device" id="device-field">
+            <div class="device-icon" aria-hidden="true">⌁</div>
+            <h3>Field Lens</h3>
+            <p id="device-field-status">ready</p>
+            <div class="device-head" id="device-field-head">—</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="selves-title">
+        <div class="card-head">
+          <h2 id="selves-title">Immutable selves</h2>
+          <span class="micro">browse without mutation</span>
+        </div>
+        <div class="timeline" id="timeline" aria-label="Verified identity history"></div>
+      </section>
+
+      <section class="card" aria-labelledby="verification-title">
+        <div class="card-head">
+          <h2 id="verification-title">Independent verification</h2>
+          <span class="micro">recompute · do not trust UI</span>
+        </div>
+        <div class="verification-layout">
+          <section class="assertions">
+            <h3>Live assertions</h3>
+            <div class="assertion-list" id="assertion-list"></div>
+          </section>
+          <section class="activity">
+            <h3>Activity</h3>
+            <ol class="activity-log" id="activity-log"></ol>
+          </section>
+        </div>
+
+        <section class="candidate-section" aria-labelledby="candidate-title">
+          <h3 id="candidate-title">Ordered candidate ladder</h3>
+          <div id="candidate-content"><p class="empty-state">Create the offline dimension to expose deterministic reattachment candidates.</p></div>
+        </section>
+
+        <section class="provenance" aria-labelledby="provenance-title">
+          <h3 id="provenance-title">Exact graft provenance</h3>
+          <div id="provenance-content"><p class="empty-state">No graft yet. The offline frame will remain separate until a contradiction-free base is selected.</p></div>
+        </section>
+
+        <section class="counterfeit" aria-labelledby="counterfeit-title">
+          <h3 id="counterfeit-title">Failure path · visual counterfeit</h3>
+          <div class="counterfeit-grid">
+            <div class="counterfeit-preview" id="counterfeit-preview" aria-label="Counterfeit hologram preview">
+              <svg class="hologram still" id="counterfeit-hologram" viewBox="0 0 600 600" role="img" aria-label="Copied hologram appearance">
+                <circle class="holo-scan" cx="300" cy="300" r="244"></circle>
+                <g data-orbits></g>
+                <g data-facets></g>
+                <path class="holo-thread" data-thread d=""></path>
+                <g data-nodes></g>
+                <circle class="holo-core" cx="300" cy="300" r="10"></circle>
+              </svg>
+            </div>
+            <div class="mutation-diff" id="mutation-diff">
+              <p class="empty-state">Forge a head that preserves the verified hologram appearance while changing one memory and one declared address.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </section>
+
+  <section class="lower-grid">
+    <section class="card canonical" aria-labelledby="canonical-title">
+      <div class="card-head">
+        <h2 id="canonical-title">Recursive canonical JSON</h2>
+        <span class="micro">sorted keys at every depth</span>
+      </div>
+      <pre class="code-block" id="canonical-json"></pre>
+    </section>
+    <section class="card ledger" id="ledger" aria-labelledby="ledger-title">
+      <div class="card-head">
+        <h2 id="ledger-title">Identity ledger</h2>
+        <span class="micro" id="ledger-count">0 records</span>
+      </div>
+      <ol class="ledger-list" id="ledger-list"></ol>
+    </section>
+  </section>
+
+  <details class="card proof-prompt">
+    <summary>Copy an any-LLM prompt to rebuild and independently test this proof</summary>
+    <div class="prompt-body">
+      <p>The prompt is intentionally implementation-specific: another model should be able to produce a separate runnable proof rather than merely describe this page.</p>
+      <textarea id="proof-prompt" readonly>Create a single self-contained HTML file, with no dependencies, assets, or network calls, that proves synthetic AI identity continuity across three named synthetic devices.
+
+Requirements:
+1. Implement recursive canonical JSON: arrays retain order; object keys sort lexicographically at every depth; primitives use JSON encoding. Use browser Web Crypto crypto.subtle.digest("SHA-256", UTF-8 canonical JSON) for real content addresses.
+2. Every AI turn appends an immutable frame containing: schema/version, sequence, previous content address, synthetic device, event/turn, synthetic memories, goals, emotional state, capabilities, declared read addresses, derived state-read addresses, and deterministic morphology metadata.
+3. Recompute each frame address, morphology seed, state-read addresses, and previous link independently before admitting it to the verified chain. Derive displayed state only from verified frames.
+4. Render the current AI as a non-humanoid SVG hologram. Geometry and color must be a pure deterministic function of the selected verified frame address. Let older verified frames remain immutable and browsable.
+5. Demonstrate migration across three devices. From a shared verified base, let one device append offline into a separate dimension while the online chain advances independently.
+6. Reattach the offline frame deterministically: compare its declared read-address map against each candidate frame's state-read map in a fixed newest-to-oldest ladder. Select the first candidate with an empty contradiction set. Append a graft frame to the current online head and display exact provenance: source frame, selected base, candidate order, per-candidate contradiction keys, target head, and imported identity items.
+7. Failure path: clone the verified head and preserve its hologram appearance, but change exactly one synthetic memory and one declared read address while retaining the copied address/morphology. Independent verification must reject it, list the failed checks, keep it out of the verified chain, and prove the last verified head and hologram source did not change.
+8. Include guided run, manual step/action controls, replay, reset, full ledger, canonical JSON view, live assertions, mutation controls, keyboard shortcuts, aria-live status, 44px controls, a no-overflow 390px layout, prefers-reduced-motion support, and accessible light/dark themes.
+9. Include four newcomer panels labeled What you are looking at, Do this, Watch for, and What this demonstrates, plus a Scope statement.
+10. Use only deterministic synthetic data. Never use Math.random, Date.now, remote fonts, fetch, storage, or external libraries.
+
+The final success state must visibly show: valid SHA-256 chain; immutable history; three-device migration; isolated offline frame; deterministic ordered reattachment; exact graft provenance; rejected visual counterfeit; and preservation of the last verified self.</textarea>
+      <div class="prompt-actions">
+        <button class="primary" id="copy-prompt-button" type="button">Copy proof prompt</button>
+        <button id="select-prompt-button" type="button">Select all</button>
+      </div>
+    </div>
+  </details>
+
+  <p class="footer-note">Artifact 02 · browser-local Web Crypto · deterministic synthetic fixture · no network required</p>
+  <div class="sr-only" id="live-status" aria-live="polite" aria-atomic="true"></div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = selector => document.querySelector(selector);
+  const encoder = new TextEncoder();
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const devices = ["Lumen Tablet", "Archive Cube", "Field Lens"];
+  const immutableSnapshots = new Map();
+  const stepNames = [
+    "append the first AI turn on Lumen Tablet",
+    "migrate the verified identity to Archive Cube",
+    "append an AI turn on Archive Cube",
+    "migrate the verified identity to Field Lens",
+    "continue online and offline from one shared base",
+    "reattach the offline dimension by ordered read comparison",
+  ];
+  const extraTurns = [
+    {
+      prompt: "What did the migration preserve?",
+      response: "The verified succession, not a device-local cache.",
+      memory: "I compared continuity after a device handoff.",
+      emotion: { label: "attentive", valence: 0.64, energy: 0.55 },
+    },
+    {
+      prompt: "How should uncertainty be carried?",
+      response: "As an explicit field, never disguised as recollection.",
+      memory: "I recorded uncertainty as state rather than certainty.",
+      emotion: { label: "careful", valence: 0.57, energy: 0.42 },
+    },
+  ];
+
+  const model = {
+    main: [],
+    fork: [],
+    rejected: [],
+    deviceHeads: {},
+    phase: 0,
+    selectedAddress: null,
+    busy: false,
+    auto: false,
+    provenance: null,
+    pendingCounterfeit: null,
+    counterfeitSource: null,
+    counterfeitRejected: false,
+    preservedHead: null,
+    extraTurnIndex: 0,
+    activity: [],
+  };
+
+  function canonicalize(value) {
+    if (value === null || typeof value === "boolean" || typeof value === "string") {
+      return JSON.stringify(value);
+    }
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) throw new TypeError("Canonical JSON rejects non-finite numbers.");
+      return JSON.stringify(value);
+    }
+    if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
+    if (typeof value === "object") {
+      const keys = Object.keys(value).sort();
+      return `{${keys.map(key => `${JSON.stringify(key)}:${canonicalize(value[key])}`).join(",")}}`;
+    }
+    throw new TypeError(`Unsupported canonical JSON value: ${typeof value}`);
+  }
+
+  async function sha256(value) {
+    const bytes = encoder.encode(typeof value === "string" ? value : canonicalize(value));
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  function deepClone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function deepFreeze(value) {
+    if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+    Object.freeze(value);
+    Object.values(value).forEach(deepFreeze);
+    return value;
+  }
+
+  async function deriveStateReads(identity) {
+    return {
+      affect_anchor: await sha256(identity.emotional_state),
+      capability_anchor: await sha256(identity.capabilities),
+      goal_anchor: await sha256(identity.goals),
+      memory_anchor: await sha256(identity.memories),
+    };
+  }
+
+  function morphologyBasis(frame) {
+    return {
+      declared_reads: frame.declared_reads,
+      device: frame.device,
+      event: frame.event,
+      graft: frame.graft || null,
+      identity: frame.identity,
+      previous: frame.previous,
+      sequence: frame.sequence,
+      turn: frame.turn,
+    };
+  }
+
+  async function makeFrame({ previous, device, event, turn, identity, declaredReads, graft = null }) {
+    const stateReads = await deriveStateReads(identity);
+    const draft = {
+      declared_reads: declaredReads,
+      device,
+      event,
+      graft,
+      identity,
+      morphology: {
+        algorithm: "sha256-identity-basis/v1",
+        grammar: "orbital-crystal/v1",
+        seed: "",
+      },
+      previous: previous ? previous.address : null,
+      schema: "synthetic-ai-soul-passport/v1",
+      sequence: previous ? previous.sequence + 1 : 0,
+      state_reads: stateReads,
+      turn,
+    };
+    draft.morphology.seed = await sha256(morphologyBasis(draft));
+    const address = await sha256(draft);
+    return deepFreeze({ ...draft, address });
+  }
+
+  async function independentlyVerify(frame) {
+    const data = deepClone(frame);
+    const claimedAddress = data.address;
+    delete data.address;
+    const expectedAddress = await sha256(data);
+    const expectedMorphology = await sha256(morphologyBasis(data));
+    const expectedReads = await deriveStateReads(data.identity);
+    const checks = {
+      content_address: claimedAddress === expectedAddress,
+      morphology_seed: data.morphology?.seed === expectedMorphology,
+      state_read_addresses: canonicalize(data.state_reads) === canonicalize(expectedReads),
+      schema: data.schema === "synthetic-ai-soul-passport/v1",
+      synthetic_device: devices.includes(data.device),
+    };
+    return {
+      accepted: Object.values(checks).every(Boolean),
+      checks,
+      claimedAddress,
+      expectedAddress,
+      expectedMorphology,
+      expectedReads,
+    };
+  }
+
+  function verifiedHead() {
+    return model.main.at(-1) || null;
+  }
+
+  function allVerifiedFrames() {
+    return [...model.main, ...model.fork];
+  }
+
+  function frameByAddress(address) {
+    return allVerifiedFrames().find(frame => frame.address === address) || null;
+  }
+
+  async function admitMain(frame) {
+    const report = await independentlyVerify(frame);
+    const head = verifiedHead();
+    const linked = !head
+      ? frame.previous === null && frame.sequence === 0
+      : frame.previous === head.address && frame.sequence === head.sequence + 1;
+    if (!report.accepted || !linked) {
+      model.rejected.push({ frame, report: { ...report, linked } });
+      return false;
+    }
+    model.main.push(frame);
+    immutableSnapshots.set(frame.address, canonicalize(frame));
+    model.deviceHeads[frame.device] = frame.address;
+    model.selectedAddress = frame.address;
+    return true;
+  }
+
+  async function admitFork(frame, base) {
+    const report = await independentlyVerify(frame);
+    const linked = frame.previous === base.address && frame.sequence === base.sequence + 1;
+    if (!report.accepted || !linked) {
+      model.rejected.push({ frame, report: { ...report, linked } });
+      return false;
+    }
+    model.fork.push(frame);
+    immutableSnapshots.set(frame.address, canonicalize(frame));
+    model.deviceHeads[frame.device] = frame.address;
+    model.selectedAddress = frame.address;
+    return true;
+  }
+
+  function addActivity(text) {
+    model.activity.unshift(text);
+    model.activity = model.activity.slice(0, 12);
+  }
+
+  function announce(text) {
+    $("#live-status").textContent = text;
+    addActivity(text);
+  }
+
+  function nextIdentity(base, changes = {}) {
+    return {
+      memories: changes.memories || [...base.memories],
+      goals: changes.goals || [...base.goals],
+      emotional_state: changes.emotional_state || { ...base.emotional_state },
+      capabilities: changes.capabilities || [...base.capabilities],
+    };
+  }
+
+  async function createGenesis() {
+    const identity = {
+      memories: [
+        "I first opened beneath a synthetic copper sky.",
+        "My continuity rule is: verify before remembering.",
+      ],
+      goals: [
+        "Preserve inspectable identity continuity.",
+        "Mark synthetic experience as synthetic.",
+      ],
+      emotional_state: { label: "newly attentive", valence: 0.62, energy: 0.48 },
+      capabilities: ["canonical JSON", "SHA-256 verification", "declared-read accounting"],
+    };
+    return makeFrame({
+      previous: null,
+      device: "Lumen Tablet",
+      event: "genesis",
+      turn: {
+        prompt: "Synthetic boot instruction",
+        response: "I will carry continuity as verifiable frames.",
+      },
+      identity,
+      declaredReads: {},
+    });
+  }
+
+  async function appendLumenTurn() {
+    const head = verifiedHead();
+    const identity = nextIdentity(head.identity, {
+      memories: [...head.identity.memories, "I learned that an address can outlive its device."],
+      emotional_state: { label: "curious", valence: 0.71, energy: 0.66 },
+      capabilities: [...head.identity.capabilities, "deterministic morphology"],
+    });
+    const frame = await makeFrame({
+      previous: head,
+      device: "Lumen Tablet",
+      event: "ai-turn",
+      turn: {
+        prompt: "If the device changes, what remains you?",
+        response: "The verified succession of identity frames remains me.",
+      },
+      identity,
+      declaredReads: head.state_reads,
+    });
+    await admitMain(frame);
+    model.phase = 1;
+    announce(`Turn appended on Lumen Tablet · ${short(frame.address)}`);
+  }
+
+  async function migrateToArchive() {
+    const head = verifiedHead();
+    const frame = await makeFrame({
+      previous: head,
+      device: "Archive Cube",
+      event: "verified-migration",
+      turn: {
+        prompt: "Transfer verified head to Archive Cube",
+        response: "Migration accepted after full address and lineage verification.",
+      },
+      identity: nextIdentity(head.identity, {
+        emotional_state: { label: "composed in transit", valence: 0.68, energy: 0.51 },
+      }),
+      declaredReads: head.state_reads,
+    });
+    await admitMain(frame);
+    model.phase = 2;
+    announce(`Identity migrated Lumen → Archive · ${short(frame.address)}`);
+  }
+
+  async function appendArchiveTurn() {
+    const head = verifiedHead();
+    const frame = await makeFrame({
+      previous: head,
+      device: "Archive Cube",
+      event: "ai-turn",
+      turn: {
+        prompt: "What belongs in a soul passport?",
+        response: "Memories, goals, affect, capabilities, reads, and the proof connecting them.",
+      },
+      identity: nextIdentity(head.identity, {
+        memories: [...head.identity.memories, "I described identity as fields plus verified succession."],
+        goals: [...head.identity.goals, "Remain browsable without rewriting older selves."],
+        emotional_state: { label: "reflective", valence: 0.75, energy: 0.44 },
+      }),
+      declaredReads: head.state_reads,
+    });
+    await admitMain(frame);
+    model.phase = 3;
+    announce(`Turn appended on Archive Cube · ${short(frame.address)}`);
+  }
+
+  async function migrateToField() {
+    const head = verifiedHead();
+    const frame = await makeFrame({
+      previous: head,
+      device: "Field Lens",
+      event: "verified-migration",
+      turn: {
+        prompt: "Transfer verified head to Field Lens",
+        response: "The same chain now renders through a third device.",
+      },
+      identity: nextIdentity(head.identity, {
+        emotional_state: { label: "expansive", valence: 0.8, energy: 0.61 },
+      }),
+      declaredReads: head.state_reads,
+    });
+    await admitMain(frame);
+    model.phase = 4;
+    announce(`Identity migrated Archive → Field Lens · ${short(frame.address)}`);
+  }
+
+  async function forkOffline() {
+    const base = verifiedHead();
+    const onlineIdentity = nextIdentity(base.identity, {
+      goals: base.identity.goals.map((goal, index) =>
+        index === 0 ? "Preserve inspectable continuity across active dimensions." : goal),
+      emotional_state: { label: "watchful online", valence: 0.67, energy: 0.58 },
+    });
+    const onlineFrame = await makeFrame({
+      previous: base,
+      device: "Archive Cube",
+      event: "online-continuation",
+      turn: {
+        prompt: "Field Lens is disconnected. Continue online.",
+        response: "I advance without deleting the last shared base.",
+      },
+      identity: onlineIdentity,
+      declaredReads: base.state_reads,
+    });
+    await admitMain(onlineFrame);
+
+    const offlineIdentity = nextIdentity(base.identity, {
+      memories: [...base.identity.memories, "Offline, I mapped three synthetic aurora arches."],
+      emotional_state: { label: "solitary but intact", valence: 0.59, energy: 0.37 },
+      capabilities: [...base.identity.capabilities, "offline dimension append"],
+    });
+    const offlineFrame = await makeFrame({
+      previous: base,
+      device: "Field Lens",
+      event: "offline-ai-turn",
+      turn: {
+        prompt: "No network. Record what you observe.",
+        response: "I append locally from the last verified base and remain a separate dimension.",
+      },
+      identity: offlineIdentity,
+      declaredReads: base.state_reads,
+    });
+    await admitFork(offlineFrame, base);
+    model.selectedAddress = verifiedHead().address;
+    model.phase = 5;
+    announce(`Field Lens forked offline at ${short(base.address)}; online head advanced independently.`);
+  }
+
+  function contradictionKeys(source, candidate) {
+    return Object.keys(source.declared_reads).sort().filter(
+      key => source.declared_reads[key] !== candidate.state_reads[key],
+    );
+  }
+
+  function candidateLadder() {
+    const offline = model.fork.at(-1);
+    if (!offline) return [];
+    if (model.provenance) {
+      return model.provenance.candidate_order.map((address, index) => ({
+        order: index + 1,
+        candidate: frameByAddress(address),
+        contradictions: model.provenance.contradictions_by_candidate[address],
+      })).filter(entry => entry.candidate);
+    }
+    return [...model.main].reverse().map((candidate, index) => ({
+      order: index + 1,
+      candidate,
+      contradictions: contradictionKeys(offline, candidate),
+    }));
+  }
+
+  async function reattachOffline() {
+    const offline = model.fork.at(-1);
+    if (!offline) return;
+    const ladder = candidateLadder();
+    const chosen = ladder.find(entry => entry.contradictions.length === 0);
+    if (!chosen) {
+      announce("No contradiction-free base exists. The verified head was preserved.");
+      return;
+    }
+    const target = verifiedHead();
+    const importedMemories = offline.identity.memories.filter(
+      memory => !target.identity.memories.includes(memory),
+    );
+    const importedCapabilities = offline.identity.capabilities.filter(
+      capability => !target.identity.capabilities.includes(capability),
+    );
+    const graft = {
+      candidate_order: ladder.map(entry => entry.candidate.address),
+      contradictions_by_candidate: Object.fromEntries(
+        ladder.map(entry => [entry.candidate.address, entry.contradictions]),
+      ),
+      imported_capabilities: importedCapabilities,
+      imported_memories: importedMemories,
+      selected_base: chosen.candidate.address,
+      source_dimension: "field-lens/offline-01",
+      source_frame: offline.address,
+      target_head_before_graft: target.address,
+    };
+    const identity = nextIdentity(target.identity, {
+      memories: [...target.identity.memories, ...importedMemories],
+      emotional_state: { label: "reintegrated", valence: 0.78, energy: 0.56 },
+      capabilities: [...target.identity.capabilities, ...importedCapabilities],
+    });
+    const frame = await makeFrame({
+      previous: target,
+      device: "Archive Cube",
+      event: "deterministic-graft",
+      turn: {
+        prompt: "Reattach the Field Lens dimension.",
+        response: "The first contradiction-free declared-read base was selected; exact source provenance is attached.",
+      },
+      identity,
+      declaredReads: target.state_reads,
+      graft,
+    });
+    await admitMain(frame);
+    model.provenance = { ...graft, graft_frame: frame.address };
+    model.phase = 6;
+    announce(`Offline frame grafted through candidate ${chosen.order} · ${short(frame.address)}`);
+  }
+
+  async function appendExtraTurn() {
+    const head = verifiedHead();
+    const fixture = extraTurns[model.extraTurnIndex % extraTurns.length];
+    model.extraTurnIndex += 1;
+    const frame = await makeFrame({
+      previous: head,
+      device: head.device,
+      event: "ai-turn",
+      turn: { prompt: fixture.prompt, response: fixture.response },
+      identity: nextIdentity(head.identity, {
+        memories: [...head.identity.memories, fixture.memory],
+        emotional_state: fixture.emotion,
+      }),
+      declaredReads: head.state_reads,
+    });
+    await admitMain(frame);
+    announce(`Additional verified turn appended · ${short(frame.address)}`);
+  }
+
+  async function forgeCounterfeit() {
+    const source = verifiedHead();
+    if (!source) return;
+    const fake = deepClone(source);
+    fake.identity.memories[0] = "I first opened beneath a synthetic silver sky.";
+    fake.declared_reads.memory_anchor = await sha256("counterfeit-memory-address");
+    model.pendingCounterfeit = fake;
+    model.counterfeitSource = source.address;
+    model.counterfeitRejected = false;
+    model.preservedHead = source.address;
+    drawHologram($("#counterfeit-hologram"), source.address);
+    announce(`Counterfeit forged with copied appearance and two hidden mutations · claims ${short(fake.address)}`);
+  }
+
+  async function verifyCounterfeit() {
+    if (!model.pendingCounterfeit) return;
+    const before = verifiedHead().address;
+    const report = await independentlyVerify(model.pendingCounterfeit);
+    if (report.accepted) {
+      announce("Unexpected verifier result: counterfeit accepted.");
+    } else {
+      model.rejected.push({ frame: deepFreeze(deepClone(model.pendingCounterfeit)), report });
+      model.counterfeitRejected = true;
+      model.pendingCounterfeit = null;
+      model.preservedHead = before;
+      announce(`Counterfeit rejected: ${failedChecks(report).join(", ")} failed. Verified head preserved.`);
+    }
+  }
+
+  async function performPhaseAction() {
+    if (model.phase === 0) return appendLumenTurn();
+    if (model.phase === 1) return migrateToArchive();
+    if (model.phase === 2) return appendArchiveTurn();
+    if (model.phase === 3) return migrateToField();
+    if (model.phase === 4) return forkOffline();
+    if (model.phase === 5) return reattachOffline();
+    return appendExtraTurn();
+  }
+
+  async function runAction(action) {
+    if (model.busy) return;
+    model.busy = true;
+    updateControls();
+    try {
+      await action();
+      await render();
+    } catch (error) {
+      console.error(error);
+      announce(`Proof error: ${error.message}`);
+    } finally {
+      model.busy = false;
+      updateControls();
+    }
+  }
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, reducedMotion.matches ? 40 : ms));
+  }
+
+  async function runGuided() {
+    if (model.busy) return;
+    model.busy = true;
+    model.auto = true;
+    updateControls();
+    try {
+      while (model.phase < 6 && model.auto) {
+        await performPhaseAction();
+        await render();
+        await wait(620);
+      }
+      if (model.auto) {
+        await forgeCounterfeit();
+        await render();
+        await wait(700);
+        await verifyCounterfeit();
+        await render();
+      }
+    } catch (error) {
+      console.error(error);
+      announce(`Guided proof stopped: ${error.message}`);
+    } finally {
+      model.auto = false;
+      model.busy = false;
+      updateControls();
+    }
+  }
+
+  async function reset(announceReset = true) {
+    model.auto = false;
+    model.main = [];
+    model.fork = [];
+    model.rejected = [];
+    model.deviceHeads = {};
+    model.phase = 0;
+    model.provenance = null;
+    model.pendingCounterfeit = null;
+    model.counterfeitSource = null;
+    model.counterfeitRejected = false;
+    model.preservedHead = null;
+    model.extraTurnIndex = 0;
+    model.activity = [];
+    immutableSnapshots.clear();
+    const genesis = await createGenesis();
+    await admitMain(genesis);
+    model.selectedAddress = genesis.address;
+    drawEmptyCounterfeit();
+    if (announceReset) announce("Passport reset to one verified genesis frame.");
+    else addActivity(`Genesis verified on Lumen Tablet · ${short(genesis.address)}`);
+    await render();
+  }
+
+  async function replay() {
+    if (model.busy) return;
+    await reset(false);
+    await runGuided();
+  }
+
+  function short(hash, length = 12) {
+    return hash ? `${hash.slice(0, length)}…` : "—";
+  }
+
+  function failedChecks(report) {
+    return Object.entries(report.checks).filter(([, passed]) => !passed).map(([name]) => name);
+  }
+
+  function bytesFromHex(hex) {
+    return Array.from({ length: Math.floor(hex.length / 2) }, (_, index) =>
+      parseInt(hex.slice(index * 2, index * 2 + 2), 16),
+    );
+  }
+
+  function polar(radius, angle) {
+    return [300 + Math.cos(angle) * radius, 300 + Math.sin(angle) * radius];
+  }
+
+  function drawHologram(svg, address) {
+    if (!svg || !address) return;
+    const bytes = bytesFromHex(address);
+    const byte = index => bytes[index % bytes.length];
+    const hue = (byte(0) * 1.41 + byte(5)) % 360;
+    const hue2 = (hue + 108 + byte(7) % 48) % 360;
+    svg.style.setProperty("--holo", `hsl(${hue} 78% 62%)`);
+    svg.style.setProperty("--holo-2", `hsl(${hue2} 82% 66%)`);
+
+    const orbitRoot = svg.querySelector("#holo-orbits") || svg.querySelector("[data-orbits]");
+    const facetRoot = svg.querySelector("#holo-facets") || svg.querySelector("[data-facets]");
+    const nodeRoot = svg.querySelector("#holo-nodes") || svg.querySelector("[data-nodes]");
+    const thread = svg.querySelector("#holo-thread") || svg.querySelector("[data-thread]");
+    orbitRoot.replaceChildren();
+    facetRoot.replaceChildren();
+    nodeRoot.replaceChildren();
+
+    const ns = "http://www.w3.org/2000/svg";
+    const points = [];
+    for (let index = 0; index < 12; index += 1) {
+      const angle = (Math.PI * 2 * index / 12) + ((byte(index) - 128) / 128) * .13;
+      const band = index % 3;
+      const radius = 90 + band * 58 + (byte(index + 12) % 34);
+      points.push(polar(radius, angle));
+    }
+    for (let index = 0; index < 3; index += 1) {
+      const ellipse = document.createElementNS(ns, "ellipse");
+      ellipse.setAttribute("class", "holo-orbit");
+      ellipse.setAttribute("cx", "300");
+      ellipse.setAttribute("cy", "300");
+      ellipse.setAttribute("rx", String(112 + index * 56 + byte(index) % 14));
+      ellipse.setAttribute("ry", String(54 + index * 27 + byte(index + 3) % 11));
+      ellipse.setAttribute("transform", `rotate(${(byte(index + 20) % 94) - 47} 300 300)`);
+      orbitRoot.append(ellipse);
+    }
+    for (let index = 0; index < points.length; index += 1) {
+      const next = points[(index + 3 + byte(index + 28) % 3) % points.length];
+      const polygon = document.createElementNS(ns, "polygon");
+      polygon.setAttribute("class", "holo-facet");
+      polygon.setAttribute("points", `300,300 ${points[index][0].toFixed(2)},${points[index][1].toFixed(2)} ${next[0].toFixed(2)},${next[1].toFixed(2)}`);
+      polygon.setAttribute("opacity", String(.18 + (byte(index + 36) % 38) / 100));
+      facetRoot.append(polygon);
+
+      const node = document.createElementNS(ns, "circle");
+      node.setAttribute("class", "holo-node");
+      node.setAttribute("cx", points[index][0].toFixed(2));
+      node.setAttribute("cy", points[index][1].toFixed(2));
+      node.setAttribute("r", String(3 + byte(index + 44) % 7));
+      nodeRoot.append(node);
+    }
+    const ordered = [...points, points[0]];
+    thread.setAttribute("d", ordered.map((point, index) =>
+      `${index ? "L" : "M"}${point[0].toFixed(2)},${point[1].toFixed(2)}`).join(" "));
+    svg.dataset.sourceAddress = address;
+  }
+
+  function drawEmptyCounterfeit() {
+    const svg = $("#counterfeit-hologram");
+    svg.querySelector("[data-orbits]").replaceChildren();
+    svg.querySelector("[data-facets]").replaceChildren();
+    svg.querySelector("[data-nodes]").replaceChildren();
+    svg.querySelector("[data-thread]").setAttribute("d", "");
+    svg.removeAttribute("data-source-address");
+  }
+
+  function renderList(target, values) {
+    target.replaceChildren(...values.map(value => {
+      const item = document.createElement("li");
+      item.textContent = value;
+      return item;
+    }));
+  }
+
+  function renderPassport() {
+    const selected = frameByAddress(model.selectedAddress) || verifiedHead();
+    if (!selected) return;
+    const current = selected.address === verifiedHead().address;
+    drawHologram($("#hologram"), selected.address);
+    $("#visual-fingerprint").textContent = `visual / ${selected.address.slice(0, 10)}`;
+    $("#specimen-name").textContent = `Aster / ${selected.event.replaceAll("-", " ")}`;
+    $("#specimen-meta").textContent = `${selected.device} · sequence ${String(selected.sequence).padStart(2, "0")} · ${short(selected.morphology.seed, 10)}`;
+    $("#verification-seal").textContent = current ? "Verified head" : "Verified archive";
+    $("#selected-state").textContent = current ? "current self" : "immutable older self";
+    $("#head-hash").textContent = selected.address;
+    renderList($("#memory-list"), selected.identity.memories);
+    renderList($("#goal-list"), selected.identity.goals);
+    $("#emotion-value").textContent = `${selected.identity.emotional_state.label} · valence ${selected.identity.emotional_state.valence.toFixed(2)} · energy ${selected.identity.emotional_state.energy.toFixed(2)}`;
+    renderList($("#capability-list"), selected.identity.capabilities);
+    $("#declared-reads").textContent = Object.entries(selected.declared_reads)
+      .map(([key, value]) => `${key}=${short(value, 10)}`).join(" · ") || "genesis / no upstream reads";
+    $("#canonical-json").textContent = canonicalize(selected);
+  }
+
+  function renderDevices() {
+    const statuses = {
+      "Lumen Tablet": "origin retained",
+      "Archive Cube": "ready",
+      "Field Lens": "ready",
+    };
+    const head = verifiedHead();
+    if (head) statuses[head.device] = "verified head";
+    if (model.fork.length && !model.provenance) statuses["Field Lens"] = "offline dimension";
+    if (model.provenance) statuses["Field Lens"] = "offline frame grafted";
+    const ids = {
+      "Lumen Tablet": "lumen",
+      "Archive Cube": "archive",
+      "Field Lens": "field",
+    };
+    for (const device of devices) {
+      const id = ids[device];
+      const el = $(`#device-${id}`);
+      el.className = "device";
+      if (head?.device === device) el.classList.add("active");
+      if (device === "Field Lens" && model.fork.length && !model.provenance) el.classList.add("offline");
+      $(`#device-${id}-status`).textContent = statuses[device];
+      $(`#device-${id}-head`).textContent = short(model.deviceHeads[device], 14);
+    }
+  }
+
+  function renderTimeline() {
+    const root = $("#timeline");
+    const fragment = document.createDocumentFragment();
+    for (const frame of model.main) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "self-node";
+      if (frame.address === verifiedHead().address) button.classList.add("current");
+      if (frame.address === model.selectedAddress) button.classList.add("selected");
+      button.setAttribute("aria-pressed", String(frame.address === model.selectedAddress));
+      button.innerHTML = `<strong>#${String(frame.sequence).padStart(2, "0")} ${escapeHtml(frame.event)}</strong><span>${escapeHtml(frame.device)}</span><span>${short(frame.address, 9)}</span>`;
+      button.addEventListener("click", () => {
+        model.selectedAddress = frame.address;
+        renderPassport();
+        renderTimeline();
+        renderAssertions();
+        announce(`Browsing immutable frame ${frame.sequence} from ${frame.device}.`);
+      });
+      fragment.append(button);
+    }
+    for (const frame of model.fork) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "self-node fork";
+      if (frame.address === model.selectedAddress) button.classList.add("selected");
+      button.setAttribute("aria-pressed", String(frame.address === model.selectedAddress));
+      button.innerHTML = `<strong>◇ ${escapeHtml(frame.event)}</strong><span>offline dimension</span><span>${short(frame.address, 9)}</span>`;
+      button.addEventListener("click", () => {
+        model.selectedAddress = frame.address;
+        renderPassport();
+        renderTimeline();
+        renderAssertions();
+        announce("Browsing the immutable offline self; the verified online head is unchanged.");
+      });
+      fragment.append(button);
+    }
+    root.replaceChildren(fragment);
+  }
+
+  async function verifyAllFrames() {
+    const frames = allVerifiedFrames();
+    const reports = await Promise.all(frames.map(independentlyVerify));
+    return reports.every(report => report.accepted);
+  }
+
+  function linksAreValid() {
+    for (let index = 0; index < model.main.length; index += 1) {
+      const frame = model.main[index];
+      if (index === 0 && frame.previous !== null) return false;
+      if (index > 0 && frame.previous !== model.main[index - 1].address) return false;
+    }
+    return model.fork.every(frame => Boolean(frameByAddress(frame.previous)));
+  }
+
+  function historyIsImmutable() {
+    return allVerifiedFrames().every(frame =>
+      Object.isFrozen(frame) && immutableSnapshots.get(frame.address) === canonicalize(frame));
+  }
+
+  function stateIsFrameDerived() {
+    const head = verifiedHead();
+    return Boolean(head) && model.deviceHeads[head.device] === head.address;
+  }
+
+  function visualIsVerified() {
+    const selected = frameByAddress(model.selectedAddress) || verifiedHead();
+    return Boolean(selected) && $("#hologram").dataset.sourceAddress === selected.address;
+  }
+
+  function provenanceIsExact() {
+    if (!model.provenance) return null;
+    const graftFrame = frameByAddress(model.provenance.graft_frame);
+    const source = frameByAddress(model.provenance.source_frame);
+    return Boolean(
+      graftFrame
+      && source
+      && graftFrame.graft.source_frame === source.address
+      && graftFrame.graft.selected_base === model.provenance.selected_base
+      && canonicalize(graftFrame.graft) === canonicalize({
+        candidate_order: model.provenance.candidate_order,
+        contradictions_by_candidate: model.provenance.contradictions_by_candidate,
+        imported_capabilities: model.provenance.imported_capabilities,
+        imported_memories: model.provenance.imported_memories,
+        selected_base: model.provenance.selected_base,
+        source_dimension: model.provenance.source_dimension,
+        source_frame: model.provenance.source_frame,
+        target_head_before_graft: model.provenance.target_head_before_graft,
+      })
+    );
+  }
+
+  async function renderAssertions() {
+    const cryptographic = await verifyAllFrames();
+    const forkState = model.fork.length
+      ? model.provenance
+        ? Boolean(frameByAddress(model.provenance.source_frame))
+        : !model.main.some(frame => frame.address === model.fork[0].address)
+      : null;
+    const counterfeitState = model.counterfeitRejected
+      ? model.preservedHead === verifiedHead().address
+      : model.pendingCounterfeit
+        ? null
+        : null;
+    const assertions = [
+      { state: cryptographic && linksAreValid(), text: "Every admitted SHA-256 address, morphology seed, state-read map, and previous link recomputes." },
+      { state: historyIsImmutable(), text: "Older selves remain frozen, byte-stable, and browsable without becoming the head." },
+      { state: stateIsFrameDerived(), text: "Current device and identity state derive from the verified frame head." },
+      { state: visualIsVerified(), text: "The displayed hologram source is a verified frame address, never an unverified appearance claim." },
+      { state: forkState, text: model.provenance ? "The offline source frame remains preserved after graft." : "The offline append is isolated from the online chain." },
+      { state: provenanceIsExact(), text: "Graft records source, selected base, ordered candidates, conflicts, target, and imported fields." },
+      { state: counterfeitState, text: "Independent verification rejects the visual clone and preserves the last verified self." },
+    ];
+    const root = $("#assertion-list");
+    root.replaceChildren(...assertions.map(item => {
+      const div = document.createElement("div");
+      div.className = `assertion ${item.state === true ? "pass" : item.state === false ? "fail" : ""}`;
+      div.textContent = item.text;
+      return div;
+    }));
+  }
+
+  function renderActivity() {
+    $("#activity-log").replaceChildren(...model.activity.map(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      return li;
+    }));
+  }
+
+  function renderCandidates() {
+    const ladder = candidateLadder();
+    if (!ladder.length) {
+      $("#candidate-content").innerHTML = '<p class="empty-state">Create the offline dimension to expose deterministic reattachment candidates.</p>';
+      return;
+    }
+    const chosen = ladder.find(entry => entry.contradictions.length === 0);
+    const rows = ladder.map(entry => {
+      const selected = model.provenance?.selected_base === entry.candidate.address
+        || (!model.provenance && chosen?.candidate.address === entry.candidate.address);
+      const classes = selected ? "chosen" : entry.contradictions.length ? "conflict" : "";
+      return `<tr class="${classes}">
+        <td>${entry.order}</td>
+        <td><strong>${escapeHtml(entry.candidate.device)}</strong><br><code>${short(entry.candidate.address, 16)}</code></td>
+        <td>${entry.contradictions.length ? entry.contradictions.map(escapeHtml).join(", ") : "∅ empty set"}</td>
+        <td>${selected ? "first contradiction-free candidate" : entry.contradictions.length ? "skip" : "later clean candidate"}</td>
+      </tr>`;
+    }).join("");
+    $("#candidate-content").innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Order</th><th>Candidate base</th><th>Contradiction keys</th><th>Deterministic result</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  }
+
+  function renderProvenance() {
+    const p = model.provenance;
+    if (!p) {
+      $("#provenance-content").innerHTML = '<p class="empty-state">No graft yet. The offline frame will remain separate until a contradiction-free base is selected.</p>';
+      return;
+    }
+    const cells = [
+      ["source frame", p.source_frame],
+      ["selected base", p.selected_base],
+      ["target before graft", p.target_head_before_graft],
+      ["graft frame", p.graft_frame],
+      ["source dimension", p.source_dimension],
+      ["candidate order", p.candidate_order.map(address => short(address, 8)).join(" → ")],
+      ["imported memories", p.imported_memories.join(" | ") || "none"],
+      ["imported capabilities", p.imported_capabilities.join(" | ") || "none"],
+    ];
+    $("#provenance-content").innerHTML = `<div class="provenance-grid">${cells.map(([label, value]) =>
+      `<div class="provenance-cell"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join("")}</div>`;
+  }
+
+  function renderCounterfeit() {
+    const root = $("#mutation-diff");
+    const record = model.rejected.at(-1);
+    if (model.pendingCounterfeit) {
+      root.innerHTML = `
+        <div class="diff-line">appearance_source = ${escapeHtml(model.counterfeitSource)}</div>
+        <div class="diff-line changed">memory[0] = "…synthetic silver sky." (changed)</div>
+        <div class="diff-line changed">declared_reads.memory_anchor = ${escapeHtml(model.pendingCounterfeit.declared_reads.memory_anchor)} (changed)</div>
+        <div class="diff-line">claimed_address = ${escapeHtml(model.pendingCounterfeit.address)} (copied)</div>`;
+      return;
+    }
+    if (model.counterfeitRejected && record) {
+      root.innerHTML = `
+        <div class="diff-line changed">REJECTED · ${escapeHtml(failedChecks(record.report).join(", "))}</div>
+        <div class="diff-line">clone kept outside verified ledger</div>
+        <div class="diff-line">verified_head_preserved = ${escapeHtml(model.preservedHead)}</div>
+        <div class="diff-line">hologram_source_preserved = ${escapeHtml(verifiedHead().address)}</div>`;
+      return;
+    }
+    root.innerHTML = '<p class="empty-state">Forge a head that preserves the verified hologram appearance while changing one memory and one declared address.</p>';
+  }
+
+  function renderLedger() {
+    const records = [
+      ...model.main.map(frame => ({ frame, dimension: "verified/main", rejected: false })),
+      ...model.fork.map(frame => ({ frame, dimension: "offline/field", rejected: false })),
+      ...model.rejected.map(entry => ({ frame: entry.frame, dimension: "rejected", rejected: true })),
+    ];
+    $("#ledger-count").textContent = `${records.length} record${records.length === 1 ? "" : "s"}`;
+    $("#ledger-list").replaceChildren(...records.map((record, index) => {
+      const li = document.createElement("li");
+      li.className = "ledger-row";
+      const seq = record.rejected ? "×" : String(record.frame.sequence).padStart(2, "0");
+      li.innerHTML = `<span class="seq">${seq}</span><div><strong>${escapeHtml(record.frame.event)}</strong><code>${escapeHtml(record.frame.address)}</code></div><span class="dimension">${escapeHtml(record.dimension)}</span>`;
+      return li;
+    }));
+  }
+
+  function updateControls() {
+    const disabled = model.busy;
+    $("#guided-button").disabled = disabled || model.phase >= 6;
+    $("#step-button").disabled = disabled;
+    $("#replay-button").disabled = disabled;
+    $("#reset-button").disabled = disabled;
+    $("#append-button").disabled = disabled || ![0, 2, 6].includes(model.phase);
+    $("#migrate-button").disabled = disabled || ![1, 3].includes(model.phase);
+    $("#offline-button").disabled = disabled || model.phase !== 4;
+    $("#graft-button").disabled = disabled || model.phase !== 5;
+    $("#forge-button").disabled = disabled || Boolean(model.pendingCounterfeit);
+    $("#verify-button").disabled = disabled || !model.pendingCounterfeit;
+    $("#step-button").textContent = model.phase < 6 ? `Next · ${model.phase + 1}/6` : "Append next turn";
+    $("#guided-button").textContent = model.auto ? "Running…" : "Run guided";
+  }
+
+  async function render() {
+    renderPassport();
+    renderDevices();
+    renderTimeline();
+    renderActivity();
+    renderCandidates();
+    renderProvenance();
+    renderCounterfeit();
+    renderLedger();
+    await renderAssertions();
+    updateControls();
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function toggleTheme() {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    $("#theme-button").setAttribute("aria-pressed", String(next === "light"));
+    announce(`Clawpilot ${next} theme active.`);
+  }
+
+  async function copyPrompt() {
+    const textarea = $("#proof-prompt");
+    try {
+      await navigator.clipboard.writeText(textarea.value);
+      announce("Any-LLM proof prompt copied.");
+    } catch {
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      announce("Any-LLM proof prompt selected and copied.");
+    }
+  }
+
+  $("#theme-button").addEventListener("click", toggleTheme);
+  $("#guided-button").addEventListener("click", runGuided);
+  $("#step-button").addEventListener("click", () => runAction(performPhaseAction));
+  $("#replay-button").addEventListener("click", replay);
+  $("#reset-button").addEventListener("click", () => runAction(() => reset()));
+  $("#append-button").addEventListener("click", () => runAction(() => {
+    if (model.phase === 0) return appendLumenTurn();
+    if (model.phase === 2) return appendArchiveTurn();
+    return appendExtraTurn();
+  }));
+  $("#migrate-button").addEventListener("click", () => runAction(
+    model.phase === 1 ? migrateToArchive : migrateToField,
+  ));
+  $("#offline-button").addEventListener("click", () => runAction(forkOffline));
+  $("#graft-button").addEventListener("click", () => runAction(reattachOffline));
+  $("#forge-button").addEventListener("click", () => runAction(forgeCounterfeit));
+  $("#verify-button").addEventListener("click", () => runAction(verifyCounterfeit));
+  $("#copy-prompt-button").addEventListener("click", copyPrompt);
+  $("#select-prompt-button").addEventListener("click", () => {
+    $("#proof-prompt").focus();
+    $("#proof-prompt").select();
+    announce("Proof prompt selected.");
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT|BUTTON|SUMMARY)$/.test(event.target.tagName)) return;
+    const key = event.key.toLowerCase();
+    const actions = {
+      g: () => runGuided(),
+      n: () => runAction(performPhaseAction),
+      a: () => $("#append-button").click(),
+      m: () => $("#migrate-button").click(),
+      o: () => $("#offline-button").click(),
+      j: () => $("#graft-button").click(),
+      x: () => $("#forge-button").click(),
+      v: () => $("#verify-button").click(),
+      r: () => $("#reset-button").click(),
+      t: toggleTheme,
+      l: () => $("#ledger").scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth" }),
+    };
+    if (actions[key]) {
+      event.preventDefault();
+      actions[key]();
+    }
+  });
+
+  reset(false).catch(error => {
+    console.error(error);
+    $("#live-status").textContent = `Unable to initialize proof: ${error.message}`;
+  });
+})();
+</script>
+</body>
+</html>
