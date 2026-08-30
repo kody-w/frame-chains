@@ -20,12 +20,12 @@
       --shadow: 0 18px 50px rgba(0,0,0,.28);
       --radius: 18px;
     }
-    html[data-theme="midnight"] {
+    html[data-theme="midnight"], html[data-theme="dark"] {
       --bg:#070a18; --panel:#10162a; --panel-2:#151d36; --ink:#f4f6ff;
       --muted:#a7b0d1; --line:#2d3966; --accent:#9ba8ff; --accent-2:#72e3ff;
       --danger:#ff8298; --warn:#ffd36f;
     }
-    html[data-theme="paper"] {
+    html[data-theme="paper"], html[data-theme="light"] {
       --bg:#f3efe4; --panel:#fffdf7; --panel-2:#f7f1e4; --ink:#1c2822;
       --muted:#596b62; --line:#c9d2ca; --accent:#087a4d; --accent-2:#006f98;
       --danger:#b92743; --warn:#8a5b00; --shadow:0 18px 42px rgba(44,53,48,.12);
@@ -304,8 +304,8 @@
         <label class="sr-only" for="theme">Theme</label>
         <select id="theme" aria-label="Color theme">
           <option value="clawpilot">Clawpilot</option>
-          <option value="midnight">Midnight</option>
-          <option value="paper">Paper</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
         </select>
         <button id="copyPrompt">Copy build prompt</button>
       </div>
@@ -1066,6 +1066,13 @@
     $("#replayDemo").addEventListener("click",async()=>{ await init(); demoStep=0; await runAllDemo(); });
     $("#liveHead").addEventListener("click",async()=>{ replayLength=activeChain().length; await renderAll("Returned to the verified live head."); });
     $("#replay").addEventListener("input",async e=>{ replayLength=Number(e.target.value); await renderAll(`Replaying prefix through frame ${replayLength-1}.`); });
+    const forcedTheme=new URLSearchParams(location.search).get("scoutTheme");
+    if (forcedTheme==="dark" || forcedTheme==="light") {
+      document.documentElement.dataset.theme=forcedTheme;
+      $("#theme").value=forcedTheme;
+    } else {
+      $("#theme").value=document.documentElement.dataset.theme;
+    }
     $("#theme").addEventListener("change",e=>document.documentElement.dataset.theme=e.target.value);
     $("#copyPrompt").addEventListener("click",async()=>{
       const text=$("#promptText").textContent.trim();
