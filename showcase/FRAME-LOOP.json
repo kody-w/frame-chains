@@ -2,7 +2,7 @@
   "schema": "frame-chains.frame-loop/1",
   "loop": 1,
   "base_commit": "6a7c980837cf33ca8e40fd48feaafd5e63c786ee",
-  "integration_head_before_ledger": "a52eff007da130c0c64113a23fcdae5556cb0fa3",
+  "integration_head_before_ledger": "5def9e87752e7787b38c3144976b827582f595ae",
   "merge_strategy": "git merge --no-ff",
   "squash": false,
   "frame_count": 10,
@@ -12,10 +12,12 @@
       "slug": "01-many-worlds",
       "branch": "frame/01-many-worlds",
       "path": "showcase/01-many-worlds",
-      "commit": "cc9ef770b25fe3bb65fe639e7ccb7b1c22dae4c1",
+      "commit": "b37cdb54cd5391a3d5798585118c7b55868bcce2",
       "commits": [
         "f48a17e00989040ac1d680c6e0cb148d743066cb",
-        "cc9ef770b25fe3bb65fe639e7ccb7b1c22dae4c1"
+        "cc9ef770b25fe3bb65fe639e7ccb7b1c22dae4c1",
+        "f6e7d85f66fd548d880c459f8a168651a53a9890",
+        "b37cdb54cd5391a3d5798585118c7b55868bcce2"
       ]
     },
     {
@@ -23,10 +25,12 @@
       "slug": "02-soul-passport",
       "branch": "frame/02-soul-passport",
       "path": "showcase/02-soul-passport",
-      "commit": "edf6a39f235729228ca8e51738e5d31fbefe3747",
+      "commit": "191419bca4b2155e6a9b47074c66c096d85d37ae",
       "commits": [
         "5cc74232da89db2dab150dcbc0817cfa2c71bd98",
-        "edf6a39f235729228ca8e51738e5d31fbefe3747"
+        "edf6a39f235729228ca8e51738e5d31fbefe3747",
+        "28ce11cfdedf69e84ca6a55d2ad2a04053444cd7",
+        "191419bca4b2155e6a9b47074c66c096d85d37ae"
       ]
     },
     {
@@ -34,11 +38,15 @@
       "slug": "03-mars-colony",
       "branch": "frame/03-mars-colony",
       "path": "showcase/03-mars-colony",
-      "commit": "79b666f574feed25e2d80ef3d989b88e5a15c8d9",
+      "commit": "f5ea55d320509ddbddfb9a4bf80b2f66dd30c702",
       "commits": [
         "03b4bb2163cbb4f0184f574fdf40ceb8f173a726",
         "b4a16bd4a30f4292a1267c034a1b33d71ac63b13",
-        "79b666f574feed25e2d80ef3d989b88e5a15c8d9"
+        "79b666f574feed25e2d80ef3d989b88e5a15c8d9",
+        "280088721694e5405dde8fa0ff9a9a132f885e99",
+        "3b0bf4559ece31a98229273dd6e2a48ab5093959",
+        "a7cad293e128eb49f0006f184870c3ca45b8aee3",
+        "f5ea55d320509ddbddfb9a4bf80b2f66dd30c702"
       ]
     },
     {
@@ -46,11 +54,13 @@
       "slug": "04-five-realities",
       "branch": "frame/04-five-realities",
       "path": "showcase/04-five-realities",
-      "commit": "8ac1a75495fcb357b958b4b7fc822a0cf2eae19f",
+      "commit": "f801174406e2044ec5f0b9ec56b8a887cdbfdb72",
       "commits": [
         "44c5edc253bae12383998e0d482aacc9971f27eb",
         "fe78e1c56be6e6c3631807090e49be5938be9154",
-        "8ac1a75495fcb357b958b4b7fc822a0cf2eae19f"
+        "8ac1a75495fcb357b958b4b7fc822a0cf2eae19f",
+        "dd269f0aa154adb08e171f2334c2ce839fa3b28c",
+        "f801174406e2044ec5f0b9ec56b8a887cdbfdb72"
       ]
     },
     {
@@ -58,10 +68,11 @@
       "slug": "05-causal-detective",
       "branch": "frame/05-causal-detective",
       "path": "showcase/05-causal-detective",
-      "commit": "e5ed13b0cbb7171f9bd765a930b99dbbbd6f7cb3",
+      "commit": "f86aacb6e84a198198b64df4581ac3dcfa837814",
       "commits": [
         "87eb041b0cf781dcbc5c2d0ab8ddea328e83487b",
-        "e5ed13b0cbb7171f9bd765a930b99dbbbd6f7cb3"
+        "e5ed13b0cbb7171f9bd765a930b99dbbbd6f7cb3",
+        "f86aacb6e84a198198b64df4581ac3dcfa837814"
       ]
     },
     {
@@ -69,9 +80,11 @@
       "slug": "06-space-station",
       "branch": "frame/06-space-station",
       "path": "showcase/06-space-station",
-      "commit": "75746bb7d2237f8721f5db81c2820759e418f2b5",
+      "commit": "427b1138b20c4e0ca25a2cad7a6513c50a285b94",
       "commits": [
-        "75746bb7d2237f8721f5db81c2820759e418f2b5"
+        "75746bb7d2237f8721f5db81c2820759e418f2b5",
+        "9c5fe246c9a2aa4ce133c4effd5e2fffece25613",
+        "427b1138b20c4e0ca25a2cad7a6513c50a285b94"
       ]
     },
     {
@@ -79,11 +92,13 @@
       "slug": "07-constitution",
       "branch": "frame/07-constitution",
       "path": "showcase/07-constitution",
-      "commit": "f25f7ff92941f2440b06ce7a8297411b9e233c26",
+      "commit": "75b636a6a3cbe47e827b2b85a4d7f0c056f281f8",
       "commits": [
         "bfff76500e4896f1c788efc3f794f5676145ba27",
         "6bfa1d38c349f8d9daafc02a22489d7b90546ba5",
-        "f25f7ff92941f2440b06ce7a8297411b9e233c26"
+        "f25f7ff92941f2440b06ce7a8297411b9e233c26",
+        "17e3b0c0107a87dc1c6c1488e15b15feffa9702b",
+        "75b636a6a3cbe47e827b2b85a4d7f0c056f281f8"
       ]
     },
     {
@@ -91,13 +106,15 @@
       "slug": "08-teleporting-roguelike",
       "branch": "frame/08-teleporting-roguelike",
       "path": "showcase/08-teleporting-roguelike",
-      "commit": "c0fc9cdcf049b15a1a1b2079b765f1f6edc26f0e",
+      "commit": "1cf0118afd4c1bbaf642f5b5f6ff69e493356c2a",
       "commits": [
         "431d46d5719c6bb49f2b5570efb91833e649d402",
         "aa05697910cec1a069a565bcc2cd1a991848ba12",
         "d489c38fb36e84297200d85938ffae89dc1f20b1",
         "c456b69356c63f49ae971a9697b36d8f0653a342",
-        "c0fc9cdcf049b15a1a1b2079b765f1f6edc26f0e"
+        "c0fc9cdcf049b15a1a1b2079b765f1f6edc26f0e",
+        "43ea4a07d8fe1d3229c15b980cf7cc36420c6aaf",
+        "1cf0118afd4c1bbaf642f5b5f6ff69e493356c2a"
       ]
     },
     {
@@ -105,11 +122,12 @@
       "slug": "09-attack-timeline",
       "branch": "frame/09-attack-timeline",
       "path": "showcase/09-attack-timeline",
-      "commit": "b477cc124f7289146ee65f332d14fb068448d458",
+      "commit": "74c4bf217bb486af06d19acc6bf5e5556af6424b",
       "commits": [
         "f4cfcccfcf1da1fcabc86042788997aad60bbdbd",
         "e646debc45aae6de8b7e045c41d4a54411c11eba",
-        "b477cc124f7289146ee65f332d14fb068448d458"
+        "b477cc124f7289146ee65f332d14fb068448d458",
+        "74c4bf217bb486af06d19acc6bf5e5556af6424b"
       ]
     },
     {
@@ -117,12 +135,14 @@
       "slug": "10-futures-museum",
       "branch": "frame/10-futures-museum",
       "path": "showcase/10-futures-museum",
-      "commit": "21d882aa405cbf37f0b5f86f0f25940e5437dbd6",
+      "commit": "462df2a340fcaf7796e8e52bffc9700beb472f7a",
       "commits": [
         "62ba08fb4d977259d9355fcc05e71ba189317525",
         "8778e61c9d87cd98280502462de38f52dde9c8bb",
         "fef699ab581f82f5c7b80bcb1e5d0c0c5fd4266a",
-        "21d882aa405cbf37f0b5f86f0f25940e5437dbd6"
+        "21d882aa405cbf37f0b5f86f0f25940e5437dbd6",
+        "937d4fd0e377265ea431adc6bf03baf405f57c66",
+        "462df2a340fcaf7796e8e52bffc9700beb472f7a"
       ]
     }
   ]
