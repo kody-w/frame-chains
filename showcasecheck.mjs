@@ -143,6 +143,7 @@ function monitorPage(page, label, origin) {
 
 async function matchingButton(page, patterns, label) {
   const buttons = page.locator("button, [role=button]");
+  let disabledMatch = null;
   for (let index = 0; index < await buttons.count(); index += 1) {
     const button = buttons.nth(index);
     const text = compact(
@@ -150,9 +151,29 @@ async function matchingButton(page, patterns, label) {
       + `${await button.getAttribute("aria-label") || ""} `
       + `${await button.getAttribute("title") || ""}`,
     );
-    if (patterns.some((pattern) => pattern.test(text))) return button;
+    if (patterns.some((pattern) => pattern.test(text))) {
+      if (await button.isVisible() && !await button.isDisabled()) return button;
+      disabledMatch ||= button;
+    }
   }
+  if (disabledMatch) throw new Error(`${label}: matching control is disabled`);
   throw new Error(`${label}: no matching control`);
+}
+
+async function hasVisibleVerdict(page, kind) {
+  const pattern = kind === "pass" ? /\bPASS\b/i : /\b(?:FAIL|REJECTED|BLOCKED|DETECTED)\b/i;
+  return page.evaluate(({ source, flags }) => {
+    const expression = new RegExp(source, flags);
+    const candidates = [
+      ...document.querySelectorAll(
+        '.pass, .fail, .failed, .bad, [data-status="pass"], [data-status="fail"], [role=status]',
+      ),
+    ].filter((node) => {
+      const rect = node.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+    return candidates.some((node) => expression.test(node.textContent || ""));
+  }, { source: pattern.source, flags: pattern.flags });
 }
 
 async function waitForVisibleVerdict(page, kind) {
@@ -229,11 +250,18 @@ async function exerciseFrame(context, origin, slug) {
   const before = compact(await page.locator("body").innerText());
   const guided = await matchingButton(
     page,
-    [/\bguided\b/i, /\brun\b.*\b(?:mission|scenario|demo|loop|swarm|tour)\b/i, /\bauto\b/i],
+    [/\bguided\b/i, /\brun all\b/i, /\brun next\b/i, /\brun control\b/i, /\bauto\b/i],
     `${slug} guided run`,
   );
-  await guided.click();
-  await page.waitForTimeout(2_500);
+  const guidedLabel = compact(await guided.innerText());
+  const guidedSteps = /\bnext\b/i.test(guidedLabel) ? 14 : 1;
+  for (let step = 0; step < guidedSteps; step += 1) {
+    if (await guided.isDisabled()) break;
+    await guided.click();
+    await page.waitForTimeout(step === 0 ? 1_000 : 350);
+    if (!/\bnext\b/i.test(guidedLabel) && await hasVisibleVerdict(page, "pass")) break;
+  }
+  await page.waitForTimeout(1_000);
   const afterGuided = compact(await page.locator("body").innerText());
   check(afterGuided !== before, `${slug}: guided run produced no visible change`);
   await waitForVisibleVerdict(page, "pass");
@@ -247,6 +275,9 @@ async function exerciseFrame(context, origin, slug) {
   await page.waitForTimeout(700);
   await waitForVisibleVerdict(page, "fail");
 
+  await page.locator("details").evaluateAll((details) => {
+    details.forEach((item) => { item.open = true; });
+  });
   const copy = await matchingButton(page, [/\bcopy\b.*\bprompt\b/i], `${slug} prompt copy`);
   const prompt = await copy.evaluate((button) => {
     const scope = button.closest("details, section, article") || document;
