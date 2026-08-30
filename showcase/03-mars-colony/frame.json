@@ -1,0 +1,29 @@
+{
+  "frame": 3,
+  "slug": "mars-colony",
+  "title": "Mars Colony Immune System",
+  "claim": "A deterministic content-addressed frame chain can bound colony healing to observed delta, converge, preserve authority through precommitted logical-beat leases without election, and safely reattach an offline dimension only when its base claims do not contradict accepted history.",
+  "entry": "showcase/03-mars-colony/index.html",
+  "synthetic_only": true,
+  "network_required": false,
+  "invariants": [
+    "Every frame is canonicalized with lexicographically sorted object keys, hashed with browser Web Crypto SHA-256, and linked to the previous hash in its dimension.",
+    "All visible colony state is reconstructed by replaying accepted frames.",
+    "Every scan response references the exact parent scan-tile hash and every report references its response hashes.",
+    "Repair targets must equal the deterministic report delta; a full-colony sweep is rejected.",
+    "Coordinator succession follows a precommitted ranked roster and logical-beat lease windows without an election.",
+    "Offline research work reattaches only when exact base-claim comparison finds no contradiction."
+  ],
+  "positive_path": [
+    "Inject the seeded synthetic drift into oxygen, water, and agriculture.",
+    "Fan one scan tile to all twelve modules and derive a linked deterministic report.",
+    "Repair only the three-module report delta and rescan those modules to an empty delta.",
+    "Disable ARES, advance to logical beat 4, and accept PHOBOS under the precommitted lease roster.",
+    "Partition research, append an observation to its offline dimension, and reattach its head after contradiction-free comparison."
+  ],
+  "failure_path": [
+    "Attempt a twelve-module full sweep against a three-module report delta and fail the delta assertion.",
+    "Attempt a premature DEIMOS lower-rank claim and fail the logical-beat lease oracle.",
+    "Offer a contradictory navigation base claim during research reattachment and refuse the reattachment without mutating accepted colony state."
+  ]
+}
