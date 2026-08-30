@@ -10,11 +10,12 @@ const planPath = resolve(root, process.argv[2] || "showcase/loop-01.plan.json");
 const plan = JSON.parse(await readFile(planPath, "utf8"));
 
 function git(args, options = {}) {
-  return execFileSync("git", args, {
+  const output = execFileSync("git", args, {
     cwd: root,
     encoding: "utf8",
     stdio: options.stdio || ["ignore", "pipe", "pipe"],
-  }).trim();
+  });
+  return typeof output === "string" ? output.trim() : "";
 }
 
 function check(condition, message) {
