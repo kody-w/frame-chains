@@ -66,6 +66,16 @@ html[data-theme="dark"] {
   --cp-sheen: rgba(255, 255, 255, 0.04);
   --cp-highlight: rgba(253, 142, 161, 0.12);
 }
+:root {
+  --lab-text-muted: var(--cp-text-muted);
+  --lab-success-text: color-mix(in srgb, var(--cp-success) 62%, var(--cp-text));
+  --lab-warning-text: color-mix(in srgb, var(--cp-warning) 50%, var(--cp-text));
+}
+html[data-theme="dark"] {
+  --lab-text-muted: color-mix(in srgb, var(--cp-text-muted) 55%, var(--cp-text));
+  --lab-success-text: var(--cp-success);
+  --lab-warning-text: var(--cp-warning);
+}
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
@@ -176,7 +186,7 @@ h1 {
 .lede {
   max-width: 740px;
   margin: 0;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font-size: clamp(17px, 2vw, 22px);
 }
 .seal {
@@ -214,6 +224,10 @@ h1 {
   box-shadow: var(--cp-shadow);
 }
 .command-bar .spacer { flex: 1 1 12px; }
+.command-bar button {
+  min-width: 44px;
+  min-height: 44px;
+}
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -222,7 +236,7 @@ h1 {
   border: 1px solid var(--cp-border);
   border-radius: 999px;
   padding: 8px 13px;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font: 700 12px/1 Consolas, "Courier New", Courier, monospace;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -262,7 +276,7 @@ h1 {
 .panel-head p {
   max-width: 540px;
   margin: 5px 0 0;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font-size: 14px;
 }
 .panel-body { padding: 20px; }
@@ -279,7 +293,7 @@ h1 {
   width: 150px;
   border-block: 1px solid var(--cp-success);
   padding: 3px 0;
-  color: var(--cp-success);
+  color: var(--lab-success-text);
   transform: rotate(36deg);
   text-align: center;
   font: 800 9px/1 Consolas, "Courier New", Courier, monospace;
@@ -299,13 +313,13 @@ h1 {
   border: 1px solid var(--cp-success);
   border-radius: 50%;
   background: var(--cp-surface);
-  color: var(--cp-success);
+  color: var(--lab-success-text);
   font-size: 26px;
 }
 .world-title { margin: 0; font-size: 20px; }
 .world-sub {
   margin: 2px 0 0;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font: 13px/1.4 Consolas, "Courier New", Courier, monospace;
 }
 .world-grid {
@@ -322,7 +336,7 @@ h1 {
 }
 .datum span {
   display: block;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .08em;
@@ -373,7 +387,7 @@ h1 {
   border: 2px solid var(--cp-success);
   border-radius: 50%;
   background: var(--cp-surface);
-  color: var(--cp-success);
+  color: var(--lab-success-text);
   font: 800 10px/1 Consolas, "Courier New", Courier, monospace;
 }
 .frame-card {
@@ -394,7 +408,7 @@ h1 {
 .hash {
   overflow: hidden;
   margin-top: 5px;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
   font: 11px/1.35 Consolas, "Courier New", Courier, monospace;
@@ -412,7 +426,7 @@ h1 {
 .attack strong, .attack span { display: block; }
 .attack strong { margin-bottom: 5px; font-size: 13px; line-height: 1.25; }
 .attack span {
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font: 11px/1.35 Consolas, "Courier New", Courier, monospace;
 }
 .attack:hover:not(:disabled) span { color: var(--cp-text); }
@@ -429,7 +443,7 @@ h1 {
   vertical-align: middle;
 }
 .matrix th {
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font-size: 11px;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -449,7 +463,7 @@ h1 {
   border: 1px solid var(--cp-border);
   border-radius: 999px;
   padding: 5px 8px;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font: 700 10px/1 Consolas, "Courier New", Courier, monospace;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -463,7 +477,7 @@ h1 {
 }
 .signal.pass {
   border-color: var(--cp-success);
-  color: var(--cp-success);
+  color: var(--lab-success-text);
 }
 .signal.pass::before { background: var(--cp-success); }
 .signal.fail {
@@ -473,12 +487,12 @@ h1 {
 .signal.fail::before { background: var(--cp-danger); }
 .signal.warn {
   border-color: var(--cp-warning);
-  color: var(--cp-warning);
+  color: var(--lab-warning-text);
 }
 .signal.warn::before { background: var(--cp-warning); }
 .detail {
   max-width: 310px;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font-size: 12px;
 }
 .result-banner {
@@ -496,10 +510,10 @@ h1 {
 .result-banner[data-state="verified"] { border-left-color: var(--cp-success); }
 .result-banner[data-state="rejected"] { border-left-color: var(--cp-danger); }
 .result-banner strong { display: block; }
-.result-banner p { margin: 2px 0 0; color: var(--cp-text-muted); font-size: 13px; }
+.result-banner p { margin: 2px 0 0; color: var(--lab-text-muted); font-size: 13px; }
 .result-code {
   min-width: 74px;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font: 800 11px/1 Consolas, "Courier New", Courier, monospace;
   text-align: center;
 }
@@ -528,17 +542,17 @@ h1 {
 }
 .log li:last-child { border-bottom: 0; }
 .log time {
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   font: 11px/1.4 Consolas, "Courier New", Courier, monospace;
 }
 .log strong { display: block; font-size: 13px; }
-.log p { margin: 2px 0 0; color: var(--cp-text-muted); font-size: 12px; }
+.log p { margin: 2px 0 0; color: var(--lab-text-muted); font-size: 12px; }
 .log strong, .log p, .quarantine-item strong span { overflow-wrap: anywhere; }
 .empty {
   border: 1px dashed var(--cp-border-strong);
   border-radius: 0.625rem;
   padding: 20px;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   text-align: center;
   font-size: 13px;
 }
@@ -561,7 +575,7 @@ h1 {
   display: block;
   overflow: hidden;
   margin-top: 6px;
-  color: var(--cp-text-muted);
+  color: var(--lab-text-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
   font: 10px/1.4 Consolas, "Courier New", Courier, monospace;
@@ -578,7 +592,7 @@ h1 {
   background: var(--cp-surface-soft);
 }
 .assertion strong { display: block; font-size: 12px; }
-.assertion p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 11px; }
+.assertion p { margin: 4px 0 0; color: var(--lab-text-muted); font-size: 11px; }
 .assertion[data-state="pass"] { border-color: var(--cp-success); }
 .assertion[data-state="fail"] { border-color: var(--cp-danger); }
 .assertion[data-state="unmeasured"] { border-style: dashed; }
@@ -593,7 +607,7 @@ h1 {
 }
 .scope h2 { font-size: clamp(26px, 4vw, 42px); line-height: 1.05; }
 .scope ul { margin: 0; padding-left: 20px; }
-.scope li { margin-bottom: 8px; color: var(--cp-text-muted); }
+.scope li { margin-bottom: 8px; color: var(--lab-text-muted); }
 .prompt-wrap { margin-top: 24px; }
 .prompt-wrap textarea {
   width: 100%;
@@ -613,7 +627,7 @@ h1 {
   gap: 12px;
   margin-top: 8px;
 }
-.prompt-actions small { color: var(--cp-text-muted); }
+.prompt-actions small { color: var(--lab-text-muted); }
 .sr-only {
   position: absolute;
   width: 1px;
