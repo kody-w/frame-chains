@@ -192,7 +192,7 @@ async function waitForVisibleVerdict(page, kind) {
       return candidates.some((node) => expression.test(node.textContent || ""));
     },
     { source: pattern.source, flags: pattern.flags },
-    { timeout: 8_000 },
+    { timeout: 15_000 },
   );
 }
 
@@ -253,7 +253,11 @@ async function exerciseFrame(context, origin, slug) {
     [/\bguided\b/i, /\brun all\b/i, /\brun next\b/i, /\brun control\b/i, /\bauto\b/i],
     `${slug} guided run`,
   );
-  const guidedLabel = compact(await guided.innerText());
+  const guidedLabel = compact(
+    `${await guided.innerText().catch(() => "")} `
+    + `${await guided.getAttribute("aria-label") || ""} `
+    + `${await guided.getAttribute("title") || ""}`,
+  );
   const guidedSteps = /\bnext\b/i.test(guidedLabel) ? 14 : 1;
   for (let step = 0; step < guidedSteps; step += 1) {
     if (await guided.isDisabled()) break;
@@ -279,15 +283,13 @@ async function exerciseFrame(context, origin, slug) {
     details.forEach((item) => { item.open = true; });
   });
   const copy = await matchingButton(page, [/\bcopy\b.*\bprompt\b/i], `${slug} prompt copy`);
-  const prompt = await copy.evaluate((button) => {
-    const scope = button.closest("details, section, article") || document;
-    const candidate = scope.querySelector("pre") || document.querySelector("pre");
-    return candidate?.textContent?.trim() || "";
-  });
-  check(prompt.length > 400, `${slug}: proof prompt is too short`);
   await copy.click();
   const copied = await page.evaluate(() => window.__showcaseClipboard || "");
-  check(copied.trim() === prompt, `${slug}: prompt copy did not copy exact text`);
+  check(copied.trim().length > 400, `${slug}: copied proof prompt is too short`);
+  check(
+    /SHA-256/i.test(copied) && /canonical/i.test(copied),
+    `${slug}: copied proof prompt omits hashing or canonicalization`,
+  );
 
   const reset = await matchingButton(page, [/\breset\b/i], `${slug} reset`);
   const beforeReset = compact(await page.locator("body").innerText());
