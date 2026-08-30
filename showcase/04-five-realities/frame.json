@@ -1,9 +1,9 @@
 {
   "frame": 4,
-  "slug": "five-realities",
+  "slug": "04-five-realities",
   "title": "One History, Five Realities",
   "claim": "Exactly one verified synthetic event chain can independently project into five simultaneous interfaces whose separately authored oracles recover the same canonical reduced state at every shared prefix, while a one-event omission isolates exactly the faulty projector and leaves the other four in agreement.",
-  "entry": "showcase/04-five-realities/index.html",
+  "entry": "index.html",
   "synthetic_only": true,
   "network_required": false,
   "invariants": [
@@ -20,10 +20,5 @@
     "Confirm unanimous five-of-five hash agreement at every unmutated prefix.",
     "Delete all five projections and rebuild them solely from history with identical hashes."
   ],
-  "failure_path": [
-    "Enable the selective mutation at the completed history so only Command ignores the mentoring-link event.",
-    "Observe the detector identify exactly Command as divergent.",
-    "Confirm Kanban, city, graph, and comic still share the same majority canonical hash.",
-    "Repair the projector and restore unanimous five-of-five agreement without changing history."
-  ]
+  "failure_path": "Enable the selective mutation at the completed history so only Command ignores the mentoring-link event; observe the detector identify exactly Command as divergent while Kanban, city, graph, and comic retain the same majority canonical hash, then repair the projector and restore unanimous five-of-five agreement without changing history."
 }
