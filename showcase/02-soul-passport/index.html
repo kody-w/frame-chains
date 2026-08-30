@@ -148,6 +148,9 @@ code, pre, .mono {
   z-index: 100;
   top: 8px;
   left: 8px;
+  display: flex;
+  min-height: 44px;
+  align-items: center;
   padding: 10px 14px;
   border-radius: 8px;
   background: var(--ink);
@@ -185,7 +188,12 @@ code, pre, .mono {
     radial-gradient(circle, var(--accent) 0 12%, transparent 13%),
     conic-gradient(from 45deg, transparent 0 11%, var(--accent) 12% 14%, transparent 15% 36%, var(--accent) 37% 39%, transparent 40%);
 }
-.bar-actions { display: flex; gap: 8px; }
+.bar-actions { display: flex; align-items: center; gap: 8px; }
+.top-guided {
+  min-height: 44px;
+  padding-inline: 18px;
+  white-space: nowrap;
+}
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr);
@@ -731,6 +739,7 @@ textarea {
   .shell { width: calc(100% - 16px); padding-top: 10px; }
   .museum-bar { min-height: 48px; }
   .hero { gap: 24px; }
+  .top-guided { padding-inline: 14px; font-size: 12px; }
   .guidance { grid-template-columns: 1fr; }
   .guidance article { min-height: 0; }
   .guide-number { margin-bottom: 12px; }
@@ -762,6 +771,7 @@ textarea {
   <header class="museum-bar">
     <div class="museum-mark"><span>Continuity Gallery · Artifact 02</span></div>
     <div class="bar-actions">
+      <button class="primary top-guided" id="top-guided-button" type="button">Run guided proof</button>
       <button class="icon-button" id="theme-button" type="button" aria-label="Switch Clawpilot light or dark theme" title="Clawpilot light/dark" aria-pressed="false">◐</button>
     </div>
   </header>
@@ -1941,7 +1951,9 @@ The final success state must visibly show: valid SHA-256 chain; immutable histor
 
   function updateControls() {
     const disabled = model.busy;
-    $("#guided-button").disabled = disabled || model.phase >= 6;
+    for (const button of [$("#guided-button"), $("#top-guided-button")]) {
+      button.disabled = disabled || model.phase >= 6;
+    }
     $("#step-button").disabled = disabled;
     $("#replay-button").disabled = disabled;
     $("#reset-button").disabled = disabled;
@@ -1953,6 +1965,7 @@ The final success state must visibly show: valid SHA-256 chain; immutable histor
     $("#verify-button").disabled = disabled || !model.pendingCounterfeit;
     $("#step-button").textContent = model.phase < 6 ? `Next · ${model.phase + 1}/6` : "Append next turn";
     $("#guided-button").textContent = model.auto ? "Running…" : "Run guided";
+    $("#top-guided-button").textContent = model.auto ? "Running proof…" : "Run guided proof";
   }
 
   async function render() {
@@ -1998,6 +2011,7 @@ The final success state must visibly show: valid SHA-256 chain; immutable histor
   }
 
   $("#theme-button").addEventListener("click", toggleTheme);
+  $("#top-guided-button").addEventListener("click", runGuided);
   $("#guided-button").addEventListener("click", runGuided);
   $("#step-button").addEventListener("click", () => runAction(performPhaseAction));
   $("#replay-button").addEventListener("click", replay);
