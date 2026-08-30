@@ -424,6 +424,25 @@ details pre { max-height: 280px; overflow: auto; white-space: pre-wrap; overflow
 .live-region.error { border-color: var(--cp-danger); color: var(--cp-danger); }
 .live-region.success { border-color: var(--cp-success); color: var(--cp-text); }
 .footer-note { margin: 18px 0 6px; color: var(--cp-text-muted); font-size: 12px; text-align: center; }
+button:disabled {
+  border-color: var(--cp-border);
+  border-style: dashed;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text-muted);
+  opacity: 1;
+}
+html[data-theme="light"] :is(.verdict.pass, .assertion.pass strong, .ledger-result.pass) {
+  color: var(--cp-text);
+}
+html[data-theme="light"] .ledger-result.pass { box-shadow: inset 3px 0 var(--cp-success); }
+html[data-theme="light"] tr.row-fail .ledger-result.fail {
+  box-shadow: inset 3px 0 var(--cp-danger);
+  color: var(--cp-text);
+}
+html[data-theme="light"] .stranded {
+  border-color: var(--cp-accent);
+  color: var(--cp-accent);
+}
 html[data-theme="dark"] :is(
   button.quiet,
   .dek,
@@ -451,6 +470,7 @@ html[data-theme="dark"] :is(
   .live-region,
   .footer-note
 ) { color: var(--cp-text-soft); }
+html[data-theme="dark"] button:disabled { color: var(--cp-text-soft); }
 html[data-theme="dark"] tr.row-fail .ledger-result.fail { color: var(--cp-accent); }
 @media (max-width: 980px) {
   .workspace, .masthead { grid-template-columns: 1fr; }
