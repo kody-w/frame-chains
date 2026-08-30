@@ -1,9 +1,9 @@
 {
   "frame": 8,
-  "slug": "teleporting-roguelike",
+  "slug": "08-teleporting-roguelike",
   "title": "The Teleporting Roguelike",
   "claim": "A playable deterministic world can teleport between devices as chain bytes alone, reconstruct byte-identically despite clock skew, accept compatible offline work by declared reads, and reject forged provenance without disturbing the last verified game.",
-  "entry": "showcase/08-teleporting-roguelike/index.html",
+  "entry": "index.html",
   "synthetic_only": true,
   "network_required": false,
   "invariants": [
@@ -20,9 +20,5 @@
     "Continue Device C offline from an older frame and reattach its discoveries when all declared reads remain ancestors.",
     "Scrub and replay the append-only ledger while live assertions independently verify the active chain."
   ],
-  "failure_path": [
-    "Append a valid-hash use event for an inventory item that replay proves never existed and refuse it semantically.",
-    "Append a valid-hash frame naming the wrong parent and refuse its provenance.",
-    "Corrupt Device C with a declared read absent from the destination and refuse reattachment without changing the accepted head."
-  ]
+  "failure_path": "Append a valid-hash nonexistent inventory use, wrong-parent frame, or unavailable Device C declared read; verification refuses the candidate without changing the accepted head."
 }
