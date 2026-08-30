@@ -130,6 +130,16 @@ button:disabled { cursor: not-allowed; opacity: .5; }
   align-items: center;
 }
 .topbar { justify-content: space-between; margin-bottom: 42px; }
+.top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.top-actions button,
+.skip {
+  min-height: 44px;
+}
 .brand {
   display: inline-flex;
   gap: 10px;
@@ -453,6 +463,8 @@ pre {
 @media (max-width: 560px) {
   .shell { width: min(100% - 20px, 1180px); padding-top: 12px; }
   .topbar { margin-bottom: 28px; }
+  .top-actions { width: 100%; }
+  .top-actions button { flex: 1 1 150px; }
   h1 { font-size: clamp(40px, 13vw, 58px); }
   .guide, .society, .fork-grid, .statline { grid-template-columns: 1fr; }
   .state-card.wide { grid-column: auto; }
@@ -468,10 +480,13 @@ pre {
 <body>
 <a class="skip" href="#simulator">Skip to constitution simulator</a>
 <main class="shell">
-  <div class="topbar">
+  <nav class="topbar" aria-label="Frame actions">
     <div class="brand"><span class="brand-mark" aria-hidden="true">§7</span> Frame 07 · Synthetic civics</div>
-    <button class="secondary theme-button" id="themeBtn" type="button" aria-label="Switch color theme">Theme: system</button>
-  </div>
+    <div class="top-actions">
+      <button id="guidedBtn" type="button">Run guided history</button>
+      <button class="secondary theme-button" id="themeBtn" type="button" aria-label="Switch color theme">Theme: system</button>
+    </div>
+  </nav>
 
   <header class="hero">
     <div>
@@ -513,7 +528,6 @@ pre {
         <p class="panel-note">The visible society is the last valid state produced by replaying the selected chain.</p>
 
         <div class="controls" aria-label="Primary controls">
-          <button id="guidedBtn" type="button">Run guided history</button>
           <button id="replayBtn" class="secondary" type="button">Replay independently</button>
           <button id="ledgerBtn" class="secondary" type="button" aria-expanded="true" aria-controls="ledgerPanel">Hide ledger</button>
           <button id="resetBtn" class="secondary" type="button">Reset</button>
