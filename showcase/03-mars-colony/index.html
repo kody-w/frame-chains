@@ -784,6 +784,8 @@ let guidedIndex = 0;
 let busy = false;
 let toastTimer = 0;
 let lastHashVerification = {result: "pending", detail: "Not yet verified."};
+let lastSemanticVerification = {result: "pending", detail: "Not yet verified."};
+let lastRejectedMutation = null;
 
 const encoder = new TextEncoder();
 const $ = (selector) => document.querySelector(selector);
@@ -850,7 +852,100 @@ function initialPayload() {
   };
 }
 
-function deriveState() {
+function normalizeTargetSet(values) {
+  return [...new Set(Array.isArray(values) ? values.filter(value => typeof value === "string") : [])].sort();
+}
+
+function sameTargetSet(left, right) {
+  return canonical(normalizeTargetSet(left)) === canonical(normalizeTargetSet(right));
+}
+
+function evaluateRepairBatch(frames, batchIndex) {
+  const batch = frames[batchIndex];
+  const reportIndex = frames.findIndex((frame, index) =>
+    index < batchIndex && frame.type === "report" && frame.hash === batch?.payload?.report_hash
+  );
+  if (!batch || batch.type !== "repair_batch" || reportIndex < 0) {
+    return {
+      accepted: false,
+      reason: "linked report_hash does not resolve to an earlier report",
+      authorizedTargets: [],
+      actualTargets: [],
+      batchTargets: [],
+      repairFrames: [],
+      repairFrameIndexes: []
+    };
+  }
+  const report = frames[reportIndex];
+  const repairFrameIndexes = [];
+  const repairFrames = frames.slice(reportIndex + 1, batchIndex).filter((frame, offset) => {
+    const matches = frame.type === "repair" && frame.payload.report_hash === report.hash;
+    if (matches) repairFrameIndexes.push(reportIndex + 1 + offset);
+    return matches;
+  });
+  const authorizedTargets = normalizeTargetSet(report.payload.delta);
+  const actualTargets = normalizeTargetSet(repairFrames.map(frame => frame.payload.module));
+  const batchTargets = normalizeTargetSet(batch.payload.targets);
+  const actualMatchesReport = sameTargetSet(actualTargets, authorizedTargets);
+  const batchMatchesReport = sameTargetSet(batchTargets, authorizedTargets);
+  const batchMatchesActual = sameTargetSet(batchTargets, actualTargets);
+  const accepted = actualMatchesReport && batchMatchesReport && batchMatchesActual;
+  return {
+    accepted,
+    reason: accepted
+      ? "linked report delta, actual repair frames, and batch targets are the same normalized set"
+      : `authorized [${authorizedTargets.join(", ")}], actual [${actualTargets.join(", ")}], batch [${batchTargets.join(", ")}]`,
+    reportHash: report.hash,
+    authorizedTargets,
+    actualTargets,
+    batchTargets,
+    repairFrames,
+    repairFrameIndexes
+  };
+}
+
+function verifyRepairSemantics(frames) {
+  const coveredRepairs = new Set();
+  let batches = 0;
+  for (let index = 0; index < frames.length; index += 1) {
+    if (frames[index].type !== "repair_batch") continue;
+    batches += 1;
+    const evaluation = evaluateRepairBatch(frames, index);
+    if (!evaluation.accepted) {
+      return {
+        result: "fail",
+        detail: `Repair batch ${shortHash(frames[index].hash)} rejected by independent replay: ${evaluation.reason}.`,
+        evaluation
+      };
+    }
+    evaluation.repairFrameIndexes.forEach(repairIndex => coveredRepairs.add(repairIndex));
+  }
+  const orphanIndex = frames.findIndex((frame, index) => frame.type === "repair" && !coveredRepairs.has(index));
+  if (orphanIndex >= 0) {
+    return {
+      result: "fail",
+      detail: `Repair frame ${shortHash(frames[orphanIndex].hash)} is not admitted by a valid linked repair batch.`
+    };
+  }
+  return {
+    result: "pass",
+    detail: batches
+      ? `${batches} repair batch${batches === 1 ? "" : "es"} independently derived from linked report deltas.`
+      : "No repair batch is present; no repair scope has been admitted."
+  };
+}
+
+function applyRepair(state, frame) {
+  const module = state.modules[frame.payload.module];
+  if (!module) return;
+  module.reading = module.baseline;
+  module.issue = null;
+  module.repairCount += 1;
+  module.revision += 1;
+  module.signature = "rev-" + String(module.revision + MODULE_ORDER.indexOf(frame.payload.module) + 1).padStart(2, "0");
+}
+
+function deriveState(sourceFrames = mainFrames) {
   const state = {
     modules: {},
     beat: 0,
@@ -868,7 +963,8 @@ function deriveState() {
     linkedResponses: "pending",
     events: []
   };
-  for (const frame of mainFrames) {
+  for (let frameIndex = 0; frameIndex < sourceFrames.length; frameIndex += 1) {
+    const frame = sourceFrames[frameIndex];
     const p = frame.payload;
     if (frame.type === "genesis") {
       state.modules = Object.fromEntries(p.modules.map(module => [module.id, clone(module)]));
@@ -889,18 +985,13 @@ function deriveState() {
       state.lastReport = frame;
       state.linkedResponses = p.all_linked ? "pass" : "fail";
       if (p.delta.length === 0) state.convergence = "pass";
-    } else if (frame.type === "repair") {
-      const module = state.modules[p.module];
-      module.reading = module.baseline;
-      module.issue = null;
-      module.repairCount += 1;
-      module.revision += 1;
-      module.signature = "rev-" + String(module.revision + MODULE_ORDER.indexOf(p.module) + 1).padStart(2, "0");
-      state.lastRepairTargets.push(p.module);
     } else if (frame.type === "repair_batch") {
-      state.deltaAssertion = p.scope_valid ? "pass" : "fail";
-    } else if (frame.type === "full_sweep_rejected") {
-      state.deltaAssertion = "fail";
+      const evaluation = evaluateRepairBatch(sourceFrames, frameIndex);
+      state.deltaAssertion = evaluation.accepted ? "pass" : "fail";
+      if (evaluation.accepted) {
+        evaluation.repairFrames.forEach(repair => applyRepair(state, repair));
+        state.lastRepairTargets = evaluation.actualTargets;
+      }
     } else if (frame.type === "coordinator_disabled") {
       if (state.coordinator === p.coordinator) state.coordinator = null;
     } else if (frame.type === "beat_advance") {
@@ -941,6 +1032,34 @@ async function appendMain(type, payload) {
   return frame;
 }
 
+async function buildMainCandidates(specifications) {
+  const candidates = [];
+  let prevHash = mainFrames.at(-1)?.hash || ZERO_HASH;
+  const beat = deriveState().beat;
+  for (const specification of specifications) {
+    const frame = await makeFrame(
+      "main",
+      mainFrames.length + candidates.length,
+      specification.type,
+      beat,
+      prevHash,
+      specification.payload
+    );
+    candidates.push(frame);
+    prevHash = frame.hash;
+  }
+  return candidates;
+}
+
+async function admitRepairCandidates(candidates) {
+  const proposedFrames = [...mainFrames, ...candidates];
+  const hashVerification = await verifyChain(proposedFrames);
+  const semanticVerification = verifyRepairSemantics(proposedFrames);
+  const accepted = hashVerification.result === "pass" && semanticVerification.result === "pass";
+  if (accepted) mainFrames.push(...candidates);
+  return {accepted, hashVerification, semanticVerification, proposedFrames};
+}
+
 async function appendOfflineFrame(type, payload) {
   const prev = offlineFrames.at(-1)?.hash || ZERO_HASH;
   const frame = await makeFrame("research/offline", offlineFrames.length, type, deriveState().beat, prev, payload);
@@ -965,9 +1084,18 @@ async function verifyAll(announceResult = true) {
   lastHashVerification = main.result === "pass" && offline.result === "pass"
     ? {result: "pass", detail: `${mainFrames.length + offlineFrames.length} frames verified across both dimensions.`}
     : (main.result === "fail" ? main : offline);
+  lastSemanticVerification = verifyRepairSemantics(mainFrames);
   renderAssertions();
-  if (announceResult) announce(lastHashVerification.detail);
-  return lastHashVerification;
+  if (announceResult) {
+    announce(lastHashVerification.result === "pass" && lastSemanticVerification.result === "pass"
+      ? `${lastHashVerification.detail} ${lastSemanticVerification.detail}`
+      : `${lastHashVerification.detail} ${lastSemanticVerification.detail}`);
+  }
+  return {
+    result: lastHashVerification.result === "pass" && lastSemanticVerification.result === "pass" ? "pass" : "fail",
+    hashVerification: lastHashVerification,
+    semanticVerification: lastSemanticVerification
+  };
 }
 
 function currentDelta() {
@@ -1055,23 +1183,32 @@ async function repairDelta() {
     announce("The latest report has an empty delta; no repair frames are needed.");
     return false;
   }
-  for (const id of delta) {
-    await appendMain("repair", {
-      module: id,
-      report_hash: state.lastReport.hash,
-      tile_hash: state.lastReport.payload.tile_hash,
-      reason: state.modules[id].issue,
-      bounded_by: "report.delta"
-    });
+  const candidates = await buildMainCandidates([
+    ...delta.map(id => ({
+      type: "repair",
+      payload: {
+        module: id,
+        report_hash: state.lastReport.hash,
+        tile_hash: state.lastReport.payload.tile_hash,
+        reason: state.modules[id].issue,
+        bounded_by: "report.delta"
+      }
+    })),
+    {
+      type: "repair_batch",
+      payload: {
+        report_hash: state.lastReport.hash,
+        targets: delta,
+        touched: delta.length,
+        estate_size: MODULE_ORDER.length
+      }
+    }
+  ]);
+  const admission = await admitRepairCandidates(candidates);
+  if (!admission.accepted) {
+    announce(`Repair admission refused: ${admission.semanticVerification.detail}`);
+    return false;
   }
-  await appendMain("repair_batch", {
-    report_hash: state.lastReport.hash,
-    targets: delta,
-    expected_delta: delta,
-    scope_valid: true,
-    touched: delta.length,
-    estate_size: MODULE_ORDER.length
-  });
   announce(`Delta repair accepted: ${delta.length} of ${MODULE_ORDER.length} modules touched.`);
   return true;
 }
@@ -1089,15 +1226,58 @@ async function attemptFullSweep() {
     announce("Create a non-empty scan delta before testing the wasteful sweep.");
     return false;
   }
-  await appendMain("full_sweep_rejected", {
-    report_hash: state.lastReport.hash,
-    attempted_targets: MODULE_ORDER,
-    allowed_targets: delta,
-    assertion: "attempted_targets must equal report.delta",
-    accepted: false,
-    excess: MODULE_ORDER.filter(id => !delta.includes(id))
-  });
-  announce(`Delta assertion failed as intended: full sweep touched ${MODULE_ORDER.length}, report authorized ${delta.length}.`);
+  const acceptedHeadBefore = mainFrames.at(-1).hash;
+  const stateBefore = canonical(Object.fromEntries(MODULE_ORDER.map(id => {
+    const module = state.modules[id];
+    return [id, {reading: module.reading, issue: module.issue, repairCount: module.repairCount, revision: module.revision}];
+  })));
+  const candidates = await buildMainCandidates([
+    ...MODULE_ORDER.map(id => ({
+      type: "repair",
+      payload: {
+        module: id,
+        report_hash: state.lastReport.hash,
+        tile_hash: state.lastReport.payload.tile_hash,
+        reason: state.modules[id].issue || "writer-requested-sweep",
+        bounded_by: "writer-claim"
+      }
+    })),
+    {
+      type: "repair_batch",
+      payload: {
+        report_hash: state.lastReport.hash,
+        targets: MODULE_ORDER,
+        scope_valid: true,
+        touched: MODULE_ORDER.length,
+        estate_size: MODULE_ORDER.length
+      }
+    }
+  ]);
+  const admission = await admitRepairCandidates(candidates);
+  const replayedCandidateState = deriveState(admission.proposedFrames);
+  const stateAfterReplay = canonical(Object.fromEntries(MODULE_ORDER.map(id => {
+    const module = replayedCandidateState.modules[id];
+    return [id, {reading: module.reading, issue: module.issue, repairCount: module.repairCount, revision: module.revision}];
+  })));
+  const acceptedHeadAfter = mainFrames.at(-1).hash;
+  lastRejectedMutation = {
+    candidateHash: candidates.at(-1).hash,
+    reportHash: state.lastReport.hash,
+    acceptedHeadBefore,
+    acceptedHeadAfter,
+    hashResult: admission.hashVerification.result,
+    semanticResult: admission.semanticVerification.result,
+    reason: admission.semanticVerification.detail,
+    authorizedTargets: admission.semanticVerification.evaluation?.authorizedTargets || delta,
+    actualTargets: admission.semanticVerification.evaluation?.actualTargets || MODULE_ORDER,
+    batchTargets: admission.semanticVerification.evaluation?.batchTargets || MODULE_ORDER,
+    statePreserved: stateBefore === stateAfterReplay && acceptedHeadBefore === acceptedHeadAfter,
+    admitted: admission.accepted
+  };
+  if (admission.accepted || admission.hashVerification.result !== "pass" || admission.semanticVerification.result !== "fail" || !lastRejectedMutation.statePreserved) {
+    throw new Error("Independent repair admission oracle did not safely reject the overbroad candidate.");
+  }
+  announce(`Valid-hash mutation ${shortHash(lastRejectedMutation.candidateHash)} rejected: ${MODULE_ORDER.length} actual targets exceeded the linked report delta of ${delta.length}; accepted head ${shortHash(acceptedHeadAfter)} stayed intact.`);
   return true;
 }
 
@@ -1246,6 +1426,8 @@ async function resetFrames() {
   guidedIndex = 0;
   selectedModule = "oxygen";
   lastHashVerification = {result: "pending", detail: "Run verification to recompute every frame hash."};
+  lastSemanticVerification = {result: "pending", detail: "Run verification to independently derive repair scope."};
+  lastRejectedMutation = null;
   const genesis = await makeFrame("main", 0, "genesis", 0, ZERO_HASH, initialPayload());
   mainFrames.push(genesis);
   announce("Reset complete. State was reconstructed from a new deterministic genesis frame.");
@@ -1389,17 +1571,28 @@ function renderControls(state) {
 
 function assertionRows() {
   const state = deriveState();
+  const acceptedHead = mainFrames.at(-1)?.hash;
   const latestTile = state.lastTile;
   const responses = latestTile ? latestResponsesFor(latestTile.hash) : [];
   const linkResult = !latestTile ? "pending" : responses.length === latestTile.payload.targets.length && responses.every(frame => frame.payload.tile_hash === latestTile.hash) ? "pass" : "fail";
   const linkedDetail = !latestTile
     ? "Mint a scan tile to test child linkage."
     : `${responses.length}/${latestTile.payload.targets.length} responses reference tile ${shortHash(latestTile.hash)}.`;
-  const deltaDetail = state.deltaAssertion === "pass"
-    ? `${state.lastRepairTargets.length} repair targets matched the report delta.`
-    : state.deltaAssertion === "fail"
-      ? "The twelve-module sweep exceeded the report delta and was rejected."
-      : "Run a report, then try bounded repair or the forbidden full sweep.";
+  const mutationAtCurrentHead = lastRejectedMutation
+    && lastRejectedMutation.acceptedHeadBefore === acceptedHead
+    && lastRejectedMutation.acceptedHeadAfter === acceptedHead;
+  const deltaResult = mutationAtCurrentHead
+    ? "fail"
+    : lastSemanticVerification.result === "fail"
+      ? "fail"
+      : state.deltaAssertion;
+  const deltaDetail = mutationAtCurrentHead
+    ? `Correctly hashed candidate ${shortHash(lastRejectedMutation.candidateHash)} was refused: authorized [${lastRejectedMutation.authorizedTargets.join(", ")}], actual/batch [${lastRejectedMutation.actualTargets.join(", ")}]. Writer scope_valid=true was ignored; accepted head ${shortHash(acceptedHead)} and prior module state stayed intact.`
+    : state.deltaAssertion === "pass"
+      ? `${state.lastRepairTargets.length} actual repair targets exactly matched the delta derived from linked report ${shortHash(state.lastReport?.hash)}.`
+      : lastSemanticVerification.result === "fail"
+        ? lastSemanticVerification.detail
+        : "Run a report, then try bounded repair or the valid-hash forbidden full sweep.";
   const leaseFrame = [...mainFrames].reverse().find(frame => frame.type === "lease_claim");
   const leaseDetail = !leaseFrame
     ? "Disable the coordinator, then test a ranked lease claim."
@@ -1415,7 +1608,7 @@ function assertionRows() {
   return [
     ["Canonical hash chain", lastHashVerification.result, lastHashVerification.detail],
     ["Scan children link to tile", linkResult, linkedDetail],
-    ["Repair scope equals report delta", state.deltaAssertion, deltaDetail],
+    ["Repair scope equals report delta", deltaResult, deltaDetail],
     ["Lease oracle gates succession", state.leaseAssertion, leaseDetail],
     ["Contradiction-safe reattachment", state.reattachment, reattachDetail],
     ["Homeostatic convergence", state.convergence, state.convergence === "pass" ? "Focused rescan produced an empty delta; no further repair was emitted." : "Repair the report delta, then rescan the changed modules."]
