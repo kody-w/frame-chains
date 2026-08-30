@@ -45,8 +45,8 @@ const resetSelectors = {
   "10-futures-museum": "#resetBtn",
 };
 const primarySelectors = {
-  "01-many-worlds": "#guided-btn",
-  "02-soul-passport": "#guided-button",
+  "01-many-worlds": "#hero-guided-btn",
+  "02-soul-passport": "#top-guided-button",
   "03-mars-colony": "#nextButton",
   "04-five-realities": "#guideBtn",
   "05-causal-detective": "#guidedBtn",
