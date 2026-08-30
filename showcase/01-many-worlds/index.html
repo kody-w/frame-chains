@@ -424,6 +424,34 @@ details pre { max-height: 280px; overflow: auto; white-space: pre-wrap; overflow
 .live-region.error { border-color: var(--cp-danger); color: var(--cp-danger); }
 .live-region.success { border-color: var(--cp-success); color: var(--cp-text); }
 .footer-note { margin: 18px 0 6px; color: var(--cp-text-muted); font-size: 12px; text-align: center; }
+html[data-theme="dark"] :is(
+  button.quiet,
+  .dek,
+  .seal-copy span,
+  .lesson-card p,
+  .scope-note,
+  .field label,
+  .status-chip span,
+  .panel-heading p,
+  .plot-caption,
+  .telemetry-cell span,
+  .frame-node code,
+  .branch-title p,
+  .verdict.wait,
+  .provenance,
+  .mini-telemetry span,
+  .timeline-origin code,
+  .timeline-lane code,
+  .score-copy span,
+  .merge-dimension p,
+  .assertion.wait strong,
+  .assertion span,
+  th,
+  details p,
+  .live-region,
+  .footer-note
+) { color: var(--cp-text-soft); }
+html[data-theme="dark"] tr.row-fail .ledger-result.fail { color: var(--cp-accent); }
 @media (max-width: 980px) {
   .workspace, .masthead { grid-template-columns: 1fr; }
   .hero-seal { display: none; }
