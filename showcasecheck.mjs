@@ -35,6 +35,25 @@ function compact(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
 }
 
+function assertNoSensitiveIndicators(text, label) {
+  const ipv4 = text.match(/(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])/g) || [];
+  const validIpv4 = ipv4.filter((value) =>
+    value.split(".").every((part) => Number(part) <= 255)
+  );
+  const checks = [
+    ["IPv4 address", validIpv4],
+    ["email address", text.match(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi) || []],
+    ["home path", text.match(/(?:\/Users\/|\/home\/|[A-Z]:\\Users\\)[^\s"'`]+/gi) || []],
+    ["local hostname", text.match(/\b(?:localhost|[a-z0-9-]+\.(?:local|lan|internal|corp))\b/gi) || []],
+    ["private key", text.match(/-----BEGIN [A-Z ]*PRIVATE KEY-----/g) || []],
+    ["token prefix", text.match(/\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[A-Z0-9]{16})\b/g) || []],
+  ];
+  const failures = checks.flatMap(([kind, matches]) =>
+    matches.map((match) => `${kind}: ${match}`)
+  );
+  check(failures.length === 0, `${label}: sensitive indicators found: ${failures.join(", ")}`);
+}
+
 async function startServer() {
   const server = createServer(async (request, response) => {
     try {
@@ -122,6 +141,8 @@ async function checkStaticContract() {
     check(/aria-live/.test(html), `${slug}: missing aria-live feedback`);
     check(/prefers-reduced-motion/.test(html), `${slug}: missing reduced-motion handling`);
     check(!/<(?:script|img|link)[^>]+(?:src|href)=["']https?:/i.test(html), `${slug}: external runtime asset`);
+    assertNoSensitiveIndicators(html, slug);
+    assertNoSensitiveIndicators(JSON.stringify(metadata), `${slug}/frame.json`);
   }
   console.log("  ✓ ten metadata contracts and ten preserved frame commits");
 }
@@ -272,7 +293,7 @@ async function exerciseFrame(context, origin, slug) {
 
   const mutation = await matchingButton(
     page,
-    [/\bmutat/i, /\btamper/i, /\battack/i, /\bforge/i, /\bunsafe/i, /\boverwrite/i, /\btyrant/i, /\bcorrupt/i, /\bbreak\b/i],
+    [/\bmutat/i, /\btamper/i, /\battack/i, /\bforge/i, /\bunsafe/i, /\boverwrite/i, /\btyrant/i, /\bcorrupt/i, /\battempt\b/i, /\bbreak\b/i],
     `${slug} failure path`,
   );
   await mutation.click();
