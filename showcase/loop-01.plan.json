@@ -1,0 +1,67 @@
+{
+  "schema": "frame-chains.frame-loop-plan/1",
+  "loop": 1,
+  "base": "origin/main",
+  "frames": [
+    {
+      "frame": 1,
+      "slug": "01-many-worlds",
+      "branch": "frame/01-many-worlds",
+      "path": "showcase/01-many-worlds"
+    },
+    {
+      "frame": 2,
+      "slug": "02-soul-passport",
+      "branch": "frame/02-soul-passport",
+      "path": "showcase/02-soul-passport"
+    },
+    {
+      "frame": 3,
+      "slug": "03-mars-colony",
+      "branch": "frame/03-mars-colony",
+      "path": "showcase/03-mars-colony"
+    },
+    {
+      "frame": 4,
+      "slug": "04-five-realities",
+      "branch": "frame/04-five-realities",
+      "path": "showcase/04-five-realities"
+    },
+    {
+      "frame": 5,
+      "slug": "05-causal-detective",
+      "branch": "frame/05-causal-detective",
+      "path": "showcase/05-causal-detective"
+    },
+    {
+      "frame": 6,
+      "slug": "06-space-station",
+      "branch": "frame/06-space-station",
+      "path": "showcase/06-space-station"
+    },
+    {
+      "frame": 7,
+      "slug": "07-constitution",
+      "branch": "frame/07-constitution",
+      "path": "showcase/07-constitution"
+    },
+    {
+      "frame": 8,
+      "slug": "08-teleporting-roguelike",
+      "branch": "frame/08-teleporting-roguelike",
+      "path": "showcase/08-teleporting-roguelike"
+    },
+    {
+      "frame": 9,
+      "slug": "09-attack-timeline",
+      "branch": "frame/09-attack-timeline",
+      "path": "showcase/09-attack-timeline"
+    },
+    {
+      "frame": 10,
+      "slug": "10-futures-museum",
+      "branch": "frame/10-futures-museum",
+      "path": "showcase/10-futures-museum"
+    }
+  ]
+}

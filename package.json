@@ -7,9 +7,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "check": "npm run evidence:check && node papercheck.mjs chromium full",
+    "check": "npm run evidence:check && node papercheck.mjs chromium full && npm run showcase:check",
     "evidence:generate": "node evidence/generate.mjs",
     "evidence:check": "node evidence/generate.mjs --check && node evidence/verify.mjs && node evidence/privacycheck.mjs",
+    "frame-loop:merge": "node scripts/merge-frame-loop.mjs showcase/loop-01.plan.json",
+    "showcase:check": "node showcasecheck.mjs",
     "smoke": "node papercheck.mjs chromium smoke",
     "papercheck": "node papercheck.mjs"
   },

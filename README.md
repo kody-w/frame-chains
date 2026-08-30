@@ -43,6 +43,19 @@ assertions, reset/replay controls, and a copyable prompt for asking any LLM to
 build an independent runnable proof. These are explanatory models; the paper is
 the source of truth for the reported estate runs and limitations.
 
+## Ten-frame showcase
+
+The [ten-frame showcase](https://kody-w.github.io/frame-chains/showcase/)
+pushes the same substrate into ten deliberately extreme interactive worlds:
+counterfactual mission control, an AI identity passport, a self-healing Mars
+colony, five synchronized projections, a causal mystery, a swarm-built space
+station, an executable constitution, a teleporting roguelike, an adversarial
+timeline laboratory, and a museum of possible futures.
+
+Each frame is built in its own Git worktree and preserved as its own commit.
+The final integration merges all ten commits without squashing and records the
+exact commit mapping in `showcase/FRAME-LOOP.json`.
+
 ## Run a sample
 
 ```
@@ -97,7 +110,9 @@ guide.html      the newcomer-first guided evidence path
 play/           six interactive exercises (self-contained HTML)
 samples/        frame_chain.py — the runnable toy
 evidence/       synthetic fixtures, generator, verifier, and privacy gate
+showcase/       ten preserved interactive frames and the merge ledger
 papercheck.mjs  structural and browser verification for the publication
+showcasecheck.mjs adversarial browser gate for the ten-frame loop
 ```
 
 Substrate: the [rapp/1 protocol](https://kody-w.github.io/rapp-1/) (published

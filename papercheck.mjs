@@ -35,7 +35,27 @@ const guideExercises = [
   "play/reattach.html",
   "play/merge-fidelity.html",
 ];
-const smokePages = ["index.html", "guide.html", "paper.html", "evidence/index.html", ...expectedExercises];
+const showcasePages = [
+  "showcase/index.html",
+  "showcase/01-many-worlds/index.html",
+  "showcase/02-soul-passport/index.html",
+  "showcase/03-mars-colony/index.html",
+  "showcase/04-five-realities/index.html",
+  "showcase/05-causal-detective/index.html",
+  "showcase/06-space-station/index.html",
+  "showcase/07-constitution/index.html",
+  "showcase/08-teleporting-roguelike/index.html",
+  "showcase/09-attack-timeline/index.html",
+  "showcase/10-futures-museum/index.html",
+];
+const smokePages = [
+  "index.html",
+  "guide.html",
+  "paper.html",
+  "evidence/index.html",
+  ...expectedExercises,
+  ...showcasePages,
+];
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
