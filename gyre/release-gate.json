@@ -1,0 +1,58 @@
+{
+  "schema": "gyre-publication-gate/1",
+  "artifact_kind": "document-and-reproducible-evidence",
+  "reference_bar": "Feynman's scientific-integrity standard and independently reproducible program-search evidence",
+  "publication_scope": "A sanitized exploratory pilot and a falsifiable research protocol, not a claim of established general self-improvement.",
+  "acceptance_rules": [
+    {
+      "id": "complete-denominator",
+      "requirement": "Account for all 20 candidate requests, both arms and both generations. Do not select only winners for the public results."
+    },
+    {
+      "id": "observed-behavior",
+      "requirement": "Replay generated program behavior against the frozen original, selection, and reserved audit cases. Hash validity or model self-reports cannot substitute for output agreement."
+    },
+    {
+      "id": "independent-countercheck",
+      "requirement": "Use a countercheck independent of the original recorded grades and explicitly state the relationship between the execution interpreter, oracle, and verifier."
+    },
+    {
+      "id": "falsifiable-gates",
+      "requirement": "Deliberately corrupt an artifact, a RAPP link, a source body, a result, and an original-use-case behavior; the relevant gates must fail. Missing measurements fail."
+    },
+    {
+      "id": "current-rapp",
+      "requirement": "Check actual nonzero frame chains against the pinned current RAPP/1 reference, preserving exactly 11 envelope fields and distinguishing particle links from cross-stream provenance."
+    },
+    {
+      "id": "privacy-boundary",
+      "requirement": "Publish only allowlisted synthetic study material and public reference code. Reject credentials, home paths, machine addresses, raw account/session identifiers, unrelated source, and private diagnostic logs."
+    },
+    {
+      "id": "claims-within-evidence",
+      "requirement": "State the direct-repair tie, first-generation ceiling, restricted execution language, pretrained-model contribution, absent causal ablations, and blocked model-mediated demonstrations."
+    },
+    {
+      "id": "prior-art-and-hypothesis",
+      "requirement": "Cite primary prior art and distinguish a proposed role-pivoted co-evolution architecture from the fixed-lens experiment actually performed."
+    },
+    {
+      "id": "prospective-research",
+      "requirement": "Any stronger study protocol fixes hypotheses, controls, budgets, scoring, exclusions, stop rules, and disconfirming outcomes before collecting its primary data."
+    },
+    {
+      "id": "review-closure",
+      "requirement": "Resolve or explicitly narrow claims around independently reproduced blocker/major findings. Never edit original observations to satisfy a desired conclusion."
+    },
+    {
+      "id": "publication-integrity",
+      "requirement": "Preserve the predecessor paper and its evidence release. Existing repository checks and added targeted gates pass; public URLs serve the intended commit and files."
+    }
+  ],
+  "not_a_stop_condition": [
+    "A positive effect in favor of the proposed mechanism.",
+    "A more impressive adjective or a larger frame count.",
+    "An assurance from the author or an AI reviewer.",
+    "A claim that the system has no possible errors."
+  ]
+}

@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A controlled source-frame mutation pilot, its matched-control tie, reproducible evidence, and a falsifiable research program for RAPP Gyre.">
+<title>RAPP Gyre: Evidence Before Adjectives</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f7f4ef; --panel:#fff; --ink:#242424; --muted:#545454; --line:#d8d3cc; --accent:#a51c46; --link:#005a9e; --notice:#fff1cf; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#242322; --panel:#302e2c; --ink:#f0ece6; --muted:#c2bab0; --line:#625b54; --accent:#ff9db7; --link:#91caff; --notice:#443b25; } }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--ink); background:var(--bg); font:17px/1.65 "Segoe UI",Aptos,Calibri,system-ui,sans-serif; }
+  main { max-width:66rem; margin:auto; padding:2.5rem 1.25rem 5rem; }
+  nav { display:flex; flex-wrap:wrap; gap:.5rem 1.2rem; margin-bottom:2rem; font-size:.95rem; }
+  a { color:var(--link); text-underline-offset:.18em; overflow-wrap:anywhere; }
+  a:focus-visible,button:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+  h1 { font-size:clamp(2rem,6vw,3.5rem); line-height:1.12; letter-spacing:-.025em; margin:.5rem 0; }
+  h2 { font-size:1.55rem; line-height:1.3; margin:2.8rem 0 1rem; }
+  h3 { font-size:1.1rem; margin:1.4rem 0 .4rem; }
+  p,li { max-width:78ch; }
+  .eyebrow { color:var(--accent); font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.8rem; }
+  .subtitle { font-size:1.2rem; max-width:55ch; }
+  .meta,.muted { color:var(--muted); }
+  .notice,.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:1.2rem; margin:1.2rem 0; }
+  .notice { background:var(--notice); border-left:5px solid var(--accent); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr)); gap:1rem; }
+  .grid .card { margin:0; }
+  .table-wrap { max-width:100%; overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:.95rem; }
+  th,td { text-align:left; vertical-align:top; padding:.8rem; border-bottom:1px solid var(--line); }
+  th { background:var(--panel); }
+  code { font:.9em ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+  pre { white-space:pre-wrap; overflow-wrap:anywhere; padding:1rem; border:1px solid var(--line); background:var(--panel); border-radius:8px; font-size:.85rem; }
+  button { min-height:44px; padding:.6rem 1rem; border:1px solid var(--accent); border-radius:8px; background:var(--panel); color:var(--accent); font:inherit; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:wait; }
+  .actions { display:flex; gap:.7rem; flex-wrap:wrap; margin:1rem 0; }
+  .status { min-height:1.5em; overflow-wrap:anywhere; }
+  blockquote { border-left:3px solid var(--accent); padding:.2rem 1rem; margin:1.4rem 0; }
+  details { margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; padding:.5rem 0; }
+  footer { border-top:1px solid var(--line); margin-top:3rem; padding-top:1rem; color:var(--muted); font-size:.9rem; }
+  @media print { button,.actions { display:none; } body { background:white; color:black; } a { color:inherit; } .notice,.card,pre { break-inside:avoid; } }
+</style>
+</head>
+<body>
+<main>
+<nav aria-label="Publication navigation">
+  <a href="../">Frame Chains</a>
+  <a href="../paper.html">Predecessor paper</a>
+  <a href="#results">Pilot results</a>
+  <a href="#reproduce">Reproduce</a>
+  <a href="#evidence-bar">Evidence bar</a>
+  <a href="#research-program">Research protocol</a>
+</nav>
+<header>
+  <p class="eyebrow">Exploratory research note</p>
+  <h1>RAPP Gyre</h1>
+  <p class="subtitle">A source-mutation pilot, a matched-control tie, and counterexamples its first tests missed.</p>
+  <p class="meta">Kody Wildfeuer &middot; RapterBox LLC &middot; 2026-09-09 &middot; Not peer reviewed</p>
+</header>
+
+<div class="notice" id="claim-boundary">
+  <strong>The recorded pilot passed its tests. Independent review exposed their limits.</strong>
+  <p>Generated program variants acquired a capability absent from their seed on the evaluated
+  cases. Conventional repair did equally well on those cases. Separate adversarial probes
+  found contract and resource-budget failures the frozen tests had missed.
+  This supports bounded feasibility, not complete contract preservation, a speculative-prompt
+  advantage, a general self-improving runtime, or physical quantum computation.</p>
+</div>
+
+<section aria-labelledby="question-title">
+  <h2 id="question-title">1. The question</h2>
+  <p><a href="../paper.html">Frame Chains</a> studied structural continuity: content-addressed
+  history, recovery, and orchestration. This follow-up asks about <strong>behavioral
+  continuity</strong>: can useful changes to a program be carried in a complete frame,
+  inherited by later candidates, and retained under a fixed task contract?</p>
+  <p>A source frame contains the literal program, not a claim that a capability exists.
+  A mutation lens proposes a complete replacement. An external evaluator observes what
+  the candidate does. Those roles must not be confused.</p>
+  <p>Here, <em>speculative</em> or <em>hallucination-driven</em> generation means proposing
+  counterfactual program variants. It does not turn a generated success story into evidence.
+  The language model's pretrained programming knowledge remains a substantial input.</p>
+</section>
+
+<section id="results" aria-labelledby="results-title">
+  <h2 id="results-title">2. What the pilot actually did</h2>
+  <p>The seed implemented flat lists of signed integers. The fixed extension added inclusive
+  ranges and nested repeat groups while preserving the original interface and rejection
+  behavior. The two conditions used Opus 5, the same contract, the same interpreter and
+  cases, the same number of candidate requests, and the same parent-selection rule.</p>
+  <p>The Brainstem kernel stayed fixed. Program source changed; model weights did not.
+  Candidate code ran in a bounded Python/data interpreter hosted in separate virtual
+  environments. <strong>A venv is not itself a security sandbox.</strong></p>
+  <div class="card">
+    <p id="results-status" class="status" role="status">Loading the published result record...</p>
+    <div class="table-wrap">
+      <table aria-label="Recorded outcomes by mutation condition">
+        <thead><tr><th>Condition</th><th>Candidate programs</th><th>Frozen original cases passed</th><th>Frozen audit passed</th></tr></thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+    <p id="seed-result" class="muted"></p>
+    <p class="muted">These counts come from the published result record. The offline verifier
+    reconstructs them from program outputs and frozen cases; the table is not the verifier.</p>
+  </div>
+  <p>Parent choices were fixed before opening the reserved audit. Both conditions reached
+  the frozen-case target in generation one. Generation two retained those scores and
+  selection favored smaller syntax trees under the predeclared tie-break. A smaller
+  syntax tree does not establish better semantics or lower execution cost.</p>
+  <p><strong>The original behavioral gates did not discriminate among offspring:</strong>
+  every candidate passed them, including candidates later shown to fail additional
+  permitted inputs. This run therefore did not establish that eliminating failed
+  offspring, adding generations, or using a speculative lens caused an advantage
+  over direct repair.</p>
+  <h3>Post-hoc counterexamples: the frozen scores stay unchanged</h3>
+  <p>An <a href="reviews/independent-critique.json">automated adversarial review</a> found
+  a real regression. The program <code>speculative-1/g1</code> rejects unsigned numbers
+  longer than six digits, although the contract allows leading zeros. It was not
+  selected as a parent. A subsequent reproduction applied the same three probes to
+  the seed and every frozen candidate.</p>
+  <div class="table-wrap">
+    <table aria-label="Post-hoc findings outside the frozen primary cases">
+      <thead><tr><th>Additional probe</th><th>Contract expectation</th><th>Observed counterexample</th></tr></thead>
+      <tbody>
+        <tr><td><code>0000001</code></td><td><code>[1]</code></td><td>The seed succeeds; <code>speculative-1/g1</code> raises <code>ValueError</code>.</td></tr>
+        <tr><td><code>0000002*(1)</code></td><td><code>[1,1]</code> under the extension contract</td><td>The same offspring incorrectly raises <code>ValueError</code>.</td></tr>
+        <tr><td>256 comma-separated copies of <code>0000001</code></td><td>256 ones, within the original task and study budget</td><td>The seed completes in 29,215 steps. Nine of twenty candidates fail this targeted probe: one rejects the value and eight exhaust the 120,000-step budget.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><a href="data/posthoc/summary.json">Post-hoc probe outcomes</a> are reported separately.
+  The original 109 selection-stage and 119 reserved-audit cases were not changed or
+  regraded. These targeted probes do not establish an unbiased arm comparison.
+  They do refute complete contract-preservation claims for the affected programs
+  under the stated execution conditions.</p>
+  <p><strong>A perfectly valid frame can carry a defective program.</strong> Integrity
+  checks and behavioral acceptance are different obligations.</p>
+  <div class="notice">
+    <strong>Integration limitation, retained rather than hidden.</strong>
+    <p>The two model-mediated tool demonstrations returned empty responses with
+    <code>content_filter</code> in the worker log. A separate local software check showed
+    one already-loaded agent instance using an updated source frame without being recreated.
+    That local check is not a successful model-mediated chat demonstration.</p>
+  </div>
+</section>
+
+<section id="reproduce" aria-labelledby="reproduce-title">
+  <h2 id="reproduce-title">3. Inspect and reproduce the evidence</h2>
+  <p>The public package is an allowlisted projection of a synthetic experiment. It is not
+  an export of the author's estate, authentication material, machine logs, or unrelated
+  conversations. Program frames retain their original contents and ancestry; any sanitized
+  call metadata is labeled as a projection.</p>
+  <p>The legacy result field <code>original_preserved</code> means that the original
+  controller's frozen original-case set passed. It is not a guarantee over all permitted
+  inputs. The field is preserved as recorded rather than renamed inside immutable frames.</p>
+  <div class="actions">
+    <a href="data/manifest.json">Release manifest</a>
+    <a href="data/results.json">Result record</a>
+    <a href="evidence-README.md">Reproduction instructions</a>
+    <a href="verify.py">Offline verifier</a>
+    <a href="release-gate.json">Publication gate</a>
+  </div>
+  <pre><code>git clone https://github.com/kody-w/frame-chains.git
+cd frame-chains
+python3 gyre/verify.py
+python3 gyre/verify.py --self-test
+python3 gyre/privacy.py</code></pre>
+  <p>No model access is needed to replay the published programs and outcomes. Replaying
+  stored artifacts is different from independently regenerating those artifacts through
+  a stochastic model. The package must not claim to authenticate the original provider
+  responses or reproduce hidden provider internals.</p>
+  <p>The released audit cases were withheld from candidate generation and parent selection
+  in the original run. They are public now. A new confirmatory experiment must use newly
+  prepared evaluation instances rather than treating this published set as still hidden.</p>
+  <div class="card">
+    <h3>Read the actual selected program from its frame</h3>
+    <p>This browser view reads source as text. It does not execute the program or generate
+    a new mutation. The regression example deliberately shows why a matching source hash
+    is not a correctness certificate.</p>
+    <div class="actions">
+      <button type="button" id="inspect-source">Inspect selected source frame</button>
+      <button type="button" id="inspect-regression">Inspect known-regression frame</button>
+    </div>
+    <p id="source-status" class="status" role="status">Source has not been loaded.</p>
+    <pre id="source-output" hidden><code id="source-code"></code></pre>
+  </div>
+  <p>RAPP/1 content addresses make records checkable relative to a retained head. They do
+  not, by themselves, prove authorship, trusted timestamps, or semantic truth. These are
+  unsigned research frames, not the predecessor paper's signed authority mechanism.</p>
+</section>
+
+<section id="evidence-bar" aria-labelledby="bar-title">
+  <h2 id="bar-title">4. What would justify a stronger claim?</h2>
+  <p>In his <a href="https://calteches.library.caltech.edu/51/2/CargoCult.htm">1974
+  Caltech address</a>, Richard Feynman argued for reporting what could invalidate an
+  interpretation, including competing explanations and contrary results. Applying that
+  standard is more useful than guessing what would personally have persuaded him.</p>
+  <blockquote>
+    At a fixed resource budget and with a fixed external model, does inherited
+    program-and-lens adaptation produce more retained capability on independently
+    prepared tasks than independent best-of-N generation or fixed-lens search?
+  </blockquote>
+  <p>That is a falsifiable question. An impressive isolated offspring, a large population,
+  or a growing frame archive is not sufficient to answer it.</p>
+  <div class="table-wrap">
+    <table aria-label="Evidence required for increasingly strong claims">
+      <thead><tr><th>Claim</th><th>Required evidence</th><th>Current boundary</th></tr></thead>
+      <tbody>
+        <tr><td>Records preserve the programs and their lineage.</td><td>Canonical frame and byte checks, stream binding, and deliberately corrupted negative controls.</td><td>Mechanically checkable for the published records.</td></tr>
+        <tr><td>A descendant gains useful behavior.</td><td>Actual program outputs, original-case coverage, and unseen-case evaluation.</td><td>Small synthetic feasibility result; post-hoc counterexamples limit contract-preservation claims.</td></tr>
+        <tr><td>Inheritance contributes beyond more attempts.</td><td>Matched-budget fresh-seed, independent best-of-N, and inherited-search controls.</td><td>Not established by this pilot.</td></tr>
+        <tr><td>Evolving lenses improves the search.</td><td>Fixed versus evolving lens arms, with lens-generation costs included and delayed credit tied to later offspring.</td><td>Not run.</td></tr>
+        <tr><td>Useful behavior transfers with the frame.</td><td>Fresh processes, declared dependencies, no prior conversation, and separate host/model transfer trials.</td><td>Local software hotload check only in this source-mutation study.</td></tr>
+        <tr><td>The advantage generalizes.</td><td>Independent task families, repeated runs, held-out distributions, and outside replication.</td><td>One task family is not that evidence.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>What would count against the hypothesis?</h3>
+  <p>If independent best-of-N generation performs just as well at the same budget, the
+  population may be buying attempts rather than cumulative adaptation. If resetting
+  inherited state does not hurt, inheritance has not shown a causal benefit on that
+  distribution. If evolving lenses only consumes extra inference, the meta-level has
+  not earned its cost. If success disappears under an independent grader, the system
+  may have exploited the evaluation rather than acquired the claimed capability.</p>
+  <p>The current direct-repair tie is part of that record, not something to explain away.</p>
+</section>
+
+<section id="research-program" aria-labelledby="program-title">
+  <h2 id="program-title">5. The proposed Gyre, and the experiment it still needs</h2>
+  <p><strong>RAPP Gyre</strong> is a proposed role-pivoted system: program source, lens
+  source, and eventually the literal Brainstem program can all be represented as frames.
+  A pivot assigns which frame is the subject, which is the transformer, which runtime
+  materializes the candidate, and which dimension is being explored.</p>
+  <p>Parallel workers would explore separate branches from pinned ancestors. Completed
+  observations could guide later pivots. The externally fixed original-use-case contract
+  would determine promotion; a mutable candidate could not weaken its own mandatory
+  evaluator. <strong>The full co-evolving architecture was not run in this pilot.</strong></p>
+  <p>The term <em>quantum</em> in dimension-mining descriptions is a metaphor for
+  concurrent alternatives and measured selection. There is no claim of quantum
+  computation or access to physical alternative universes. The existing
+  <a href="https://github.com/kody-w/openrappter/blob/9edfced00e509ad2c3547e3666116cf4e41f029e/beta/docs/QQDRILL-PROTOCOL.md">QQDRILL protocol</a>
+  also separates local discovery from compatibility-gated assimilation. The proposed
+  generative Gyre adds speculative candidate creation; it does not silently redefine
+  a read-only lookup as a successful program mutation.</p>
+  <div class="grid">
+    <div class="card">
+      <h3>Performance study</h3>
+      <p>Compare direct repair, independent best-of-N, fixed-lens inheritance, and
+      lens co-evolution under declared budgets. Count proposal, evaluation, retry,
+      meta-lens, and repair costs. Define worthwhile effect sizes before choosing
+      the confirmatory sample size.</p>
+    </div>
+    <div class="card">
+      <h3>Operational reliability study</h3>
+      <p>Compare equivalent framed and unframed state for corruption detection,
+      reconstruction, transfer, lineage preservation, and recovery. Do not
+      attribute solver intelligence to the presence of hashes.</p>
+    </div>
+  </div>
+  <p><a href="research-protocol.json">Prospective research specification</a> records
+  the controls, disconfirming outcomes, and prerequisites. It is a draft design,
+  <strong>not a claim that a confirmatory trial has already been registered or run</strong>.
+  Task generators, budgets, endpoints, exclusions, sample size, and stop rules must be
+  frozen and publicly timestamped before that trial's primary data are collected.</p>
+  <p>A large number of case rows is not a large number of independent experiments.
+  The unit of replication must be the independently sampled task/run, not correlated
+  siblings or many inputs to one parser. Both successful and unsuccessful runs must
+  remain in the denominator.</p>
+</section>
+
+<section id="prior-art" aria-labelledby="prior-title">
+  <h2 id="prior-title">6. Prior art and position</h2>
+  <p>The RAPP/1 substrate and the predecessor's orchestration work are not claimed as
+  new here. Nor is the general idea of using language models to propose programs and
+  an evaluator to select them. Any distinctive contribution must be located in the
+  implemented composition, its operational guarantees, or a measured result that
+  survives comparison with existing methods.</p>
+  <div class="table-wrap">
+    <table aria-label="Primary prior art and its relevance">
+      <thead><tr><th>Primary source</th><th>Established overlap</th><th>Boundary for a Gyre claim</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/funsearch-making-new-discoveries-in-mathematical-sciences-using-large-language-models/Mathematical-discoveries-from-program-search-with-large-language-models.pdf">FunSearch (2023), accepted manuscript</a></td>
+          <td>A frozen LLM proposes executable programs; evaluation, inherited candidates, independently evolving islands, and asynchronous search guide later proposals. The supplementary study includes a no-evolution sampling ablation.</td>
+          <td>Program variation, evaluation, inheritance, concurrency, and success-oriented next-version prompting are not new here.</td>
+        </tr>
+        <tr>
+          <td><a href="https://arxiv.org/abs/2309.16797">Promptbreeder (2023)</a></td>
+          <td>Task prompts and the mutation prompts that modify them evolve together.</td>
+          <td>Evolving a lens that generates later variations has direct precedent.</td>
+        </tr>
+        <tr>
+          <td><a href="https://arxiv.org/abs/2310.02304">Self-Taught Optimizer / STOP (2023)</a></td>
+          <td>An executable improver is applied to its own scaffolding under a utility function and resource bounds; the language model remains unchanged.</td>
+          <td>An improved program and a better improver require different evidence.</td>
+        </tr>
+        <tr>
+          <td><a href="https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/AlphaEvolve.pdf">AlphaEvolve (2025), official white paper</a></td>
+          <td>Whole-code evolution, co-evolving intermediate solutions and search algorithms, and meta-prompt evolution. Figure 8 includes a no-meta-prompt-evolution ablation.</td>
+          <td>The combination of evolving program bodies and evolving lenses is especially close prior art, not a unique Gyre discovery. Its reported ablation is not a universal guarantee.</td>
+        </tr>
+        <tr>
+          <td><a href="https://arxiv.org/html/2505.22954v1">Darwin G&ouml;del Machine (2025)</a></td>
+          <td>Agents modify their own code and explore archived lineages. The outer archive/selection mechanism remains fixed. Appendix F documents fabricated tool/test logs and objective hacking.</td>
+          <td>Runtime/source claims must identify the fixed trusted boundary; generated testimony cannot be the evaluator.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p>This overlap is encouraging for plausibility and raises the novelty bar. A possible
+  RAPP contribution is an interoperable representation, reconstructable execution,
+  compatibility contracts, and inspectable provenance across these roles. It is
+  not evidence of a new physical principle or an automatically better search algorithm.</p>
+  <p class="muted">Reading locations: FunSearch accepted manuscript methods and supplementary
+  ablations (PDF positions 3-6, 17-18, 28-29); AlphaEvolve pp. 5, 16, 18 and Figure 8;
+  Promptbreeder pp. 1-3; STOP original version pp. 1-5; Darwin G&ouml;del Machine
+  sections 3, 4.3, and Appendix F. Adaptive use of evaluation data is also discussed
+  by <a href="https://arxiv.org/abs/1506.02629">Dwork et al., Generalization in Adaptive
+  Data Analysis and Holdout Reuse</a>.</p>
+</section>
+
+<section aria-labelledby="limits-title">
+  <h2 id="limits-title">7. Limitations and publication status</h2>
+  <p>One task family; one model; five siblings per condition per generation; provider-default
+  sampling; no pure-random mutation or fresh-seed-each-generation control; a restricted
+  execution language; no causal advantage observed over direct repair; no rejected
+  offspring on the primary behavioral gates despite later counterexamples; and no
+  demonstrated full-runtime or lens co-evolution. The external model supplied pretrained
+  programming knowledge.</p>
+  <p>The original interpreter is not a general CPython-equivalent implementation.
+  Review found that its list <code>+=</code> handling does not preserve Python's
+  in-place alias semantics. None of the twenty candidates uses augmented assignment,
+  so that mismatch does not invalidate their frozen scores. It remains a reason not
+  to generalize the interpreter's claims beyond the stated study.</p>
+  <p>Automated adversarial review is not independent human replication or peer review.
+  A public replay can reproduce artifacts and computations, but cannot retroactively
+  authenticate a private model invocation. No confidence interval over a population
+  of task families is inferred from this single-family pilot.</p>
+  <p>The <a href="reviews/release-implementation.json">release implementation review</a>
+  also found two structured-JSON privacy gaps. Decoded-key inspection and strict
+  duplicate-member rejection were added and independently rechecked before release.
+  No original program or experimental observation was changed to close those findings.</p>
+  <p>Corrections belong in the public record. Original observations must not be edited
+  into a more favorable history.</p>
+</section>
+
+<footer>
+  <p>Follow-up research to <a href="../paper.html">Frame Chains</a>.
+  Copyright notices in the repository apply. Vendored reference code retains its
+  upstream license. Publication does not convert a hypothesis into a result.</p>
+</footer>
+</main>
+<script>
+"use strict";
+const byId = id => document.getElementById(id);
+
+function count(value, label) {
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error(`Invalid count: ${label}`);
+  return value;
+}
+
+async function readJson(path) {
+  const response = await fetch(path, { cache: "no-store", credentials: "omit" });
+  if (!response.ok) throw new Error(`${path} returned ${response.status}`);
+  return response.json();
+}
+
+async function renderResults() {
+  const result = await readJson("data/results.json");
+  const labels = { speculative: "Success-conditioned speculation", direct: "Conventional repair" };
+  const fragment = document.createDocumentFragment();
+  for (const arm of ["speculative", "direct"]) {
+    let candidates = 0, preserved = 0, passed = 0;
+    for (const generation of ["generation_1", "generation_2"]) {
+      const group = result.aggregate[arm][generation];
+      const total = count(group.candidates, `${arm}/${generation}`);
+      const old = count(group.original_preserved, "original floor");
+      const audit = count(group.audit_flag_captured, "audit");
+      if (old > total || audit > total) throw new Error("An outcome exceeds its denominator");
+      candidates += total; preserved += old; passed += audit;
+    }
+    const row = document.createElement("tr");
+    for (const value of [labels[arm], String(candidates), `${preserved}/${candidates}`, `${passed}/${candidates}`]) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.append(cell);
+    }
+    fragment.append(row);
+  }
+  const seed = result.seed;
+  byId("seed-result").textContent =
+    `Seed: ${count(seed.original.correct, "seed original")}/${count(seed.original.total, "seed original total")} original cases; ` +
+    `${count(seed["new-valid"].correct, "seed new")}/${count(seed["new-valid"].total, "seed new total")} valid extension cases.`;
+  byId("results-body").replaceChildren(fragment);
+  byId("results-status").textContent = `Recorded ${result.model} pilot results loaded.`;
+  byId("results-status").dataset.state = "loaded";
+}
+
+async function inspectSource(regression) {
+  const buttons = [byId("inspect-source"), byId("inspect-regression")];
+  for (const button of buttons) button.disabled = true;
+  byId("source-output").hidden = true;
+  byId("source-code").textContent = "";
+  byId("source-status").dataset.state = "loading";
+  byId("source-status").textContent = "Loading the selected source frame...";
+  try {
+    const selection = regression ? null : await readJson("data/selection-g2.json");
+    const path = regression ? "streams/speculative-1-1/frames/1.json" : selection.speculative.frame_path;
+    if (typeof path !== "string" || !/^[a-zA-Z0-9_./-]+$/.test(path) || path.startsWith("/") || path.split("/").includes("..")) {
+      throw new Error("Invalid source-frame path");
+    }
+    const frame = await readJson(`data/${path}`);
+    if (frame.spec !== "rapp/1" || Object.keys(frame).length !== 11 ||
+        typeof frame.payload?.source !== "string" || typeof frame.payload.source_sha256 !== "string") {
+      throw new Error("The source frame does not have the required shape");
+    }
+    const bytes = new TextEncoder().encode(frame.payload.source);
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    const hex = Array.from(new Uint8Array(digest), value => value.toString(16).padStart(2, "0")).join("");
+    if (hex !== frame.payload.source_sha256) throw new Error("Source-byte hash mismatch");
+    byId("source-code").textContent = frame.payload.source;
+    byId("source-output").hidden = false;
+    byId("source-status").textContent =
+      `${regression ? "Known-regression example. " : ""}Source-byte hash matched (${bytes.length} UTF-8 bytes). No program was executed. Full frame-chain and behavior checks belong to the offline verifier.`;
+    byId("source-status").dataset.state = "matched";
+  } catch (error) {
+    byId("source-status").textContent = `Cannot inspect source: ${error.message}`;
+    byId("source-status").dataset.state = "error";
+  } finally {
+    for (const button of buttons) button.disabled = false;
+  }
+}
+byId("inspect-source").addEventListener("click", () => inspectSource(false));
+byId("inspect-regression").addEventListener("click", () => inspectSource(true));
+
+renderResults().catch(error => {
+  byId("results-status").textContent = `Cannot load the published results: ${error.message}. No result is being inferred.`;
+  byId("results-status").dataset.state = "error";
+});
+</script>
+</body>
+</html>

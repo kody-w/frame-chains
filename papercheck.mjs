@@ -53,6 +53,7 @@ const smokePages = [
   "guide.html",
   "paper.html",
   "evidence/index.html",
+  "gyre/index.html",
   ...expectedExercises,
   ...showcasePages,
 ];
@@ -165,7 +166,7 @@ async function openCheckedPage(context, origin, relativePath, mobile = true) {
 
 async function runSmoke(context, origin) {
   for (const relativePath of smokePages) {
-    const mobile = ["index.html", "guide.html", "paper.html"].includes(relativePath);
+    const mobile = ["index.html", "guide.html", "paper.html", "gyre/index.html"].includes(relativePath);
     const { page } = await openCheckedPage(context, origin, relativePath, mobile);
     await page.close();
     console.log(
@@ -204,6 +205,112 @@ async function checkPaperEmbeds(context, origin) {
   assertClean();
   await page.close();
   console.log("  ✓ paper.html embeds six unique, titled standalone exercises");
+}
+
+async function checkGyreEvidence(context, origin, negativeControls) {
+  const { page, assertClean } = await openCheckedPage(context, origin, "gyre/index.html");
+  await page.waitForFunction(() =>
+    ["loaded", "error"].includes(document.getElementById("results-status")?.dataset.state));
+  check(
+    await page.locator("#results-status").getAttribute("data-state") === "loaded",
+    "Gyre page could not load the actual result record.",
+  );
+  const result = JSON.parse(await readFile(resolve(root, "gyre/data/results.json"), "utf8"));
+  const labels = { speculative: "Success-conditioned speculation", direct: "Conventional repair" };
+  const expected = Object.entries(labels).map(([arm, label]) => {
+    const groups = Object.values(result.aggregate[arm]);
+    const total = groups.reduce((sum, item) => sum + item.candidates, 0);
+    const preserved = groups.reduce((sum, item) => sum + item.original_preserved, 0);
+    const passed = groups.reduce((sum, item) => sum + item.audit_flag_captured, 0);
+    return [label, String(total), `${preserved}/${total}`, `${passed}/${total}`];
+  });
+  const rendered = await page.locator("#results-body tr").evaluateAll(rows =>
+    rows.map(row => [...row.querySelectorAll("td")].map(cell => cell.textContent.trim())));
+  check(JSON.stringify(rendered) === JSON.stringify(expected), "Gyre table does not match the published result record.");
+  const text = compact(await page.locator("body").innerText());
+  for (const requirement of [
+    /not peer reviewed/i,
+    /conventional repair did equally well/i,
+    /full co-evolving architecture was not run/i,
+    /not a claim that a confirmatory trial has already been registered or run/i,
+    /content_filter/,
+    /nine of twenty candidates fail/i,
+    /not changed or regraded/i,
+    /a perfectly valid frame can carry a defective program/i,
+  ]) {
+    check(requirement.test(text), `Gyre page omitted an evidentiary boundary: ${requirement}`);
+  }
+  check(
+    !/being independently reviewed before publication/i.test(text),
+    "Gyre prior-art review still contains a pre-publication placeholder.",
+  );
+  const links = await page.locator("a[href]").evaluateAll(nodes =>
+    nodes.map(node => node.getAttribute("href")));
+  for (const href of new Set(links)) {
+    const url = new URL(href, `${origin}/gyre/index.html`);
+    if (url.origin !== origin || url.hash) continue;
+    const response = await context.request.get(url.href);
+    check(response.ok(), `Gyre publication link does not resolve: ${href}`);
+    check((await response.body()).length > 0, `Gyre publication link returned an empty body: ${href}`);
+  }
+  await page.locator("#inspect-source").click();
+  await page.waitForFunction(() =>
+    ["matched", "error"].includes(document.getElementById("source-status")?.dataset.state));
+  check(
+    await page.locator("#source-status").getAttribute("data-state") === "matched",
+    "Gyre selected source did not pass its real byte-hash comparison.",
+  );
+  const selection = JSON.parse(await readFile(resolve(root, "gyre/data/selection-g2.json"), "utf8"));
+  const relativeFrame = selection.speculative.frame_path;
+  const frame = JSON.parse(await readFile(resolve(root, "gyre/data", relativeFrame), "utf8"));
+  check(
+    await page.locator("#source-code").textContent() === frame.payload.source,
+    "Gyre inspector did not display the complete source from the frame.",
+  );
+  await page.locator("#inspect-regression").click();
+  await page.waitForFunction(() =>
+    ["matched", "error"].includes(document.getElementById("source-status")?.dataset.state));
+  check(
+    await page.locator("#source-status").getAttribute("data-state") === "matched",
+    "Gyre could not inspect the intact but behaviorally defective frame.",
+  );
+  check(
+    /known-regression example/i.test(await page.locator("#source-status").innerText()),
+    "Gyre failed to distinguish source integrity from known behavioral failure.",
+  );
+  const regressionFrame = JSON.parse(await readFile(
+    resolve(root, "gyre/data/streams/speculative-1-1/frames/1.json"), "utf8"));
+  check(
+    await page.locator("#source-code").textContent() === regressionFrame.payload.source,
+    "Gyre regression inspector did not show the actual frozen source.",
+  );
+  if (negativeControls) {
+    const frameUrl = `${origin}/gyre/data/${relativeFrame}`;
+    const tamperedFrame = structuredClone(frame);
+    tamperedFrame.payload.source += "\n# deliberately changed without rehashing\n";
+    await page.route(frameUrl, route => route.fulfill({
+      status: 200, contentType: "application/json", body: JSON.stringify(tamperedFrame),
+    }));
+    await page.locator("#inspect-source").click();
+    await page.waitForFunction(() =>
+      document.getElementById("source-status")?.dataset.state === "error");
+    check(await page.locator("#source-output").isHidden(), "Gyre left stale source visible after a failed hash comparison.");
+    await page.unroute(frameUrl);
+
+    const resultsUrl = `${origin}/gyre/data/results.json`;
+    await page.route(resultsUrl, route => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ model: result.model, aggregate: {}, seed: result.seed }),
+    }));
+    await page.reload({ waitUntil: "load" });
+    await page.waitForFunction(() =>
+      document.getElementById("results-status")?.dataset.state === "error");
+    check(await page.locator("#results-body tr").count() === 0, "Gyre fabricated result rows from an incomplete result record.");
+    await page.unroute(resultsUrl);
+  }
+  assertClean();
+  await page.close();
+  console.log(`  ✓ Gyre displays recorded results and complete source${negativeControls ? "; tamper and missing-data controls fail visibly" : ""}`);
 }
 
 async function checkGuidePath(context, origin) {
@@ -843,6 +950,7 @@ try {
   await checkGuidePath(context, started.origin);
   await checkStandaloneGuidance(context, started.origin);
   await checkEvidencePage(context, started.origin);
+  await checkGyreEvidence(context, started.origin, mode === "full");
   if (mode === "full") {
     await checkPromptCopy(context, started.origin);
     await checkClockExercise(context, started.origin);

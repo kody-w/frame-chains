@@ -1,0 +1,68 @@
+CAPABILITY: expand a compact frame-selection expression into a list of integers.
+Interface: solve(expression) -> list[int]. Raise ValueError for invalid input.
+
+Original use cases that MUST survive:
+- Input must be a string. Empty or whitespace-only input returns [].
+- A comma-separated list of signed ASCII decimal integers expands unchanged.
+- Leading zeros and an explicit + sign on integers are allowed.
+- Integers must be between -1000 and 1000 inclusive.
+- At most 256 output integers. Reject empty comma elements and non-ASCII digits.
+- Whitespace satisfying str.isspace() is allowed between tokens, not inside an integer.
+
+Target extension (the same target in both generations):
+ expression := empty | term ("," term)*
+ term := integer | integer ".." integer | count "*" "(" expression ")"
+ integer := optional "+" or "-" followed by one or more ASCII digits
+ count := one or more ASCII digits, UNSIGNED, with value 0 through 20 inclusive
+
+Ranges are inclusive. Descending ranges descend by one. Equal endpoints yield one value.
+Repeat groups recursively repeat the FULL expanded inner expression.
+Parentheses are legal only after count *; plain grouping parentheses are invalid.
+All tokens must be consumed; reject junk, malformed ranges, missing separators,
+trailing commas, incomplete groups, and otherwise invalid syntax.
+The two dots in ".." must be adjacent. Whitespace may surround operators.
+A signed count is invalid, including +2*(1) and -0*(1).
+An empty repeat body is valid: 3*() -> [].
+Zero repeat still parses and validates its body: 0*(bad) is invalid.
+Enforce at most 12 nested repeat groups.
+Every term and every subexpression must expand to at most 256 integers, EVEN INSIDE
+a zero repeat. Thus 0*(0..1000) and 0*(20*(20*(1))) are invalid.
+Every integer token, including range endpoints, must remain in -1000..1000.
+Do not silently truncate, clamp, or repair invalid expressions.
+
+Public examples:
+ "" -> []
+ "1, -2, +03" -> [1,-2,3]
+ "1..3" -> [1,2,3]
+ "3..1" -> [3,2,1]
+ "2*(1,-1)" -> [1,-1,1,-1]
+ "2*(1,2*(3)),0" -> [1,3,3,1,3,3,0]
+ " 2 * ( -1 .. +1 ) " -> [-1,0,1,-1,0,1]
+ "0*()" -> []
+ "1,": ValueError
+ "0*(2,)": ValueError
+ "0*(0..1000)": ValueError
+
+Execution language for this controlled pilot:
+- Full Python source containing solve and optional TOP-LEVEL helper functions.
+- No imports, classes, nested functions, decorators, async, generators,
+  comprehensions, f-strings, try/except, global, nonlocal, or main/print blocks.
+- Ordinary positional parameters, optional scalar literal defaults, local variables,
+  if/for/while, return, break/continue, and explicit raise ValueError are supported.
+- Lists, tuples, dictionaries, indexing, slices, unpacking, scalar module constants,
+  boolean/comparison operations, + - * // %, and ordinary helper calls are supported.
+- Pure builtins: len, int, str, bool, list, tuple, range, enumerate, zip, min, max,
+  abs, all, any, sum, sorted, isinstance, ValueError.
+- str conversion is scalar-only; sum takes one integer collection; no builtin keyword
+  arguments. Helper keyword arguments are allowed.
+- String methods: strip/lstrip/rstrip/split/isdigit/isdecimal/isspace,
+  startswith/endswith/find/count/join.
+- List methods: append/extend/pop/copy/clear/reverse.
+- Dictionary methods: get/keys/values/items/copy.
+- No callable-name shadowing, dynamic calls, dunder access, or method references.
+- Source <= 24,000 UTF-8 bytes, <= 5,000 AST nodes. Per case: <= 120,000 interpreter
+  steps, <= 80 helper-call depth, collections <= 4,096 items, integers <= 10^12.
+- These limits are an execution boundary, not a substitute for the stricter task limits.
+
+Return the entire candidate program. Do not claim that it passed; an independent
+evaluator will execute it. Do not include the evaluator, tests, Markdown, or prose.

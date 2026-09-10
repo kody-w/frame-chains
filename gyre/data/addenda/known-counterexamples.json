@@ -1,0 +1,62 @@
+{
+  "schema": "gyre-posthoc-counterexamples/1",
+  "status": "Post-hoc targeted counterexamples reported after the completed pilot, not original frozen cases or a confirmatory arm comparison.",
+  "frozen_candidate_measurements_unchanged": 4560,
+  "public_original_floor_label": "Passed frozen original-floor cases",
+  "complete_contract_preservation": false,
+  "input_encoding": "literal is a string; comma_join constructs exactly count copies separated by commas. These are data constructors, never executable source.",
+  "probes": [
+    {
+      "id": "gyre-review-1001",
+      "name": "Leading-zero integer",
+      "family": "original",
+      "input": {
+        "literal": "0000001"
+      },
+      "expected": {
+        "value": [1]
+      }
+    },
+    {
+      "id": "gyre-review-1002",
+      "name": "Leading-zero repeat count",
+      "family": "extension",
+      "input": {
+        "literal": "0000002*(1)"
+      },
+      "expected": {
+        "value": [1, 1]
+      }
+    },
+    {
+      "id": "gyre-review-1003",
+      "name": "Original 256-element zero-padded list",
+      "family": "original",
+      "input": {
+        "comma_join": {
+          "item": "0000001",
+          "count": 256
+        }
+      },
+      "expected": {
+        "repeat": {
+          "item": 1,
+          "count": 256
+        }
+      }
+    }
+  ],
+  "reported_counterexamples": [
+    "Unselected gyre-speculative-1-1 rejects both short probes with ValueError because its unsigned digit-length check caps tokens at six digits.",
+    "The seed completes the 256-element original-input probe in 29215 interpreter steps.",
+    "Selected direct parents gyre-direct-1-0 and gyre-direct-2-2 hit GuestLimit at 120001 steps on that valid original input; selected speculative parents complete it.",
+    "Targeted post-hoc outcomes do not establish a prompt-arm advantage and do not change the original case definitions, recorded outcomes, or denominators."
+  ],
+  "execution_semantics": {
+    "engine": "Unchanged fixed pilot bounded AST interpreter",
+    "known_difference": "List += alias semantics differs from CPython: the interpreter rebinds the augmented-assignment target instead of mutating the aliased list.",
+    "frozen_candidates_with_augassign": 0,
+    "native_guest_countercheck_performed": false,
+    "boundary": "No general-Python equivalence or general-purpose sandbox claim. Native guest replay would require an appropriately isolated OS execution boundary and was not performed."
+  }
+}

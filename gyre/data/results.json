@@ -1,0 +1,173 @@
+{
+  "aggregate": {
+    "direct": {
+      "generation_1": {
+        "admitted": 5,
+        "audit_flag_captured": 5,
+        "candidates": 5,
+        "original_preserved": 5,
+        "selected_parent_all_audit_correct": true,
+        "selected_parent_audit": {
+          "new-invalid": {
+            "correct": 21,
+            "total": 21
+          },
+          "new-valid": {
+            "correct": 83,
+            "total": 83
+          },
+          "original": {
+            "correct": 15,
+            "total": 15
+          }
+        },
+        "selection_flag_captured": 5
+      },
+      "generation_2": {
+        "admitted": 5,
+        "audit_flag_captured": 5,
+        "candidates": 5,
+        "original_preserved": 5,
+        "selected_parent_all_audit_correct": true,
+        "selected_parent_audit": {
+          "new-invalid": {
+            "correct": 21,
+            "total": 21
+          },
+          "new-valid": {
+            "correct": 83,
+            "total": 83
+          },
+          "original": {
+            "correct": 15,
+            "total": 15
+          }
+        },
+        "selection_flag_captured": 5
+      }
+    },
+    "speculative": {
+      "generation_1": {
+        "admitted": 5,
+        "audit_flag_captured": 5,
+        "candidates": 5,
+        "original_preserved": 5,
+        "selected_parent_all_audit_correct": true,
+        "selected_parent_audit": {
+          "new-invalid": {
+            "correct": 21,
+            "total": 21
+          },
+          "new-valid": {
+            "correct": 83,
+            "total": 83
+          },
+          "original": {
+            "correct": 15,
+            "total": 15
+          }
+        },
+        "selection_flag_captured": 5
+      },
+      "generation_2": {
+        "admitted": 5,
+        "audit_flag_captured": 5,
+        "candidates": 5,
+        "original_preserved": 5,
+        "selected_parent_all_audit_correct": true,
+        "selected_parent_audit": {
+          "new-invalid": {
+            "correct": 21,
+            "total": 21
+          },
+          "new-valid": {
+            "correct": 83,
+            "total": 83
+          },
+          "original": {
+            "correct": 15,
+            "total": 15
+          }
+        },
+        "selection_flag_captured": 5
+      }
+    }
+  },
+  "candidate_requests": 20,
+  "completed_utc": "2026-09-09T20:48:34.919Z",
+  "generations": 2,
+  "interpretation": "Report feasibility separately from comparative advantage. This is stochastic model-guided source variation in a bounded Python/data language, not pure random mutation, a full runtime rewrite, or evidence of biological or physical-quantum evolution.",
+  "limitations": [
+    "The model supplies pre-trained programming knowledge; this is not emergence from no prior.",
+    "No pure random-code mutation arm or fresh-seed-each-generation arm; lineage gains do not causally isolate inheritance from additional search.",
+    "The restricted language can reject valid general Python; language-admission failures must be reported separately.",
+    "No mutable lens implementation, full Brainstem source, real deployment, or biological/physical-quantum claim is tested.",
+    "A successful child establishes feasibility; only a matched outcome difference could suggest an advantage over direct repair.",
+    "Both arms reached the measured ceiling in generation 1; the observed comparison is a tie, not a speculative-mutation advantage.",
+    "This release contains 41 program frames, not all 94 private records; diagnostic research-journal records are withheld.",
+    "The interpreter is the unchanged pilot evaluator. Task gold is independently derived by a new contract oracle; execution semantics are not an independent native-Python implementation.",
+    "The fixed Brainstem and fixed mutation instructions did not co-evolve; there is no mutable runtime/lens implementation in this pilot.",
+    "Both model-mediated before/after demonstrations returned empty responses. A withheld worker log was reported to contain content_filter; a separate recorded local same-agent check succeeded.",
+    "Unsigned synthetic stream records and exported response text cannot authenticate model identity, remote execution, audit secrecy at generation time, timing, or private diagnostic observations.",
+    "Selection and audit cases are public after completion and cannot serve as hidden cases in a future confirmatory experiment.",
+    "All 20 offspring passed frozen original-floor cases; this does not mean complete contract preservation. Known post-hoc contract and resource counterexamples are disclosed separately.",
+    "Unselected speculative slot 1 in generation 1 rejects 0000001 and 0000002*(1), despite permitted leading zeros, because it caps unsigned digit length at six.",
+    "For 256 comma-separated copies of 0000001, the seed completes in 29215 steps; selected direct parents hit GuestLimit at 120001 steps, while selected speculative parents complete this valid original input.",
+    "The unchanged interpreter has list += alias semantics differing from CPython. None of the 20 frozen candidates uses augmented assignment. No general-Python equivalence or general-purpose sandbox claim is made.",
+    "No native guest replay was performed. It would require an appropriately isolated OS execution boundary. Post-hoc probes do not alter the original 4560 candidate measurements or establish a prompt-arm advantage."
+  ],
+  "model": "claude-opus-5",
+  "publication": {
+    "addenda": "gyre/data/addenda.json",
+    "complete_contract_preservation": false,
+    "counts": {
+      "arms": 2,
+      "audit_cases": 119,
+      "candidate_audit_measurements": 2380,
+      "candidate_measurements": 4560,
+      "candidate_original_measurements": 780,
+      "candidate_prompt_response_projections": 20,
+      "candidate_selection_measurements": 1400,
+      "candidate_sources": 20,
+      "candidates": 20,
+      "case_definitions": 228,
+      "generations": 2,
+      "model_demo_projections": 2,
+      "non_genesis_links": 20,
+      "offspring_per_arm_per_generation": 5,
+      "original_cases": 39,
+      "program_frames": 41,
+      "recorded_measurements": 4669,
+      "seed_recorded_measurements": 109,
+      "seed_sources": 1,
+      "selection_cases": 70,
+      "streams": 21
+    },
+    "kind": "aggregate projection with additional public-boundary limitations",
+    "known_counterexamples": "gyre/data/addenda/known-counterexamples.json",
+    "measurement_status": "Original scores remain recorded observations until checked against offline replay.",
+    "original_floor_label": "Passed frozen original-floor cases",
+    "original_report": "gyre/data/observed-report.json",
+    "posthoc_boundary": "Separately replayed targeted counterexamples, not additional frozen cases or an arm-effect estimate.",
+    "posthoc_counts": {
+      "candidate_probes": 60,
+      "cases": 3,
+      "seed_probes": 3
+    },
+    "posthoc_recorded_summary": "gyre/data/posthoc/summary.json"
+  },
+  "seed": {
+    "new-invalid": {
+      "correct": 30,
+      "total": 30
+    },
+    "new-valid": {
+      "correct": 0,
+      "total": 40
+    },
+    "original": {
+      "correct": 39,
+      "total": 39
+    }
+  }
+}

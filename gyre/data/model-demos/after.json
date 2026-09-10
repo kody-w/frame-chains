@@ -1,0 +1,16 @@
+{
+  "log_observation": "content_filter was reported in a withheld private worker log; this public projection cannot independently authenticate that log.",
+  "notice": "Task-only projection; raw transport identifiers omitted. Empty response is preserved, not replaced by the local demonstration.",
+  "outcome": "empty model response; no successful model-mediated tool demonstration",
+  "phase": "after",
+  "request": {
+    "conversation_history": [],
+    "user_input": "Use GyreTile exactly once to execute this expression with the currently installed program frame: 2*(1,2*(3)),0 . Report the tool's actual result, even if it is an error. Do not solve it yourself or mutate anything."
+  },
+  "response": {
+    "model": "claude-opus-5",
+    "requested_model": "claude-opus-5",
+    "response": ""
+  },
+  "schema": "gyre-task-projection/1"
+}
