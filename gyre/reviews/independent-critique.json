@@ -1,0 +1,55 @@
+{
+  "schema": "gyre-automated-scientific-review/1",
+  "reviewer": "GPT-6 Astra in a separate read-only context from the pilot builder",
+  "independence_boundary": "Automated adversarial review, not independent human replication or peer review.",
+  "scope": "Original pilot source, evaluator, fixture construction, records, lineage, and claims.",
+  "finding": "No factual invalidation of the recorded frozen-case tallies was found, but complete contract preservation is not established and is specifically contradicted by additional permitted inputs.",
+  "confirmed_original_record": {
+    "fresh_candidate_case_executions": 4560,
+    "programs": 20,
+    "frames": 94,
+    "streams": 22,
+    "artifact_references": 243,
+    "fixture_regenerated_from_recorded_seed": true,
+    "independent_grammar_agreed_with_frozen_cases": 228,
+    "identical_expression_overlap_between_selection_and_audit": 0,
+    "reconstructed_peak_request_overlap": 4
+  },
+  "major_findings": [
+    {
+      "id": "leading-zero-regression",
+      "source": "data/candidates/speculative-1-1/candidate.py",
+      "lines": "59-60",
+      "observation": "An unsigned digit-count limit rejects 0000001 and 0000002*(1), despite the contract permitting leading zeros.",
+      "expected": ["[1]", "[1,1]"],
+      "recorded_reproduction": "ValueError in both cases.",
+      "parent_selection": "This candidate was not selected as a parent."
+    },
+    {
+      "id": "original-resource-retention",
+      "observation": "A flat list of 256 copies of 0000001 is valid original input. The seed finishes in 29215 steps; selected direct parents exceed the fixed 120000-step limit.",
+      "boundary": "A resource failure under the study interpreter, not a claim of identical behavior under unbounded CPython execution."
+    }
+  ],
+  "scope_limitation": {
+    "interpreter": "List += alias semantics differs from CPython.",
+    "affected_frozen_candidates": 0,
+    "consequence": "Do not claim general CPython equivalence or general-purpose sandbox safety."
+  },
+  "parent_reproduction": "data/posthoc/summary.json",
+  "reproduction_scope": "The three targeted probes were subsequently applied to the seed and every frozen candidate.",
+  "closure_review": {
+    "status": "Major finding accurately represented in the revised publication draft.",
+    "scope": "Scientific wording in the research note and this review record, plus consistency of the 63 post-hoc outcomes.",
+    "confirmed_posthoc_long_probe": "Nine of twenty candidates fail: one ValueError and eight GuestLimit failures.",
+    "remaining_materially_misleading_statements_in_scope": 0,
+    "boundary": "Automated scientific-claim closure, not human peer review or approval of the still-separately-reviewed public export implementation."
+  },
+  "reporting_rules": [
+    "Keep original observations, source frames, and denominators unchanged.",
+    "Say passed the frozen original-case floor, not preserved the complete contract.",
+    "Publish post-hoc findings separately and do not infer a prompt-arm advantage from them.",
+    "Retain both failed provider-mediated demonstrations and the limited local hotload claim.",
+    "Do not execute generated source natively without an appropriate OS-level isolation boundary."
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schema": "gyre-prospective-research/1",
+  "status": "draft specification; not a registered or executed confirmatory trial",
+  "purpose": "Specify evidence that could support or refute a stronger claim than the existing single-task feasibility pilot.",
+  "candidate_primary_claim": "Under a fixed external model and all-in search budget, inherited whole-program search with co-evolving mutation lenses improves independently audited success relative to otherwise matched inherited search with a fixed lens.",
+  "primary_estimand": "Paired difference in probability that a candidate selected and frozen before final audit satisfies both the original-use-case contract and the predefined extension or optimization criterion at budget B.",
+  "secondary_estimand": "Benefit of inherited fixed-lens search relative to independent best-of-N proposals at the same budget.",
+  "separate_operational_claim": "Content-addressed source frames improve inspectable reconstruction, corruption detection, lineage preservation, and controlled transfer relative to equivalent unframed state. This is not a claim that hashing improves solver intelligence.",
+  "conditions_required": [
+    {
+      "id": "independent-best-of-n",
+      "role": "Fresh proposals from the same task/initial program and fixed mutation policy. No earlier candidate source or cross-candidate feedback is given to later proposals. Selection uses development evaluation."
+    },
+    {
+      "id": "fixed-lens-inheritance",
+      "role": "Inherited program state, an explicitly specified archive/selection rule, and development feedback, with a strong fixed mutation policy tuned only on separate development tasks."
+    },
+    {
+      "id": "evolving-lens-inheritance",
+      "role": "Program and lens changes, charging meta-lens proposal/evaluation to the same total budget."
+    },
+    {
+      "id": "inheritance-ablation",
+      "role": "Remove or reset inherited state under a prespecified information policy, without falsifying any original lineage."
+    },
+    {
+      "id": "equivalent-unframed-state",
+      "role": "Match carried information and compare operational reliability rather than assuming a solver-performance advantage from the envelope."
+    }
+  ],
+  "prompt_policy_factor": {
+    "role": "Separate success-conditioned speculative wording from the search architecture.",
+    "design_if_claimed": "Cross the three principal search architectures with conventional-repair and success-conditioned speculative policies, yielding six cells; otherwise limit the prompt-specific claim.",
+    "cost_boundary": "Charge all calls and context to the relevant treatment. A lens-evolving condition does not receive free extra inference."
+  },
+  "lens_credit_assignment": {
+    "requirement": "Compare evolved and baseline lenses on common, previously unseen parent programs with matched budgets.",
+    "reason": "A lens can survive by being attached to a good program without producing better future offspring.",
+    "controls": "Use prespecified reset or reassignment controls without falsifying original frame ancestry. Record each actual parent/lens intervention.",
+    "accounting": "If these probes influence selection, include their cost and data access inside the search budget."
+  },
+  "measurement_requirements": [
+    "Independent task/run replications across more than one family; do not count correlated siblings or case rows as independent trials.",
+    "A task-development/calibration set separate from the locked primary evaluation set.",
+    "Hidden or newly prepared task instances, explicit leakage controls, and fixed public task contracts.",
+    "A protected external evaluator whose implementation and expected outcomes cannot be weakened by candidates.",
+    "Original-use-case retention, new-task success, failure modes, cumulative performance curves, and transfer outcomes.",
+    "Measured model input/output/cached/reasoning tokens where exposed, actual spend, retries, compilation, evaluator time, archive/context handling, and all meta-level costs; do not substitute only client request count for total compute.",
+    "Record final audit and replication costs separately and in total, plus human setup/tuning and interventions.",
+    "Predeclared practical effect size, sample-size justification, uncertainty estimates, exclusions, and missing-result treatment.",
+    "Fixed stop rules, no optional stopping after a favorable result, and preservation of all failed or blocked attempts.",
+    "A clean-process transfer phase with declared runtime/model dependencies and no undisclosed conversation state.",
+    "Independent replication and adversarial re-evaluation before broad generalization."
+  ],
+  "lessons_from_the_pilot_review": [
+    "Passing the frozen cases did not establish complete original-contract preservation.",
+    "Include independently derived metamorphic properties such as leading-zero invariance before primary evaluation.",
+    "Exercise worst-case permitted original inputs against the same execution/resource limits, not just their output values.",
+    "Check interpreter semantics explicitly; do not call a restricted execution profile generally CPython-equivalent.",
+    "Keep targeted post-hoc counterexamples separate from the original denominators and from unbiased arm comparisons."
+  ],
+  "disconfirming_outcomes": [
+    "Matched independent attempts perform equally well or better.",
+    "Resetting inherited state does not reduce performance on the stated task distribution.",
+    "Lens evolution adds no benefit after its inference and evaluation costs are counted.",
+    "New-task gains do not survive the original-use-case floor or a fresh-process transfer.",
+    "Independent graders overturn the reported successes.",
+    "Apparent gains depend on visible-test exploitation, undisclosed interventions, selective reporting, or changing the denominator."
+  ],
+  "registration_blockers": [
+    "Executable task generators and evaluator implementations for the new study are not yet frozen.",
+    "Exact model versions, resource ceilings, treatment schedules, and information supplied to each control are not yet fixed.",
+    "A practical effect size and confirmatory sample size have not been justified from independent calibration data.",
+    "The complete protocol has not been independently reviewed and publicly committed before primary data collection."
+  ],
+  "uncertainty_policy": "Justify the minimum worthwhile effect and sample size using paired or hierarchical simulations with separate calibration data. A wide interval is inconclusive; failure to find significance is not equivalence. Do not infer population confidence from many correlated case rows.",
+  "replication_levels": [
+    "Artifact replay: independently reconstruct the disclosed programs, decisions, and observed outputs.",
+    "Fresh-search replication: an independent group repeats the registered comparison with new stochastic runs and separately authored audit tasks."
+  ],
+  "rule": "Do not label this draft as preregistered, and do not collect or advertise confirmatory results until every registration blocker is resolved.",
+  "current_pilot_boundary": "The existing all-success matched-control tie cannot be retrospectively promoted into evidence for the stronger causal claim."
+}

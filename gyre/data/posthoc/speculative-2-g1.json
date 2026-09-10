@@ -1,0 +1,1 @@
+{"admitted":true,"ast_nodes":1297,"elapsed_ms":58,"results":[{"id":"leading-zero-integer","outcome":{"kind":"value","value":[1]},"steps":624},{"id":"leading-zero-repeat","outcome":{"kind":"value","value":[1,1]},"steps":926},{"id":"maximum-flat-zero-padded-list","outcome":{"detail":"instruction budget","error":"GuestLimit","kind":"execution_error"},"steps":120001}]}

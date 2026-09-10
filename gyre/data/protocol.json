@@ -1,0 +1,47 @@
+{
+  "additional_hotload_demo_requests": 2,
+  "audit_cases": 119,
+  "conditions": {
+    "direct": "Use ordinary, conventional code repair. Implement the target specification with the most reliable straightforward approach you can. Preserve the original contract. If the parent already works, simplify unnecessary structure without changing its correct behavior. Return a complete program.",
+    "speculative": "Use success-conditioned counterfactual invention. Imagine a reachable dimension in which this program evolved a different internal organization and can perform the target task. Give a concrete, plausible complete offspring; an unconventional representation or parsing strategy is welcome. This is speculative variation, not a claim of success. Preserve the original contract. If the parent already works, explore a different or simpler organization without discarding its competence."
+  },
+  "controls": "Both arms use the same model, full task contract, candidate count, interpreter, test sets, and parent selection. Only the mutation instruction differs.",
+  "created_utc": "2026-09-09T20:33:32.581Z",
+  "fixture_sha256": "4c1c94e24a424f8c2f125ecff39f021edb1d01129c3bb53b200f2270400449db",
+  "generations": 2,
+  "history_per_generation_request": 0,
+  "inference_policy": "Exploratory descriptive pilot. Five siblings per arm per generation are not independent evolutionary replications. No population p-values.",
+  "limits": [
+    "The model supplies pre-trained programming knowledge; this is not emergence from no prior.",
+    "No pure random-code mutation arm or fresh-seed-each-generation arm; lineage gains do not causally isolate inheritance from additional search.",
+    "The restricted language can reject valid general Python; language-admission failures must be reported separately.",
+    "No mutable lens implementation, full Brainstem source, real deployment, or biological/physical-quantum claim is tested.",
+    "A successful child establishes feasibility; only a matched outcome difference could suggest an advantage over direct repair."
+  ],
+  "max_concurrent_candidate_jobs": 4,
+  "max_evaluator_seconds": 20,
+  "max_generation_window_seconds": 1200,
+  "max_request_seconds": 180,
+  "model": "claude-opus-5",
+  "offspring_per_arm_per_generation": 5,
+  "original_cases": 39,
+  "provider_budget_boundary": "Caps client requests, not dollars or hidden provider retry attempts. Brainstem's existing internal retry behavior is unchanged.",
+  "publication": {
+    "controller": "The public verifier independently implements the documented eligibility and ranking rule; it does not copy or run the private controller.",
+    "kind": "allowlisted projection, not original protocol bytes",
+    "omitted": "Original file inventory and controller are withheld; it includes local orchestration dependencies. No endpoint or private path is required by replay."
+  },
+  "question": "Can speculative source variants acquire and inherit a task capability without losing their seed's original behavior?",
+  "reference_commit": "eb50008011447f5e69372ac22a1755f0978d15ed",
+  "safety": "Guest source is interpreted as a closed Python/data language without exec/eval, imports, I/O, host namespace access, or runtime permissions. Venvs alone are not a security boundary.",
+  "sampling": "Provider defaults; temperature and random seed are not specified by the existing /chat endpoint.",
+  "schema": "gyre-variation-pilot/1",
+  "selection": "Only original-floor-preserving children are eligible. Select highest novel-case correct count, then fewest AST nodes, then lexicographically smallest source hash. If none preserve the floor, retain the prior parent. Do not inspect audit outcomes before both generations and their parent choices are complete.",
+  "selection_cases": 70,
+  "source_limits": {
+    "ast_nodes": 5000,
+    "bytes": 24000
+  },
+  "task": "A small executable selector program, not a mutation of the full Brainstem runtime.",
+  "total_candidate_requests": 20
+}

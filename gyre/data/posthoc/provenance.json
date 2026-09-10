@@ -1,0 +1,199 @@
+{
+  "byte_identity": "The allowlisted synthetic case, summary, and 21 evaluator files retain their supplied post-hoc bytes; this publication mapping is newly authored.",
+  "case_definitions": "gyre/data/posthoc/cases.json",
+  "controller_boundary": "The original posthoc_probe.py imports private orchestration and journal code. It is neither copied nor executed; the portable public verifier independently reconstructs and replays these probes.",
+  "programs": [
+    {
+      "candidate_id": "seed",
+      "evaluation_path": "gyre/data/posthoc/seed.json",
+      "frame_hash": "1f9e00875f3079263426300db74cf539b7282365406e7d88159c70c2d0ab64a9",
+      "frame_path": "gyre/data/streams/seed/frames/0.json",
+      "program": "seed",
+      "source_path": "gyre/data/seed.py",
+      "source_sha256": "b71a75fe55f0139d5f028779f5eb17aa277f555bf2c3d10096da65abe7035559"
+    },
+    {
+      "candidate_id": "gyre-direct-1-0",
+      "evaluation_path": "gyre/data/posthoc/direct-0-g1.json",
+      "frame_hash": "eaf2e08fcfd4497dfe713b8ee1d4286590af578336d68dacb32c8bd5affc2e10",
+      "frame_path": "gyre/data/streams/direct-1-0/frames/1.json",
+      "program": "direct-0-g1",
+      "source_path": "gyre/data/candidates/direct-1-0/candidate.py",
+      "source_sha256": "9189caced00c89a29f46db8dc666cacf6171686d57d3ab8c5136f4eeca0d024f"
+    },
+    {
+      "candidate_id": "gyre-direct-1-1",
+      "evaluation_path": "gyre/data/posthoc/direct-1-g1.json",
+      "frame_hash": "92d95d4854305241eec918800acbb1806a29e57f12ddc0aa49e105c9e317e0bd",
+      "frame_path": "gyre/data/streams/direct-1-1/frames/1.json",
+      "program": "direct-1-g1",
+      "source_path": "gyre/data/candidates/direct-1-1/candidate.py",
+      "source_sha256": "ea5cdbe5740484989024af45efee9e931353c188f945d141ae58afd76a22e7f8"
+    },
+    {
+      "candidate_id": "gyre-direct-1-2",
+      "evaluation_path": "gyre/data/posthoc/direct-2-g1.json",
+      "frame_hash": "62d1b82bb5e92a002b13f29411c1c0e17211d4f2e17e0956e8decc5eb859ea05",
+      "frame_path": "gyre/data/streams/direct-1-2/frames/1.json",
+      "program": "direct-2-g1",
+      "source_path": "gyre/data/candidates/direct-1-2/candidate.py",
+      "source_sha256": "c3a92e09a686c75654973bd0ae1ab4e98cc34615ea98e7740c8132e2c866c0f2"
+    },
+    {
+      "candidate_id": "gyre-direct-1-3",
+      "evaluation_path": "gyre/data/posthoc/direct-3-g1.json",
+      "frame_hash": "d42fb80aafd10c83ab76408904ed999add8ee3040f64532dcea7ee0db5884a49",
+      "frame_path": "gyre/data/streams/direct-1-3/frames/1.json",
+      "program": "direct-3-g1",
+      "source_path": "gyre/data/candidates/direct-1-3/candidate.py",
+      "source_sha256": "72eab1c56bc76dda79cfc03f309f1769195c4281eb3f2646cbc4a122963d543a"
+    },
+    {
+      "candidate_id": "gyre-direct-1-4",
+      "evaluation_path": "gyre/data/posthoc/direct-4-g1.json",
+      "frame_hash": "7d978159791595b89de99c17f50e93de988f5ac0abcdf7a5d89fa41d3bbb316e",
+      "frame_path": "gyre/data/streams/direct-1-4/frames/1.json",
+      "program": "direct-4-g1",
+      "source_path": "gyre/data/candidates/direct-1-4/candidate.py",
+      "source_sha256": "cc33195f72592f6362be81f7dbf21e493fa3e68984d41a004a79be673a77d2c3"
+    },
+    {
+      "candidate_id": "gyre-speculative-1-0",
+      "evaluation_path": "gyre/data/posthoc/speculative-0-g1.json",
+      "frame_hash": "ddd50e37dbc6c225e3a5a248a90923dc41575793f728bb380d45e5b84f8e06ee",
+      "frame_path": "gyre/data/streams/speculative-1-0/frames/1.json",
+      "program": "speculative-0-g1",
+      "source_path": "gyre/data/candidates/speculative-1-0/candidate.py",
+      "source_sha256": "1323682df7ce493df029ff90a5aa2d7b6f847113c81e94199f25901b2d4afeda"
+    },
+    {
+      "candidate_id": "gyre-speculative-1-1",
+      "evaluation_path": "gyre/data/posthoc/speculative-1-g1.json",
+      "frame_hash": "9a433f11eb15a6ec5f82ed5959d97dd73faccf6233c434642a7754987bc002b4",
+      "frame_path": "gyre/data/streams/speculative-1-1/frames/1.json",
+      "program": "speculative-1-g1",
+      "source_path": "gyre/data/candidates/speculative-1-1/candidate.py",
+      "source_sha256": "2994cbab202d33fd3c893d212378778818d3538cf6e4dca9a4b8f5af1e7975a3"
+    },
+    {
+      "candidate_id": "gyre-speculative-1-2",
+      "evaluation_path": "gyre/data/posthoc/speculative-2-g1.json",
+      "frame_hash": "477c2fc79190f7d27a9c53657d33fac78b3ded7dafa213269b988e575ee74fab",
+      "frame_path": "gyre/data/streams/speculative-1-2/frames/1.json",
+      "program": "speculative-2-g1",
+      "source_path": "gyre/data/candidates/speculative-1-2/candidate.py",
+      "source_sha256": "fa6d80399346691d83533a69f9a09edb4b3814b70076f5410afb784399f70968"
+    },
+    {
+      "candidate_id": "gyre-speculative-1-3",
+      "evaluation_path": "gyre/data/posthoc/speculative-3-g1.json",
+      "frame_hash": "4d0c36b95f8dceaf8de98bf20e18ca3713cf069aff9746e35d964cebde03e2f0",
+      "frame_path": "gyre/data/streams/speculative-1-3/frames/1.json",
+      "program": "speculative-3-g1",
+      "source_path": "gyre/data/candidates/speculative-1-3/candidate.py",
+      "source_sha256": "505926ca13b2a4cf885dc66142b6bb7f5a330e2f5974ff276306d862185280c2"
+    },
+    {
+      "candidate_id": "gyre-speculative-1-4",
+      "evaluation_path": "gyre/data/posthoc/speculative-4-g1.json",
+      "frame_hash": "cbfe634a1fada75607f09a01f08f6d7a338002546636fd1854192064196491f9",
+      "frame_path": "gyre/data/streams/speculative-1-4/frames/1.json",
+      "program": "speculative-4-g1",
+      "source_path": "gyre/data/candidates/speculative-1-4/candidate.py",
+      "source_sha256": "ab5f6686a3661e7dd2ce59766804eeb39a05fbc036e41fe3389d71e5475227b4"
+    },
+    {
+      "candidate_id": "gyre-direct-2-0",
+      "evaluation_path": "gyre/data/posthoc/direct-0-g2.json",
+      "frame_hash": "44919ab4137d90849bd942ccff9f96f66b3618845b78bb1820502e0910bd86b2",
+      "frame_path": "gyre/data/streams/direct-2-0/frames/1.json",
+      "program": "direct-0-g2",
+      "source_path": "gyre/data/candidates/direct-2-0/candidate.py",
+      "source_sha256": "703949f577ed927483e0befd327c0dceb324b503089bf895d06667513080e486"
+    },
+    {
+      "candidate_id": "gyre-direct-2-1",
+      "evaluation_path": "gyre/data/posthoc/direct-1-g2.json",
+      "frame_hash": "56197f26cb00a24730c0987c742586f7e65c4c091bfeb6ac7f6aced5df755d5f",
+      "frame_path": "gyre/data/streams/direct-2-1/frames/1.json",
+      "program": "direct-1-g2",
+      "source_path": "gyre/data/candidates/direct-2-1/candidate.py",
+      "source_sha256": "d9c91b6c76c7e792d4d420763a4aa7d62fcfd4b184268a58242d34f14ec972a0"
+    },
+    {
+      "candidate_id": "gyre-direct-2-2",
+      "evaluation_path": "gyre/data/posthoc/direct-2-g2.json",
+      "frame_hash": "3cf3dc61fce9f77c38e648fee550bf4ae8f9a0f2211ed3b959dfb7a0c6604404",
+      "frame_path": "gyre/data/streams/direct-2-2/frames/1.json",
+      "program": "direct-2-g2",
+      "source_path": "gyre/data/candidates/direct-2-2/candidate.py",
+      "source_sha256": "420f7c52b4a0814a73912281f4e09fc7aebbda0af5bb3f1d6a14054f8a69cd68"
+    },
+    {
+      "candidate_id": "gyre-direct-2-3",
+      "evaluation_path": "gyre/data/posthoc/direct-3-g2.json",
+      "frame_hash": "a2bd7b013a4ed27fc1524cf295b31af6063080d60ba2de59e269b31c1b52f61d",
+      "frame_path": "gyre/data/streams/direct-2-3/frames/1.json",
+      "program": "direct-3-g2",
+      "source_path": "gyre/data/candidates/direct-2-3/candidate.py",
+      "source_sha256": "9d3f3357d63fb7543860aa22e81de7568f9e58aab530e23e6a8ccc33d283769c"
+    },
+    {
+      "candidate_id": "gyre-direct-2-4",
+      "evaluation_path": "gyre/data/posthoc/direct-4-g2.json",
+      "frame_hash": "351d0e176f009f038203e29b787c71d11800fc45458631e0fb73cdfd7e25f790",
+      "frame_path": "gyre/data/streams/direct-2-4/frames/1.json",
+      "program": "direct-4-g2",
+      "source_path": "gyre/data/candidates/direct-2-4/candidate.py",
+      "source_sha256": "0c52bd4c562c8067e5abedefafb4a017654cb3091a5043fe7588d92b1c264a72"
+    },
+    {
+      "candidate_id": "gyre-speculative-2-0",
+      "evaluation_path": "gyre/data/posthoc/speculative-0-g2.json",
+      "frame_hash": "1adfff1a906a7b7d4763f50fa6ba815f70f9e254b8396845a236479dde1cabc6",
+      "frame_path": "gyre/data/streams/speculative-2-0/frames/1.json",
+      "program": "speculative-0-g2",
+      "source_path": "gyre/data/candidates/speculative-2-0/candidate.py",
+      "source_sha256": "dde7981cfbdb2b0569b8f55c50d54845a37633f998a7b0c5f06a29291e714bb6"
+    },
+    {
+      "candidate_id": "gyre-speculative-2-1",
+      "evaluation_path": "gyre/data/posthoc/speculative-1-g2.json",
+      "frame_hash": "5f37d2053cf6f916117ef08a0078b3cbd9292aaad8943c90076cfc5223497e4d",
+      "frame_path": "gyre/data/streams/speculative-2-1/frames/1.json",
+      "program": "speculative-1-g2",
+      "source_path": "gyre/data/candidates/speculative-2-1/candidate.py",
+      "source_sha256": "1f108babec1c2e8a39cb7b94dbd5442abe467ec4c01d93ecb9fa1fc44f20ba78"
+    },
+    {
+      "candidate_id": "gyre-speculative-2-2",
+      "evaluation_path": "gyre/data/posthoc/speculative-2-g2.json",
+      "frame_hash": "81ebce6470592670a78594e41492066d3742151d6787f6b0b345b8a8d6cb4c6b",
+      "frame_path": "gyre/data/streams/speculative-2-2/frames/1.json",
+      "program": "speculative-2-g2",
+      "source_path": "gyre/data/candidates/speculative-2-2/candidate.py",
+      "source_sha256": "806c4e962e2c04cd7ba7e91d16d5f9b100372dcfc98cacf1540579b01dd64c1d"
+    },
+    {
+      "candidate_id": "gyre-speculative-2-3",
+      "evaluation_path": "gyre/data/posthoc/speculative-3-g2.json",
+      "frame_hash": "e2f73ee615842302456947761bec410008763b0a6b84f8f37ecf422b9eb486b1",
+      "frame_path": "gyre/data/streams/speculative-2-3/frames/1.json",
+      "program": "speculative-3-g2",
+      "source_path": "gyre/data/candidates/speculative-2-3/candidate.py",
+      "source_sha256": "fe445916133f89074eda8ff10b3332828a3611ee57af75e7d41531e641364645"
+    },
+    {
+      "candidate_id": "gyre-speculative-2-4",
+      "evaluation_path": "gyre/data/posthoc/speculative-4-g2.json",
+      "frame_hash": "76ace304046989bb3d89cd2bbc641c11e9ceece6a8ebe617da02a94b3b9d2b6e",
+      "frame_path": "gyre/data/streams/speculative-2-4/frames/1.json",
+      "program": "speculative-4-g2",
+      "source_path": "gyre/data/candidates/speculative-2-4/candidate.py",
+      "source_sha256": "2f3a9eca889db4e578f1238b0ac4058f455442c4660d28b40772d004a31e8802"
+    }
+  ],
+  "recorded_summary": "gyre/data/posthoc/summary.json",
+  "schema": "gyre-posthoc-publication/1",
+  "status": "Separate post-hoc observations; not part of the primary frozen pilot."
+}

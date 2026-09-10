@@ -1,0 +1,42 @@
+{
+  "direct": {
+    "frame_hash": "3cf3dc61fce9f77c38e648fee550bf4ae8f9a0f2211ed3b959dfb7a0c6604404",
+    "frame_path": "streams/direct-2-2/frames/1.json",
+    "parent_changed": true,
+    "score": {
+      "new-invalid": {
+        "correct": 30,
+        "total": 30
+      },
+      "new-valid": {
+        "correct": 40,
+        "total": 40
+      },
+      "original": {
+        "correct": 39,
+        "total": 39
+      }
+    },
+    "source_frame_path": "streams/direct-2-2/frames/0.json"
+  },
+  "speculative": {
+    "frame_hash": "81ebce6470592670a78594e41492066d3742151d6787f6b0b345b8a8d6cb4c6b",
+    "frame_path": "streams/speculative-2-2/frames/1.json",
+    "parent_changed": true,
+    "score": {
+      "new-invalid": {
+        "correct": 30,
+        "total": 30
+      },
+      "new-valid": {
+        "correct": 40,
+        "total": 40
+      },
+      "original": {
+        "correct": 39,
+        "total": 39
+      }
+    },
+    "source_frame_path": "streams/speculative-2-2/frames/0.json"
+  }
+}

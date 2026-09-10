@@ -1,0 +1,95 @@
+{
+  "entries": [
+    {
+      "artifacts": [
+        "gyre/data/addenda/known-counterexamples.json"
+      ],
+      "description": "Known post-hoc contract and resource counterexamples do not invalidate the original 4560 frozen tallies. Public labels mean passed frozen original-floor cases, not complete contract preservation. The unchanged interpreter has restricted semantics, including list augmented-assignment alias behavior.",
+      "id": "gyre-review-1",
+      "subjects": [
+        {
+          "path": "gyre/data/observed-report.json",
+          "sha256": "c28292a14b3013f951706dda98a6da5eb6cffe8133c55934abcb625b3de00654"
+        },
+        {
+          "path": "gyre/data/contract.txt",
+          "sha256": "ab0b365464c27812d251f60cf4f3b3bf26cf7f7ae77b2cbf06826618ba2210f6"
+        },
+        {
+          "path": "gyre/reference/interpreter.py",
+          "sha256": "6ca11b820cd911a99b4bf9862cd8b0aa3d8907b641fdae4b9470b9bfb8d56e35"
+        },
+        {
+          "path": "gyre/data/seed.py",
+          "sha256": "b71a75fe55f0139d5f028779f5eb17aa277f555bf2c3d10096da65abe7035559"
+        },
+        {
+          "path": "gyre/data/candidates/speculative-1-1/candidate.py",
+          "sha256": "2994cbab202d33fd3c893d212378778818d3538cf6e4dca9a4b8f5af1e7975a3"
+        },
+        {
+          "path": "gyre/data/candidates/direct-1-0/candidate.py",
+          "sha256": "9189caced00c89a29f46db8dc666cacf6171686d57d3ab8c5136f4eeca0d024f"
+        },
+        {
+          "path": "gyre/data/candidates/direct-2-2/candidate.py",
+          "sha256": "420f7c52b4a0814a73912281f4e09fc7aebbda0af5bb3f1d6a14054f8a69cd68"
+        },
+        {
+          "path": "gyre/data/candidates/speculative-1-4/candidate.py",
+          "sha256": "ab5f6686a3661e7dd2ce59766804eeb39a05fbc036e41fe3389d71e5475227b4"
+        },
+        {
+          "path": "gyre/data/candidates/speculative-2-2/candidate.py",
+          "sha256": "806c4e962e2c04cd7ba7e91d16d5f9b100372dcfc98cacf1540579b01dd64c1d"
+        }
+      ]
+    },
+    {
+      "artifacts": [
+        "gyre/data/posthoc/cases.json",
+        "gyre/data/posthoc/direct-0-g1.json",
+        "gyre/data/posthoc/direct-0-g2.json",
+        "gyre/data/posthoc/direct-1-g1.json",
+        "gyre/data/posthoc/direct-1-g2.json",
+        "gyre/data/posthoc/direct-2-g1.json",
+        "gyre/data/posthoc/direct-2-g2.json",
+        "gyre/data/posthoc/direct-3-g1.json",
+        "gyre/data/posthoc/direct-3-g2.json",
+        "gyre/data/posthoc/direct-4-g1.json",
+        "gyre/data/posthoc/direct-4-g2.json",
+        "gyre/data/posthoc/provenance.json",
+        "gyre/data/posthoc/seed.json",
+        "gyre/data/posthoc/speculative-0-g1.json",
+        "gyre/data/posthoc/speculative-0-g2.json",
+        "gyre/data/posthoc/speculative-1-g1.json",
+        "gyre/data/posthoc/speculative-1-g2.json",
+        "gyre/data/posthoc/speculative-2-g1.json",
+        "gyre/data/posthoc/speculative-2-g2.json",
+        "gyre/data/posthoc/speculative-3-g1.json",
+        "gyre/data/posthoc/speculative-3-g2.json",
+        "gyre/data/posthoc/speculative-4-g1.json",
+        "gyre/data/posthoc/speculative-4-g2.json",
+        "gyre/data/posthoc/summary.json"
+      ],
+      "description": "Archive the supplied 63 post-hoc evaluator observations across the seed and every candidate, separately from the unchanged frozen tallies. Verification must reproduce failures as well as successes.",
+      "id": "gyre-review-2",
+      "subjects": [
+        {
+          "path": "gyre/data/observed-report.json",
+          "sha256": "c28292a14b3013f951706dda98a6da5eb6cffe8133c55934abcb625b3de00654"
+        },
+        {
+          "path": "gyre/data/posthoc/cases.json",
+          "sha256": "a0dd9917b91b7881ba867f578d7c8c36b86dbb9940d8c83cbe8f3779702c3484"
+        },
+        {
+          "path": "gyre/data/posthoc/summary.json",
+          "sha256": "9a54b0c535fa65d2a58b696ac5a2641e23e4dfb3ee3b2351c98ff87c033e51d8"
+        }
+      ]
+    }
+  ],
+  "policy": "Append reviewer corrections and supplemental checks here. Do not rewrite preserved original frames, evaluations, scores, or report to improve outcomes. Rebind the manifest after an addition.",
+  "schema": "gyre-evidence-addenda/1"
+}

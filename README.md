@@ -25,6 +25,14 @@ walks through six claims in a deliberate order. Every step tells the reader
 what the page models, what to do, what to watch for, and what the observed
 result does—and does not—demonstrate.
 
+## Follow-up: source-frame evolution
+
+[RAPP Gyre](https://kody-w.github.io/frame-chains/gyre/) is an exploratory
+follow-up: a matched-control program-mutation pilot, reproducible synthetic
+evidence, post-hoc counterexamples, and a research specification that states
+what would count against stronger claims. It distinguishes source-frame feasibility from a demonstrated
+advantage over conventional repair or a fully co-evolving runtime.
+
 ## Play with the ideas (no coding required)
 
 | Exercise | What it teaches |
@@ -110,6 +118,7 @@ guide.html      the newcomer-first guided evidence path
 play/           six interactive exercises (self-contained HTML)
 samples/        frame_chain.py — the runnable toy
 evidence/       synthetic fixtures, generator, verifier, and privacy gate
+gyre/           source-mutation research note, public pilot data, and replay gates
 showcase/       ten preserved interactive frames and the merge ledger
 papercheck.mjs  structural and browser verification for the publication
 showcasecheck.mjs adversarial browser gate for the ten-frame loop

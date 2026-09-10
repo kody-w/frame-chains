@@ -9,6 +9,18 @@ permissions:
   contents: read
 
 jobs:
+  gyre-evidence:
+    name: Gyre replay and privacy gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 gyre/verify.py --self-test
+      - run: python3 gyre/privacy.py
+
   evidence-release:
     name: Synthetic evidence and privacy gate
     runs-on: ubuntu-latest
@@ -37,6 +49,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: xvfb-run -a npm run check

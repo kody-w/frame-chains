@@ -1,0 +1,25 @@
+{
+  "commit": "eb50008011447f5e69372ac22a1755f0978d15ed",
+  "files": {
+    "LICENSE": "3b1952c1f983b4fc60337137cc6c863e9ea617ce551397c80e5b2d74eb1c476b",
+    "rapp.py": "1a04362b02f14c1e37b70c6b4f72d79e92df1cc9c2b5b394e8e1b141fc0b6050",
+    "rapp_check.py": "a8dbc2dc242b2faabc959a917c23c37db3bd3d28b95dc57891cc8f623698b7c2"
+  },
+  "interpreter": {
+    "path": "gyre/reference/interpreter.py",
+    "sha256": "6ca11b820cd911a99b4bf9862cd8b0aa3d8907b641fdae4b9470b9bfb8d56e35",
+    "source_artifact_label": "evaluator.py",
+    "status": "Byte-identical fixed pilot bounded interpreter; not native execution of candidate source."
+  },
+  "license": "gyre/reference/LICENSE",
+  "new_material_terms": "Existing repository copyright and permissions apply; the accompanying MIT license applies to the vendored upstream reference, not the whole repository.",
+  "oracle": {
+    "basis": "Task contract only; authored before reading pilot evaluator, fixture generator, or generated solver algorithms.",
+    "initial_sha256": "2899c97a318ecce64a311f2afbf30670f960d6a0dff9a791ece0bad08b0e422a",
+    "path": "gyre/reference/oracle.py",
+    "relationship": "Independent token/explicit-stack grammar implementation, not copied gold or candidate logic; the execution interpreter is shared with the original study."
+  },
+  "reference_status": "Unmodified current reference and compliance checker, not the old pilot protocol adapter.",
+  "repository": "https://github.com/kody-w/rapp-1",
+  "schema": "gyre-reference-provenance/1"
+}

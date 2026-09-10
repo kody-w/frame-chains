@@ -1,0 +1,27 @@
+{
+  "schema": "gyre-release-implementation-review/1",
+  "reviewer": "GPT-6 Astra in a separate read-only implementation-review context",
+  "scope": "Public exporter, verifier, oracle, privacy scanner, negative controls, and artifact binding.",
+  "initial_major_finding": "Escaped JSON member names were not scanned after decoding, and duplicate members could discard an earlier value before privacy inspection.",
+  "fix": [
+    "Scan decoded JSON member names as well as values.",
+    "Reject duplicate JSON members before constructing an object that could discard one.",
+    "Use strict decoding for manifest-refresh control documents before normalization.",
+    "Reject non-finite constants and non-UTF8 structured inputs.",
+    "Exercise nested keys, decoded-equivalent duplicates, registered addenda, refresh, and full validation."
+  ],
+  "closure": {
+    "status": "confirmed",
+    "remaining_material_issue_in_scope": 0,
+    "tests": 47,
+    "test_failures": 0,
+    "test_errors": 0,
+    "program_frames": 41,
+    "original_recorded_measurements": 4669,
+    "posthoc_recorded_observations": 63,
+    "privacy_exceptions": 0
+  },
+  "preservation": "Only authored gate/test/documentation files and their manifest bindings changed. Frozen programs, observations, and upstream reference bytes remain unchanged.",
+  "boundary": "Automated implementation review, not human peer review, authenticated historical model provenance, or a general-purpose sandbox certification.",
+  "publication_timing": "The gaps were corrected before the initial public release."
+}
